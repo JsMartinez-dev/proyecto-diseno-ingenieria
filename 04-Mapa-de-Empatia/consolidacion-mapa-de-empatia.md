@@ -1,0 +1,1 @@
+# Consolidación del mapa de empatía

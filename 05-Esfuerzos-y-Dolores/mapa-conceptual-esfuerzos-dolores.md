@@ -1,0 +1,1 @@
+# Mapa conceptual — Esfuerzos / Dolores

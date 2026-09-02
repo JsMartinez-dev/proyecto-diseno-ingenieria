@@ -1,0 +1,248 @@
+{
+  "main": {
+    "id": "16c5743dd71458de",
+    "type": "split",
+    "children": [
+      {
+        "id": "efb5bb75e074cf84",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "ce98ad4b3e506df4",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "README.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "README"
+            }
+          },
+          {
+            "id": "ec6b54f11962b842",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "README.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "README"
+            }
+          },
+          {
+            "id": "b0b54df4ff2e77f0",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "02-Usuarios/usuarios-principales.md.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "usuarios-principales.md"
+            }
+          }
+        ],
+        "currentTab": 1
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "34ab6b989c53dd90",
+    "type": "split",
+    "children": [
+      {
+        "id": "5d212bbf9e78bc5f",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "4fe7ee3994669842",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-folder-closed",
+              "title": "Explorador de archivos"
+            }
+          },
+          {
+            "id": "de524daca9d405db",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "Buscar"
+            }
+          },
+          {
+            "id": "c59005b4027061d4",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-bookmark",
+              "title": "Marcadores"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "56d61a7d3e5eca91",
+    "type": "split",
+    "children": [
+      {
+        "id": "e8c2ecb67bcfae03",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "b491cee88f7d1970",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "README.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "Enlaces entrantes"
+            }
+          },
+          {
+            "id": "b656f42a02c61f18",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "README.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "Enlaces salientes"
+            }
+          },
+          {
+            "id": "1092cd0748e7345a",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "Etiquetas"
+            }
+          },
+          {
+            "id": "bc8c99aa32755e0d",
+            "type": "leaf",
+            "state": {
+              "type": "all-properties",
+              "state": {
+                "sortOrder": "frequency",
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-archive",
+              "title": "Todas las propiedades"
+            }
+          },
+          {
+            "id": "96577d309d3d5a6f",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "README.md",
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "Esquema"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Abrir selector rápido": false,
+      "graph:Abrir vista gráfica": false,
+      "canvas:Crear nuevo lienzo": false,
+      "daily-notes:Abrir la nota de hoy": false,
+      "templates:Insertar plantilla": false,
+      "command-palette:Abrir paleta de comandos": false,
+      "bases:Crear nueva base": false
+    }
+  },
+  "active": "ec6b54f11962b842",
+  "lastOpenFiles": [
+    "proyecto-diseno-ingenieria/README.md",
+    "proyecto-diseno-ingenieria",
+    "08-Historias-de-Usuario/historias-de-usuario.md",
+    "07-Casos-de-Uso/diagramas-de-casos-de-uso.md",
+    "07-Casos-de-Uso/casos-de-uso.md",
+    "06-Resultados-y-Necesidades/mapa-conceptual-resultados-necesidades.md",
+    "05-Esfuerzos-y-Dolores/mapa-conceptual-esfuerzos-dolores.md",
+    "04-Mapa-de-Empatia/consolidacion-mapa-de-empatia.md",
+    "03-Entrevistas/entrevistas-realizadas/README.md",
+    "03-Entrevistas/entrevistas-realizadas/entrevista-01-[Cliente].md",
+    "03-Entrevistas/preguntas-de-seguimiento.md",
+    "03-Entrevistas/entrevistas-realizadas",
+    "03-Entrevistas/entrevista-semiestructurada.md",
+    "01-Problema/definicion-tecnica-del-problema.md.md",
+    "02-Usuarios/usuarios-principales.md.md",
+    "00-Control-del-Proyecto/bitácora-de-decisiones-y-observaciones.md",
+    "README.md",
+    "08-Historias-de-Usuario",
+    "07-Casos-de-Uso",
+    "06-Resultados-y-Necesidades",
+    "05-Esfuerzos-y-Dolores",
+    "04-Mapa-de-Empatia",
+    "03-Entrevistas",
+    "02-Usuarios",
+    "01-Problema"
+  ]
+}
