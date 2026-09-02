@@ -27,12 +27,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "05-Esfuerzos-y-Dolores/mapa-conceptual-esfuerzos-dolores.md",
+                "file": "01-Problema/definicion-tecnica-del-problema.md.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "mapa-conceptual-esfuerzos-dolores"
+              "title": "definicion-tecnica-del-problema.md"
             }
           },
           {
@@ -219,9 +219,9 @@
   },
   "active": "ec6b54f11962b842",
   "lastOpenFiles": [
+    "05-Esfuerzos-y-Dolores/mapa-conceptual-esfuerzos-dolores.md",
     "README.md",
     "03-Entrevistas/entrevista-semiestructurada.md",
-    "05-Esfuerzos-y-Dolores/mapa-conceptual-esfuerzos-dolores.md",
     "proyecto-diseno-ingenieria/README.md",
     "proyecto-diseno-ingenieria",
     "08-Historias-de-Usuario/historias-de-usuario.md",
