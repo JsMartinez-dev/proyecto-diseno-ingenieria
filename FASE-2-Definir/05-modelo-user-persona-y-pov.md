@@ -1,7 +1,7 @@
 # Modelo - User Persona y POV (Point of View)
 
 > Este documento sintetiza los patrones comunes de las 6 entrevistas realizadas 
-> (`05-entrevistas-realizadas/`) en dos arquetipos de usuario: **Trabajador independiente** 
+> `entrevistas-realizadas` en dos arquetipos de usuario: **Trabajador independiente** 
 > y **Cliente**. Cada arquetipo es una **síntesis compuesta** de los 3 entrevistados de su 
 > segmento.
 ---
