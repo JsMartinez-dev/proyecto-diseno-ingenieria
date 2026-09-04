@@ -68,7 +68,8 @@ Marta:
 ### A nivel nacional, otros datos relevantes como contexto:
 
 - En 2024, el **90,5%** de los propietarios de micronegocios en Colombia eran trabajadores por cuenta propia [1], y el **82,3%** operaba con una sola persona (el propio propietario) [1]. Para 2025, a nivel de las 24 ciudades evaluadas, la proporción de trabajadores por cuenta propia alcanzó el **92,0%** [2] y los micronegocios unipersonales (rango de 1 persona) correspondieron al **85,7%** [2].
-![Trabajadores-infromeales](assets/grafica_trabajadores_propios.png)
+
+![Trabajadores-informales](../assets/grafica_trabajadores_propios.png)
 
 
 - En términos de adopción digital, en 2024 el **89,1%** de los micronegocios del país no utilizaba ningún dispositivo electrónico, ya sea computador, tablet o portátil [1], aunque el **70,9%** sí usaba algún tipo de teléfono celular convencional o inteligente [1]. En 2025, el **82,6%** de los micronegocios urbanos seguía careciendo de dispositivos electrónicos para sus actividades [2], mientras que el **83,9%** utilizaba teléfonos celulares [2].
