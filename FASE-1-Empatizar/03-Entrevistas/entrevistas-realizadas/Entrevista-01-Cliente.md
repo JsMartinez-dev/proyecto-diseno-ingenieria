@@ -1,6 +1,6 @@
 # Entrevista 01 — Cliente
 
-| **Entrevistada**        | Patricia                               |
+| **Entrevistada**        | Patricia Mercado                       |
 | ----------------------- | -------------------------------------- |
 | **Edad**                | 42 años                                |
 | **Lugar de residencia** | El Rodadero                            |

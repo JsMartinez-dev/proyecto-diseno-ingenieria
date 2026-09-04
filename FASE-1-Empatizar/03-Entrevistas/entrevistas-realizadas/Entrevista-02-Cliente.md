@@ -1,12 +1,12 @@
 # Entrevista 02 - Cliente
 
 
-| **Entrevistada**        | Doña Gladys                                               |
-| ----------------------- | --------------------------------------------------------- |
-| **Edad**                | 61 años                                                   |
-| **Lugar de residencia** | Centro Histórico                                          |
-| **Servicio contratado** | Plomería                                                  |
-| **Estado**              | Entrevista realizada por el estudiante                    |
+| **Entrevistada**        | Gladys Jimenez                         |
+| ----------------------- | -------------------------------------- |
+| **Edad**                | 61 años                                |
+| **Lugar de residencia** | Centro Histórico                       |
+| **Servicio contratado** | Plomería                               |
+| **Estado**              | Entrevista realizada por el estudiante |
 
 ---
 ### 1. La última vez que contrató un servicio técnico a domicilio, ¿cómo encontró a la persona que lo atendió?

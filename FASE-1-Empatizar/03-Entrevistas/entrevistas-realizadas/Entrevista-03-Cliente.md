@@ -1,12 +1,12 @@
 # Entrevista 03  Cliente
 
 
-| **Entrevistada**        | Liliana                                                   |
-| ----------------------- | --------------------------------------------------------- |
-| **Edad**                | 31 años                                                   |
-| **Lugar de residencia** | Taganga                                                   |
-| **Servicio contratado** | Pintura                                                   |
-| **Estado**              | Entrevista realizada por el estudiante                    |
+| **Entrevistada**        | Liliana Pulido                         |
+| ----------------------- | -------------------------------------- |
+| **Edad**                | 31 años                                |
+| **Lugar de residencia** | Taganga                                |
+| **Servicio contratado** | Pintura                                |
+| **Estado**              | Entrevista realizada por el estudiante |
 
 ---
 ### 1. La última vez que contrató un servicio técnico a domicilio, ¿cómo encontró a la persona que lo atendió?

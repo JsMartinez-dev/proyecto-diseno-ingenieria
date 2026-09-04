@@ -27,16 +27,44 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "FASE-1-Empatizar/03-Entrevistas/preguntas-de-seguimiento.md",
+                "file": "FASE-1-Empatizar/03-Entrevistas/entrevistas-realizadas/Entrevista-01-Cliente.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "preguntas-de-seguimiento"
+              "title": "Entrevista-01-Cliente"
+            }
+          },
+          {
+            "id": "5326374147f4e4e5",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "FASE-1-Empatizar/03-Entrevistas/entrevistas-realizadas/Entrevista-02-Cliente.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "Entrevista-02-Cliente"
+            }
+          },
+          {
+            "id": "2e6e96f582edecad",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "FASE-1-Empatizar/04-mapa-de-empatia.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "04-mapa-de-empatia"
             }
           }
         ],
-        "currentTab": 1
+        "currentTab": 3
       }
     ],
     "direction": "vertical"
@@ -203,17 +231,18 @@
       "bases:Crear nueva base": false
     }
   },
-  "active": "da2d21341f94c8c2",
+  "active": "2e6e96f582edecad",
   "lastOpenFiles": [
+    "FASE-1-Empatizar/03-Entrevistas/entrevistas-realizadas/Entrevista-03-Cliente.md",
+    "FASE-1-Empatizar/04-mapa-de-empatia.md",
+    "FASE-1-Empatizar/03-Entrevistas/entrevistas-realizadas/Entrevista-02-Trabajador-independiente.md",
+    "FASE-1-Empatizar/03-Entrevistas/entrevistas-realizadas/Entrevista-02-Cliente.md",
+    "FASE-1-Empatizar/03-Entrevistas/entrevistas-realizadas/Entrevista-01-Cliente.md",
     "FASE-1-Empatizar/03-Entrevistas/entrevista-semiestructurada.md",
     "FASE-1-Empatizar/03-Entrevistas/preguntas-de-seguimiento.md",
     "FASE-1-Empatizar/03-Entrevistas/entrevistas-realizadas/README.md",
     "FASE-1-Empatizar/03-Entrevistas/entrevistas-realizadas/Entrevista-03-Trabajador-independiente.md",
-    "FASE-1-Empatizar/03-Entrevistas/entrevistas-realizadas/Entrevista-03-Cliente.md",
-    "FASE-1-Empatizar/03-Entrevistas/entrevistas-realizadas/Entrevista-02-Trabajador-independiente.md",
-    "FASE-1-Empatizar/03-Entrevistas/entrevistas-realizadas/Entrevista-02-Cliente.md",
     "FASE-1-Empatizar/03-Entrevistas/entrevistas-realizadas/Entrevista-01-Trabajador-independiente.md",
-    "FASE-1-Empatizar/03-Entrevistas/entrevistas-realizadas/Entrevista-01-Cliente.md",
     "FASE-1-Empatizar/01-definicion-tecnica-del-problema.md",
     "FASE-5-Evaluar/14-modelo-malla-receptora-feedback.md",
     "FASE-4-Prototipar/13-prototipo-alta-fidelidad.md",
@@ -225,7 +254,6 @@
     "FASE-2-Definir/07-modelo-user-persona-y-pov.md",
     "FASE-2-Definir/05-mapa-conceptual-esfuerzos-dolores.md",
     "FASE-2-Definir/06-mapa-conceptual-resultados-necesidades.md",
-    "FASE-1-Empatizar/04-mapa-de-empatia.md",
     "FASE-1-Empatizar/02-usuarios-principales.md",
     "00-Control-del-Proyecto/bitácora-de-decisiones-y-observaciones.md",
     "FASE-5-Evaluar",
