@@ -25,28 +25,24 @@
             "id": "ec6b54f11962b842",
             "type": "leaf",
             "state": {
-              "type": "markdown",
+              "type": "image",
               "state": {
-                "file": "01-Problema/definicion-tecnica-del-problema.md",
-                "mode": "source",
-                "source": false
+                "file": "assets/grafica_uso_servicio_internet.png"
               },
-              "icon": "lucide-file",
-              "title": "definicion-tecnica-del-problema"
+              "icon": "lucide-image",
+              "title": "grafica_uso_servicio_internet"
             }
           },
           {
             "id": "b0b54df4ff2e77f0",
             "type": "leaf",
             "state": {
-              "type": "markdown",
+              "type": "image",
               "state": {
-                "file": "02-Usuarios/usuarios-principales.md.md",
-                "mode": "source",
-                "source": false
+                "file": "assets/grafica_dispositivos_electronicos.png"
               },
-              "icon": "lucide-file",
-              "title": "usuarios-principales.md"
+              "icon": "lucide-image",
+              "title": "grafica_dispositivos_electronicos"
             }
           }
         ],
@@ -217,16 +213,20 @@
       "bases:Crear nueva base": false
     }
   },
-  "active": "ec6b54f11962b842",
+  "active": "4fe7ee3994669842",
   "lastOpenFiles": [
-    "Pasted image 20260903190655.png",
-    "Pasted image 20260903190546.png",
-    "Pasted image 20260903190439.png",
-    "Pasted image 20260903190342.png",
-    "08-Historias-de-Usuario/historias-de-usuario.md",
     "01-Problema/definicion-tecnica-del-problema.md",
-    "05-Esfuerzos-y-Dolores/mapa-conceptual-esfuerzos-dolores.md",
+    "assets/grafica_uso_servicio_internet.png",
+    "Pasted image 20260903191325.png",
+    "assets/grafica_rut_empresas.png",
+    "assets/grafica_dispositivos_electronicos.png",
     "README.md",
+    "assets/grafica_trabajadores_propios.png",
+    "02-Usuarios/usuarios-principales.md.md",
+    "assets/Pasted image 20260903190546.png",
+    "assets",
+    "08-Historias-de-Usuario/historias-de-usuario.md",
+    "05-Esfuerzos-y-Dolores/mapa-conceptual-esfuerzos-dolores.md",
     "03-Entrevistas/entrevista-semiestructurada.md",
     "proyecto-diseno-ingenieria/README.md",
     "proyecto-diseno-ingenieria",
@@ -238,7 +238,6 @@
     "03-Entrevistas/entrevistas-realizadas/entrevista-01-[Cliente].md",
     "03-Entrevistas/preguntas-de-seguimiento.md",
     "03-Entrevistas/entrevistas-realizadas",
-    "02-Usuarios/usuarios-principales.md.md",
     "00-Control-del-Proyecto/bitácora-de-decisiones-y-observaciones.md",
     "08-Historias-de-Usuario",
     "07-Casos-de-Uso",
@@ -246,7 +245,6 @@
     "05-Esfuerzos-y-Dolores",
     "04-Mapa-de-Empatia",
     "03-Entrevistas",
-    "02-Usuarios",
-    "01-Problema"
+    "02-Usuarios"
   ]
 }
