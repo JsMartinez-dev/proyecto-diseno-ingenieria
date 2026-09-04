@@ -4,7 +4,7 @@
 
 Recolectar información directa sobre cómo los trabajadores independientes de 
 servicios técnicos a domicilio en Santa Marta consiguen clientes, gestionan sus 
-solicitudes y qué dificultades enfrentan en ese proceso — para validar o refutar 
+solicitudes y qué dificultades enfrentan en ese proceso, para validar o refutar 
 las hipótesis planteadas en `02-usuarios-principales.md`.
 
 Secundariamente, recolectar información desde la perspectiva del cliente que 
@@ -53,7 +53,6 @@ Duración estimada: 20-30 minutos.
 
 - Cuando un cliente lo contacta, ¿qué información le pide primero?
 - ¿Cómo decide qué día y hora puede atender la solicitud?
-- ¿Cómo calcula el costo aproximado antes de ir?
 - ¿Qué hace si dos clientes quieren ser atendidos el mismo día?
 - Después de atender un servicio, ¿registra o recuerda de alguna forma la 
   información del trabajo realizado?
@@ -71,9 +70,6 @@ Duración estimada: 20-30 minutos.
   Cuénteme qué pasó.
 - ¿Le ha pasado que un cliente le escribe y usted no le responde a tiempo? 
   ¿Por qué cree que pasa eso?
-- ¿Cuál es la parte que más trabajo o estrés le da de organizar sus servicios?
-- ¿Ha sentido que pierde clientes o trabajos por no poder organizarse bien? 
-  Cuénteme un ejemplo si lo recuerda.
 
 ### Bloque E: Expectativas
 
