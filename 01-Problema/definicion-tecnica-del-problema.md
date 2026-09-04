@@ -64,22 +64,27 @@ Marta:
 | Variación de la cantidad de micronegocios 2023-2024                             | -16,3%                                                                    | El número de micronegocios en la ciudad se redujo de forma notable en el último año medido                                                  |
 | Variación del valor agregado 2023-2024                                          | -19,6%                                                                    | Santa Marta fue una de las tres ciudades que contribuyó negativamente a la variación del valor agregado total de las 24 ciudades            |
 
-A nivel nacional, otros datos relevantes como contexto:
+---
+### A nivel nacional, otros datos relevantes como contexto:
 
-- El 90,5% de los propietarios de micronegocios en Colombia son trabajadores por 
-  cuenta propia, y el 82,3% ocupa solamente a una persona (el propio propietario).
-- El 89,1% de los micronegocios no usa dispositivos electrónicos (computador, tablet, 
-  portátil) para su actividad, aunque el 70,9% sí usa algún tipo de teléfono.
-- El 50,4% de los micronegocios no usó servicio de internet para su actividad en 2024, 
-  aunque el uso de internet entre micronegocios creció 14,7% respecto a 2023.
-- El 77,6% de los micronegocios no tiene Registro Único Tributario (RUT) y el 89,5% no 
-  está registrado en Cámara de Comercio.
+- En 2024, el **90,5%** de los propietarios de micronegocios en Colombia eran trabajadores por cuenta propia [1], y el **82,3%** operaba con una sola persona (el propio propietario) [1]. Para 2025, a nivel de las 24 ciudades evaluadas, la proporción de trabajadores por cuenta propia alcanzó el **92,0%** [2] y los micronegocios unipersonales (rango de 1 persona) correspondieron al **85,7%** [2].
 
-> Estos datos nacionales sugieren que una parte importante de los micronegocios opera 
-> con bajo nivel de digitalización, lo cual es coherente con el contexto de la 
-> hipótesis.
+![[Pasted image 20260903190342.png]]
+
+- En términos de adopción digital, en 2024 el **89,1%** de los micronegocios del país no utilizaba ningún dispositivo electrónico, ya sea computador, tablet o portátil [1], aunque el **70,9%** sí usaba algún tipo de teléfono celular convencional o inteligente [1]. En 2025, el **82,6%** de los micronegocios urbanos seguía careciendo de dispositivos electrónicos para sus actividades [2], mientras que el **83,9%** utilizaba teléfonos celulares [2].
+
+![[Pasted image 20260903190439.png]]
+
+- En cuanto al uso de internet, en 2024 el **50,4%** de los micronegocios no empleaba este servicio para su actividad [1], aunque los negocios conectados registraron un crecimiento del **14,7%** frente a 2023 [1]. En 2025, el uso de internet en los micronegocios de las 24 ciudades alcanzó el **75,8%** [2], reportando una variación positiva de **11,7%** frente al año anterior [2].
+
+![[Pasted image 20260903190546.png]]
+
+- Respecto a la formalidad de entrada, en 2024 el **77,6%** de los micronegocios nacionales no contaba con Registro Único Tributario (RUT) [1] y el **89,5%** no estaba registrado ante alguna Cámara de Comercio [1]. En 2025, dentro de las 24 ciudades, el **68,4%** de los micronegocios continuaba operando sin RUT [2] y el **87,0%** carecía de matrícula mercantil registrada [2]. Adicionalmente, el **81,6%** de los propietarios no realizó aportes periódicos a salud y pensión en 2025 [2].
+
+![[Pasted image 20260903190655.png|686]]
 
 
+> Estos datos nacionales y urbanos demuestran que, si bien el uso del teléfono celular y el acceso a internet han crecido en las cabeceras urbanas, una gran mayoría de los micronegocios de servicios son de carácter unipersonal, operan bajo la informalidad empresarial (sin registro mercantil ni tributario y sin cotizaciones de seguridad social) y dependen de herramientas manuales o informales para operar, careciendo de software de gestión especializada, lo cual apoya firmemente la necesidad y el planteamiento de la hipótesis del proyecto.
 
 ## 4. Fuentes consultadas
 
