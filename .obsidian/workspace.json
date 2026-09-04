@@ -107,12 +107,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "FASE-5-Evaluar/modelo-malla-receptora-feedback.md",
+                "file": "FASE-1-Empatizar/02-Usuarios/usuarios-principales.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "modelo-malla-receptora-feedback"
+              "title": "usuarios-principales"
             }
           }
         ],
@@ -283,10 +283,11 @@
       "bases:Crear nueva base": false
     }
   },
-  "active": "4fe7ee3994669842",
+  "active": "b5f606340c9bda30",
   "lastOpenFiles": [
-    "FASE-4-Prototipar/modelo4-ficha-especificacion-mvp.md",
+    "FASE-1-Empatizar/01-Problema/definicion-tecnica-del-problema.md",
     "FASE-5-Evaluar/modelo-malla-receptora-feedback.md",
+    "FASE-4-Prototipar/modelo4-ficha-especificacion-mvp.md",
     "FASE-5-Evaluar",
     "FASE-4-Prototipar/prototipo-alta-fidelidad.md",
     "FASE-4-Prototipar/prototipo-baja-fidelidad.md",
@@ -295,9 +296,8 @@
     "FASE-2-Definir/06-Resultados-y-Necesidades/mapa-conceptual-resultados-necesidades.md",
     "FASE-3-Idear",
     "FASE-2-Definir/modelo2-user-persona-y-pov.md",
-    "FASE-1-Empatizar/01-Problema/definicion-tecnica-del-problema.md",
     "FASE-2-Definir",
-    "FASE-1-Empatizar/02-Usuarios/usuarios-principales.md.md",
+    "FASE-1-Empatizar/02-Usuarios/usuarios-principales.md",
     "FASE-1-Empatizar",
     "assets/grafica_dispositivos_electronicos.png",
     "assets/grafica_rut_empresas.png",
