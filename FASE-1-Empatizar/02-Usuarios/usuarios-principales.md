@@ -1,4 +1,4 @@
-# # Usuarios principales
+# Usuarios principales
 
 ## 1. Tipos de usuario identificados
 
