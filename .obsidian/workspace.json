@@ -11,26 +11,12 @@
             "id": "ce98ad4b3e506df4",
             "type": "leaf",
             "state": {
-              "type": "markdown",
-              "state": {
-                "file": "README.md",
-                "mode": "source",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "README"
-            }
-          },
-          {
-            "id": "ec6b54f11962b842",
-            "type": "leaf",
-            "state": {
               "type": "image",
               "state": {
-                "file": "assets/grafica_uso_servicio_internet.png"
+                "file": "assets/grafica_dispositivos_electronicos.png"
               },
               "icon": "lucide-image",
-              "title": "grafica_uso_servicio_internet"
+              "title": "grafica_dispositivos_electronicos"
             }
           },
           {
@@ -44,9 +30,23 @@
               "icon": "lucide-image",
               "title": "grafica_dispositivos_electronicos"
             }
+          },
+          {
+            "id": "3bdc6e059dfc8cf9",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "01-Problema/definicion-tecnica-del-problema.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "definicion-tecnica-del-problema"
+            }
           }
         ],
-        "currentTab": 1
+        "currentTab": 2
       }
     ],
     "direction": "vertical"
@@ -213,15 +213,19 @@
       "bases:Crear nueva base": false
     }
   },
-  "active": "4fe7ee3994669842",
+  "active": "3bdc6e059dfc8cf9",
   "lastOpenFiles": [
+    "assets/grafica_dispositivos_electronicos.png",
     "01-Problema/definicion-tecnica-del-problema.md",
+    "assets/grafica_trabajadores_propios.md",
+    "assets/grafica_trabajadores_propios.png",
+    "README.md",
+    "assets 1.md",
+    "assets.md",
+    "assets/Pasted image 20260903190342.png.md",
     "assets/grafica_uso_servicio_internet.png",
     "Pasted image 20260903191325.png",
     "assets/grafica_rut_empresas.png",
-    "assets/grafica_dispositivos_electronicos.png",
-    "README.md",
-    "assets/grafica_trabajadores_propios.png",
     "02-Usuarios/usuarios-principales.md.md",
     "assets/Pasted image 20260903190546.png",
     "assets",
