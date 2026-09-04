@@ -1,1 +1,0 @@
-# Mapa conceptual — Resultados / Necesidades
