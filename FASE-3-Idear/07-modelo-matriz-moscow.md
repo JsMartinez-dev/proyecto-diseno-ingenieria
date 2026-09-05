@@ -1,5 +1,4 @@
 
-
 ## 1. Criterios de priorización aplicados
 
 | Categoría            | Criterio aplicado al proyecto                                                                                                                                                      |
