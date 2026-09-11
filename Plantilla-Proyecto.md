@@ -66,9 +66,8 @@ La necesidad de intervenir se sustenta en dos tipos de evidencia:
 
 2. **Evidencia directa (entrevistas):** las 6 entrevistas realizadas confirman de forma consistente los síntomas descritos en el planteamiento del problema: solicitudes sin responder, citas olvidadas, falta de registro, pérdida de oportunidades comerciales y desconfianza del cliente ante la informalidad del trabajador.
 
-Ver evidencia completa y gráficas en
-[01-definición técnica del problema](FASE-1-Empatizar/01-definicion-tecnica-del-problema.md)
-
+Ver evidencia completa y gráficas en [01-definición técnica del problema](FASE-1-Empatizar/01-definicion-tecnica-del-problema.md)
+	
 ### Usuarios o beneficiarios
 
 - **Cliente:** persona natural en Santa Marta que necesita contratar un servicio técnico a domicilio y que actualmente depende de mecanismos informales para encontrar, evaluar y coordinar con un trabajador independiente.
@@ -101,15 +100,16 @@ Seleccionen cuáles de las siguientes restricciones aplican e indican cómo se i
  1. **Definición de requerimientos del diseño:** 
 	
 **Requerimientos funcionales (RF):** documentados en el repositorio, organizados por caso de uso.
-| Caso de uso | Archivo | Alcance | N.º de RF |
-| --- | --- | --- | --- |
-| UC-01 | [spec-01-acceso-identidad-cuenta-privacidad](FASE-4-Prototipar/08-Casos-de-Uso/Caso-de-uso-1/spec-01-acceso-identidad-cuenta-privacidad.md) | Registro, autenticación, roles, privacidad de ubicación | 15 |
-| UC-02 | [spec-02-cliente-descubrimiento-solicitudes](FASE-4-Prototipar/08-Casos-de-Uso/Caso-de-uso-2/spec-02-cliente-descubrimiento-solicitudes.md) | Publicación de solicitudes, descubrimiento de prestadores | 15 |
-| UC-03 | [spec-03-prestador-perfil-oportunidades](FASE-4-Prototipar/08-Casos-de-Uso/Caso-de-uso-3/spec-03-prestador-perfil-oportunidades.md) | Perfil profesional, tablero de oportunidades | 16 |
-| UC-04 | [spec-04-propuestas-contratacion-ciclo-servicio](FASE-4-Prototipar/08-Casos-de-Uso/Caso-de-uso-4/spec-04-propuestas-contratacion-ciclo-servicio.md) | Propuestas, contratación, ciclo de vida del servicio | 20 |
-| UC-05 | [spec-05-confianza-verificacion-reportes-administracion](FASE-4-Prototipar/08-Casos-de-Uso/Caso-de-uso-5/spec-05-confianza-verificacion-reportes-administracion.md) | Calificaciones, reportes, moderación, administración | 19 |
-| UC-06 | [spec-06-formalizacion-notificaciones-historial](FASE-4-Prototipar/08-Casos-de-Uso/Caso-de-uso-6/spec-06-formalizacion-notificaciones-historial.md) | Formalización progresiva, notificaciones, historial | 12 |
-| UC-07 | [spec-07-capacidades-could-future](FASE-4-Prototipar/08-Casos-de-Uso/Caso-de-uso-7/spec-07-capacidades-could-future.md) | Capacidades Could/Future (fuera del MVP) | 10 |
+
+| Caso de uso | Archivo                                                                                                                                                             | Alcance                                                   | N.º de RF |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------- | --------- |
+| UC-01       | [spec-01-acceso-identidad-cuenta-privacidad](FASE-4-Prototipar/08-Casos-de-Uso/Caso-de-uso-1/spec-01-acceso-identidad-cuenta-privacidad.md)                         | Registro, autenticación, roles, privacidad de ubicación   | 15        |
+| UC-02       | [spec-02-cliente-descubrimiento-solicitudes](FASE-4-Prototipar/08-Casos-de-Uso/Caso-de-uso-2/spec-02-cliente-descubrimiento-solicitudes.md)                         | Publicación de solicitudes, descubrimiento de prestadores | 15        |
+| UC-03       | [spec-03-prestador-perfil-oportunidades](FASE-4-Prototipar/08-Casos-de-Uso/Caso-de-uso-3/spec-03-prestador-perfil-oportunidades.md)                                 | Perfil profesional, tablero de oportunidades              | 16        |
+| UC-04       | [spec-04-propuestas-contratacion-ciclo-servicio](FASE-4-Prototipar/08-Casos-de-Uso/Caso-de-uso-4/spec-04-propuestas-contratacion-ciclo-servicio.md)                 | Propuestas, contratación, ciclo de vida del servicio      | 20        |
+| UC-05       | [spec-05-confianza-verificacion-reportes-administracion](FASE-4-Prototipar/08-Casos-de-Uso/Caso-de-uso-5/spec-05-confianza-verificacion-reportes-administracion.md) | Calificaciones, reportes, moderación, administración      | 19        |
+| UC-06       | [spec-06-formalizacion-notificaciones-historial](FASE-4-Prototipar/08-Casos-de-Uso/Caso-de-uso-6/spec-06-formalizacion-notificaciones-historial.md)                 | Formalización progresiva, notificaciones, historial       | 12        |
+| UC-07       | [spec-07-capacidades-could-future](FASE-4-Prototipar/08-Casos-de-Uso/Caso-de-uso-7/spec-07-capacidades-could-future.md)                                             | Capacidades Could/Future (fuera del MVP)                  | 10        |
 
 **Total: 107 requerimientos funcionales**, cada uno con Historia de Usuario, Escenarios de Aceptación, Casos Límite y Criterios de Éxito medibles.
 
