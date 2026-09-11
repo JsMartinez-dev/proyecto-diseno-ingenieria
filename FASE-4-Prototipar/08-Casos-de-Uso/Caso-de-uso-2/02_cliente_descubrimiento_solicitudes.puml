@@ -1,0 +1,51 @@
+@startuml
+title CONectaSM - UC-02 Cliente: descubrimiento y solicitudes
+left to right direction
+skinparam packageStyle rectangle
+skinparam shadowing false
+
+actor "Cliente" as Cliente
+
+rectangle "CONectaSM" {
+  usecase "Explorar categorías\n[US-025]" as UC025
+  usecase "Descubrir prestadores\npor categoría y zona\n[US-026]" as UC026
+  usecase "Filtrar \nprestadores\n[US-027]" as UC027
+  usecase "Consultar perfil público\ndel prestador\n[US-024]" as UC024
+
+  usecase "Crear solicitud de servicio" as CrearSolicitud
+  usecase "Crear borrador\n[US-030]" as UC030
+  usecase "Definir categoría\ny descripción\n[US-031]" as UC031
+  usecase "Adjuntar fotos\n[US-032]" as UC032
+  usecase "Definir zona aproximada\ny urgencia\n[US-033]" as UC033
+  usecase "Publicar solicitud\n[US-034]" as UC034
+
+  usecase "Editar solicitud abierta\n[US-035]" as UC035
+  usecase "Cancelar solicitud abierta\n[US-036]" as UC036
+  usecase "Consultar mis solicitudes\n[US-037]" as UC037
+  usecase "Consultar detalle y estado\nde solicitud\n[US-038]" as UC038
+}
+
+Cliente --> UC025
+Cliente --> UC026
+Cliente --> UC027
+Cliente --> UC024
+Cliente --> CrearSolicitud
+Cliente --> UC035
+Cliente --> UC036
+Cliente --> UC037
+Cliente --> UC038
+
+UC026 .> UC025 : <<include>>
+UC027 .> UC026 : <<extend>>
+UC026 .> UC024 : <<extend>>
+
+CrearSolicitud .> UC030 : <<include>>
+CrearSolicitud .> UC031 : <<include>>
+CrearSolicitud .> UC032 : <<include>>
+CrearSolicitud .> UC033 : <<include>>
+CrearSolicitud .> UC034 : <<include>>
+
+UC037 .> UC038 : <<extend>>
+
+
+@enduml

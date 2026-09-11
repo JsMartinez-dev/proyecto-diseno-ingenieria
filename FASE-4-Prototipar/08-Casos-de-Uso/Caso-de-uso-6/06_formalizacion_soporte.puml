@@ -1,0 +1,50 @@
+@startuml
+title CONectaSM - UC-06 Formalización progresiva, notificaciones e historial
+left to right direction
+skinparam packageStyle rectangle
+skinparam shadowing false
+
+actor "Usuario" as Usuario
+actor "Cliente" as Cliente
+actor "Prestador" as Prestador
+
+
+Usuario <|-- Cliente
+Usuario <|-- Prestador
+
+rectangle "CONectaSM" {
+  usecase "Consultar ruta de\nformalización\n[US-083]" as UC083
+  usecase "Consultar checklist por\ncuatro dimensiones\n[US-084]" as UC084
+  usecase "Registrar avance declarado\nen checklist\n[US-085]" as UC085
+  usecase "Abrir enlaces oficiales\nde formalización\n[US-086]" as UC086
+  usecase "Mostrar progreso sin declarar\nestatus legal\n[US-087]" as UC087
+  usecase "Vincular ruta institucional\nfutura\n[US-088]" as UC088
+
+  usecase "Configurar preferencias\nde notificación\n[US-091]" as UC091
+  usecase "Consultar historial\nde trabajos\n[US-092]" as UC092
+  usecase "Descargar historial\n[US-093]" as UC093
+  usecase "Consultar indicadores\nbásicos del prestador\n[US-094]" as UC094
+  usecase "Consultar actividad reciente\n[US-095]" as UC095
+}
+
+Prestador --> UC083
+Prestador --> UC084
+Prestador --> UC085
+Prestador --> UC086
+Prestador --> UC087
+Prestador --> UC088
+Prestador --> UC094
+
+Usuario --> UC091
+Usuario --> UC092
+Usuario --> UC093
+Usuario --> UC095
+
+UC083 .> UC084 : <<include>>
+UC084 .> UC085 : <<extend>>
+UC084 .> UC087 : <<include>>
+UC083 .> UC086 : <<extend>>
+UC092 .> UC093 : <<extend>>
+
+
+@enduml

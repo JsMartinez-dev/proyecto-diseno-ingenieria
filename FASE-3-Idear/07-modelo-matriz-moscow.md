@@ -176,13 +176,13 @@
 
 ### EP-13 — Capacidades Could Have / evolución
 
-| MoSCoW | ID | Historia | Justificación de priorización |
-|---|---|---|---|
-| **Could** | US-096 | Chat interno en tiempo real | Mejora evolutiva; no bloquea la hipótesis central ni el ciclo principal. |
-| **Could** | US-097 | Mapa visual de prestadores | Mejora evolutiva; no bloquea la hipótesis central ni el ciclo principal. |
-| **Could** | US-098 | Insignia de progreso de formalización | Mejora evolutiva; no bloquea la hipótesis central ni el ciclo principal. |
-| **Could** | US-099 | Programa de referidos | Mejora evolutiva; no bloquea la hipótesis central ni el ciclo principal. |
-| **Could** | US-100 | Soporte por WhatsApp | Mejora evolutiva; no bloquea la hipótesis central ni el ciclo principal. |
-| **Could** | US-101 | Onboarding asistido por WhatsApp o gestor comunitario | Mejora evolutiva; no bloquea la hipótesis central ni el ciclo principal. |
-| **Could** | US-102 | Idiomas adicionales | Mejora evolutiva; no bloquea la hipótesis central ni el ciclo principal. |
-| **Won't** | US-103 | Piloto de pasarela de pago | Won’t Have del MVP: el backlog la ubica como piloto posterior y el alcance excluye pagos integrados/billetera del release inicial. |
+| MoSCoW    | ID     | Historia                                              | Justificación de priorización                                                                                                      |
+| --------- | ------ | ----------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| **Could** | US-096 | Chat interno en tiempo real                           | Mejora evolutiva; no bloquea la hipótesis central ni el ciclo principal.                                                           |
+| **Could** | US-097 | Mapa visual de prestadores                            | Mejora evolutiva; no bloquea la hipótesis central ni el ciclo principal.                                                           |
+| **Could** | US-098 | Insignia de progreso de formalización                 | Mejora evolutiva; no bloquea la hipótesis central ni el ciclo principal.                                                           |
+| **Could** | US-099 | Programa de referidos                                 | Mejora evolutiva; no bloquea la hipótesis central ni el ciclo principal.                                                           |
+| **Could** | US-100 | Soporte por WhatsApp                                  | Mejora evolutiva; no bloquea la hipótesis central ni el ciclo principal.                                                           |
+| **Could** | US-101 | Onboarding asistido por WhatsApp o gestor comunitario | Mejora evolutiva; no bloquea la hipótesis central ni el ciclo principal.                                                           |
+| **Could** | US-102 | Idiomas adicionales                                   | Mejora evolutiva; no bloquea la hipótesis central ni el ciclo principal.                                                           |
+| **Won't** | US-103 | Piloto de pasarela de pago                            | Won’t Have del MVP: el backlog la ubica como piloto posterior y el alcance excluye pagos integrados/billetera del release inicial. |

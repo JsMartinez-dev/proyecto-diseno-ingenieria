@@ -1,0 +1,43 @@
+@startuml
+title CONectaSM - UC-07 Capacidades Could Have y evolución futura
+left to right direction
+skinparam packageStyle rectangle
+skinparam shadowing false
+
+actor "Usuario" as Usuario
+actor "Cliente" as Cliente
+actor "Prestador" as Prestador
+actor "Gestor comunitario" as Gestor
+
+
+Usuario <|-- Cliente
+Usuario <|-- Prestador
+
+rectangle "CONectaSM - Evolución" {
+  usecase "Chat interno en tiempo real\n[US-096] <<Could>>" as UC096
+  usecase "Mapa visual de prestadores\n[US-097] <<Could>>" as UC097
+  usecase "Insignia de progreso de\nformalización\n[US-098] <<Could>>" as UC098
+  usecase "Programa de referidos\n[US-099] <<Could>>" as UC099
+  usecase "Soporte por WhatsApp\n[US-100] <<Could>>" as UC100
+  usecase "Onboarding asistido por\nWhatsApp o gestor\n[US-101] <<Could>>" as UC101
+  usecase "Idiomas adicionales\n[US-102] <<Could>>" as UC102
+  usecase "Piloto de pasarela de pago\n[US-103] <<Future>>" as UC103
+}
+
+Cliente --> UC096
+Prestador --> UC096
+Cliente --> UC097
+Cliente --> UC098
+Prestador --> UC098
+Usuario --> UC099
+Usuario --> UC100
+Prestador --> UC101
+Usuario --> UC102
+Cliente --> UC103
+Prestador --> UC103
+
+
+Gestor --> UC101
+
+
+@enduml

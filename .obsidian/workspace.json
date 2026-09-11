@@ -4,67 +4,39 @@
     "type": "split",
     "children": [
       {
-        "id": "25d08c3cb9d635a6",
+        "id": "06dc1f89cd24b922",
         "type": "tabs",
         "children": [
           {
-            "id": "98d29270308f65fa",
+            "id": "0f7ac8523e8846d3",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "FASE-1-Empatizar/03-Entrevistas/entrevistas-realizadas/Entrevista-02-Trabajador-independiente.md",
+                "file": "FASE-4-Prototipar/13-prototipo-alta-fidelidad.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Entrevista-02-Trabajador-independiente"
+              "title": "13-prototipo-alta-fidelidad"
             }
           },
           {
-            "id": "da2d21341f94c8c2",
+            "id": "d80ac99b4f1f9221",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "FASE-1-Empatizar/03-Entrevistas/entrevistas-realizadas/Entrevista-01-Cliente.md",
+                "file": "templates/spec-template.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Entrevista-01-Cliente"
-            }
-          },
-          {
-            "id": "5326374147f4e4e5",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "FASE-1-Empatizar/03-Entrevistas/entrevistas-realizadas/Entrevista-02-Cliente.md",
-                "mode": "source",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "Entrevista-02-Cliente"
-            }
-          },
-          {
-            "id": "2e6e96f582edecad",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "FASE-3-Idear/06-historias-de-usuario.md",
-                "mode": "source",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "06-historias-de-usuario"
+              "title": "spec-template"
             }
           }
         ],
-        "currentTab": 3
+        "currentTab": 1
       }
     ],
     "direction": "vertical"
@@ -126,7 +98,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 300
+    "width": 294.3000183105469
   },
   "right": {
     "id": "56d61a7d3e5eca91",
@@ -142,7 +114,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "05-Esfuerzos-y-Dolores/mapa-conceptual-esfuerzos-dolores.md",
+                "file": "templates/spec-template.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -161,8 +133,8 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "05-Esfuerzos-y-Dolores/mapa-conceptual-esfuerzos-dolores.md",
-                "linksCollapsed": false,
+                "file": "templates/spec-template.md",
+                "linksCollapsed": true,
                 "unlinkedCollapsed": true
               },
               "icon": "links-going-out",
@@ -213,7 +185,8 @@
               "title": "Esquema"
             }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "horizontal",
@@ -231,43 +204,44 @@
       "bases:Crear nueva base": false
     }
   },
-  "active": "2e6e96f582edecad",
+  "active": "d80ac99b4f1f9221",
   "lastOpenFiles": [
-    "FASE-4-Prototipar/08-Casos-de-Uso/casos-de-uso.md",
-    "evidencia-spec/spec-template.md",
+    "templates/plantilla-estudiante-capstone.md",
+    "templates/plan-template.md",
     "FASE-3-Idear/07-modelo-matriz-moscow.md",
-    "evidencia-spec",
-    "plantilla-estudiante-capstone.md",
-    "FASE-1-Empatizar/01-definicion-tecnica-del-problema.md",
-    "plan-template.md",
     "FASE-3-Idear/06-historias-de-usuario.md",
+    "FASE-4-Prototipar/13-prototipo-alta-fidelidad.md",
+    "FASE-4-Prototipar/12-prototipo-baja-fidelidad.md",
     "FASE-4-Prototipar/11-modelo-ficha-especificacion-mvp.md",
     "FASE-4-Prototipar/09-requisitos-funcionales.md",
-    "FASE-1-Empatizar/04-mapa-de-empatia.md",
-    "FASE-2-Definir/05-modelo-user-persona-y-pov.md",
-    "FASE-1-Empatizar/02-usuarios-principales.md",
-    "FASE-4-Prototipar/08-Casos-de-Uso/diagramas-de-casos-de-uso.md",
-    "Sin confirmar 839693.crdownload",
-    "FASE-2-Definir/06-mapa-conceptual-resultados-necesidades.md",
-    "FASE-2-Definir/05-mapa-conceptual-esfuerzos-dolores.md",
-    "FASE-1-Empatizar/03-Entrevistas/entrevistas-realizadas/Entrevista-03-Cliente.md",
+    "FASE-4-Prototipar/08-Casos-de-Uso/Caso-de-uso-7/spec-07-capacidades-could-future.md",
+    "FASE-4-Prototipar/08-Casos-de-Uso/Caso-de-uso-6/spec-06-formalizacion-notificaciones-historial.md",
+    "FASE-4-Prototipar/08-Casos-de-Uso/Caso-de-uso-5/spec-05-confianza-verificacion-reportes-administracion.md",
+    "FASE-4-Prototipar/08-Casos-de-Uso/Caso-de-uso-4/spec-04-propuestas-contratacion-ciclo-servicio.md",
+    "FASE-4-Prototipar/08-Casos-de-Uso/Caso-de-uso-1/spec-01-acceso-identidad-cuenta-privacidad.md",
+    "FASE-4-Prototipar/08-Casos-de-Uso/Caso-de-uso-2/spec-02-cliente-descubrimiento-solicitudes.md",
+    "FASE-4-Prototipar/08-Casos-de-Uso/Caso-de-uso-3/spec-03-prestador-perfil-oportunidades.md",
     "FASE-1-Empatizar/03-Entrevistas/entrevistas-realizadas/Entrevista-02-Trabajador-independiente.md",
-    "FASE-1-Empatizar/03-Entrevistas/entrevistas-realizadas/Entrevista-02-Cliente.md",
+    "templates/spec-template.md",
     "FASE-1-Empatizar/03-Entrevistas/entrevistas-realizadas/Entrevista-01-Cliente.md",
-    "FASE-1-Empatizar/03-Entrevistas/entrevista-semiestructurada.md",
-    "FASE-1-Empatizar/03-Entrevistas/preguntas-de-seguimiento.md",
-    "FASE-1-Empatizar/03-Entrevistas/entrevistas-realizadas/README.md",
-    "FASE-1-Empatizar/03-Entrevistas/entrevistas-realizadas/Entrevista-03-Trabajador-independiente.md",
-    "FASE-1-Empatizar/03-Entrevistas/entrevistas-realizadas/Entrevista-01-Trabajador-independiente.md",
-    "FASE-5-Evaluar/14-modelo-malla-receptora-feedback.md",
-    "FASE-5-Evaluar",
-    "FASE-4-Prototipar/08-Casos-de-Uso",
-    "FASE-4-Prototipar",
-    "FASE-3-Idear/08-Historias-de-Usuario",
-    "FASE-3-Idear",
-    "FASE-2-Definir/06-Resultados-y-Necesidades",
-    "FASE-2-Definir/05-Esfuerzos-y-Dolores",
-    "FASE-2-Definir",
+    "FASE-4-Prototipar/08-Casos-de-Uso/Caso-de-uso-1/spec-template.md",
+    "templates",
+    "FASE-4-Prototipar/08-Casos-de-Uso/README.md",
+    "README.md",
+    "FASE-1-Empatizar/03-Entrevistas/entrevistas-realizadas/Entrevista-02-Cliente.md",
+    "FASE-4-Prototipar/08-Casos-de-Uso/spec-07-capacidades-could-future.md",
+    "FASE-4-Prototipar/08-Casos-de-Uso/spec-06-formalizacion-notificaciones-historial.md",
+    "FASE-4-Prototipar/08-Casos-de-Uso/spec-05-confianza-verificacion-reportes-administracion.md",
+    "FASE-4-Prototipar/08-Casos-de-Uso/spec-04-propuestas-contratacion-ciclo-servicio.md",
+    "FASE-4-Prototipar/08-Casos-de-Uso/Caso-de-uso-7/07_evolucion_futura.puml",
+    "FASE-4-Prototipar/08-Casos-de-Uso/Caso-de-uso-6/06_formalizacion_soporte.puml",
+    "FASE-4-Prototipar/08-Casos-de-Uso/Caso-de-uso-5/05_confianza_moderacion_admin.puml",
+    "FASE-4-Prototipar/08-Casos-de-Uso/Caso-de-uso-4/04_propuestas_servicio.puml",
+    "FASE-4-Prototipar/08-Casos-de-Uso/Caso-de-uso-3/03_prestador_perfil_oportunidades.puml",
+    "FASE-4-Prototipar/08-Casos-de-Uso/Caso-de-uso-2/02_cliente_descubrimiento_solicitudes.puml",
+    "FASE-4-Prototipar/08-Casos-de-Uso/Caso-de-uso-1/01_acceso_cuenta.puml",
+    "FASE-4-Prototipar/08-Casos-de-Uso/Caso-de-uso-7",
+    "FASE-4-Prototipar/08-Casos-de-Uso/Caso-de-uso-6",
     "Pasted image 20260903191325.png",
     "assets/grafica_dispositivos_electronicos.png",
     "assets/grafica_trabajadores_propios.png",
