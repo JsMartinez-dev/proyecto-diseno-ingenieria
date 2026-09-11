@@ -27,12 +27,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "templates/spec-template.md",
+                "file": "FASE-4-Prototipar/08-Casos-de-Uso/README.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "spec-template"
+              "title": "README"
             }
           }
         ],
@@ -114,7 +114,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "templates/spec-template.md",
+                "file": "FASE-4-Prototipar/08-Casos-de-Uso/README.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -133,7 +133,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "templates/spec-template.md",
+                "file": "FASE-4-Prototipar/08-Casos-de-Uso/README.md",
                 "linksCollapsed": true,
                 "unlinkedCollapsed": true
               },
@@ -206,6 +206,7 @@
   },
   "active": "d80ac99b4f1f9221",
   "lastOpenFiles": [
+    "templates/spec-template.md",
     "templates/plantilla-estudiante-capstone.md",
     "templates/plan-template.md",
     "FASE-3-Idear/07-modelo-matriz-moscow.md",
@@ -222,7 +223,6 @@
     "FASE-4-Prototipar/08-Casos-de-Uso/Caso-de-uso-2/spec-02-cliente-descubrimiento-solicitudes.md",
     "FASE-4-Prototipar/08-Casos-de-Uso/Caso-de-uso-3/spec-03-prestador-perfil-oportunidades.md",
     "FASE-1-Empatizar/03-Entrevistas/entrevistas-realizadas/Entrevista-02-Trabajador-independiente.md",
-    "templates/spec-template.md",
     "FASE-1-Empatizar/03-Entrevistas/entrevistas-realizadas/Entrevista-01-Cliente.md",
     "FASE-4-Prototipar/08-Casos-de-Uso/Caso-de-uso-1/spec-template.md",
     "templates",
