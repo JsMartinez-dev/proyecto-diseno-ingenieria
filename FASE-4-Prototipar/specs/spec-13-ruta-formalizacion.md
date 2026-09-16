@@ -1,84 +1,112 @@
 # Feature Specification: SPEC-13 — Ruta de formalización
 
-**Creado**: 2026-09-16  
-**Casos de uso cubiertos**: UC077–UC080
+**Creado**: 2026-09-16
+**Casos de uso cubiertos**: UC077,UC078,UC079,UC080
 
 ## User Scenarios & Testing *(mandatory)*
 
-### User Story 1 - Consulta de ruta (Priority: P1)
+> Relaciones del diagrama: UC078 extiende la consulta UC077; UC080 representa una vinculación futura.
+### User Story 1 - Consultar ruta de formalización [UC077] (Priority: P1)
+Como prestador, quiero consultar ruta de formalización, para gestionar específicamente consultar ruta de formalización dentro de CONectaSM.
 
-Como prestador, quiero consultar mi ruta de formalización para conocer los pasos disponibles sin que la plataforma declare mi estatus legal.
+**Why this priority**: UC077 permite a Prestador consultar ruta de formalización; el resultado se limita a la operación descrita en el diagrama.
 
-**Why this priority**: Esta funcionalidad aporta valor directo al flujo de la plataforma y su prioridad refleja su dependencia y relevancia para el alcance definido.
-
-**Independent Test**: Abrir la ruta y comprobar que muestra progreso e información de orientación.
-
-**Acceptance Scenarios**:
-
-1. **Scenario**: Flujo exitoso de consulta de ruta
-   - **Given** el actor tiene permisos y los datos requeridos son válidos
-   - **When** ejecuta la acción principal del caso de uso
-   - **Then** el sistema completa la operación y deja el resultado trazable
-
-2. **Scenario**: Datos inválidos o condición no permitida en consulta de ruta
-   - **Given** falta un dato obligatorio o el estado no permite la operación
-   - **When** el actor intenta completar la acción
-   - **Then** el sistema rechaza la operación, explica el motivo y conserva la información válida
-
----
-
-### User Story 2 - Enlaces institucionales (Priority: P2)
-
-Como prestador, quiero abrir enlaces oficiales y consultar futuras integraciones institucionales para continuar mi proceso.
-
-**Why this priority**: Esta funcionalidad aporta valor directo al flujo de la plataforma y su prioridad refleja su dependencia y relevancia para el alcance definido.
-
-**Independent Test**: Abrir un enlace oficial válido y comprobar que la plataforma registra la consulta sin afirmar cumplimiento legal.
+**Independent Test**: Con una cuenta de prestador y un registro de prueba de «Consultar ruta de formalización», verificar que UC077 muestra o guarda el resultado indicado sin ejecutar otro CU.
 
 **Acceptance Scenarios**:
 
-1. **Scenario**: Flujo exitoso de enlaces institucionales
-   - **Given** el actor tiene permisos y los datos requeridos son válidos
-   - **When** ejecuta la acción principal del caso de uso
-   - **Then** el sistema completa la operación y deja el resultado trazable
+1. **Scenario**: Consultar ruta de formalización para UC077
+   - **Given** un prestador autorizado dispone de los datos de «Consultar ruta de formalización»
+   - **When** ejecuta la acción «Consultar ruta de formalización»
+   - **Then** el sistema muestra la información específica de «Consultar ruta de formalización».
 
-2. **Scenario**: Datos inválidos o condición no permitida en enlaces institucionales
-   - **Given** falta un dato obligatorio o el estado no permite la operación
-   - **When** el actor intenta completar la acción
-   - **Then** el sistema rechaza la operación, explica el motivo y conserva la información válida
+2. **Scenario**: Datos insuficientes o actor no autorizado en UC077
+   - **Given** la solicitud de «Consultar ruta de formalización» no identifica un registro válido o el actor no tiene el rol Prestador
+   - **When** intenta confirmar la operación
+   - **Then** el sistema rechaza la operación, no modifica el registro y comunica la causa
+
+### User Story 2 - Abrir enlaces oficiales de formalización [UC078] (Priority: P1)
+Como prestador, quiero abrir enlaces oficiales de formalización, para gestionar específicamente abrir enlaces oficiales de formalización dentro de CONectaSM.
+
+**Why this priority**: UC078 permite a Prestador abrir enlaces oficiales de formalización; el resultado se limita a la operación descrita en el diagrama.
+
+**Independent Test**: Con una cuenta de prestador y un registro de prueba de «Abrir enlaces oficiales de formalización», verificar que UC078 muestra o guarda el resultado indicado sin ejecutar otro CU.
+
+**Acceptance Scenarios**:
+
+1. **Scenario**: Abrir enlaces oficiales de formalización para UC078
+   - **Given** un prestador autorizado dispone de los datos de «Abrir enlaces oficiales de formalización»
+   - **When** ejecuta la acción «Abrir enlaces oficiales de formalización»
+   - **Then** el sistema muestra la información específica de «Abrir enlaces oficiales de formalización».
+
+2. **Scenario**: Datos insuficientes o actor no autorizado en UC078
+   - **Given** la solicitud de «Abrir enlaces oficiales de formalización» no identifica un registro válido o el actor no tiene el rol Prestador
+   - **When** intenta confirmar la operación
+   - **Then** el sistema rechaza la operación, no modifica el registro y comunica la causa
+
+### User Story 3 - Mostrar progreso sin declarar estatus legal [UC079] (Priority: P1)
+Como prestador, quiero mostrar progreso sin declarar estatus legal, para gestionar específicamente mostrar progreso sin declarar estatus legal dentro de CONectaSM.
+
+**Why this priority**: UC079 permite a Prestador mostrar progreso sin declarar estatus legal; el resultado se limita a la operación descrita en el diagrama.
+
+**Independent Test**: Con una cuenta de prestador y un registro de prueba de «Mostrar progreso sin declarar estatus legal», verificar que UC079 muestra o guarda el resultado indicado sin ejecutar otro CU.
+
+**Acceptance Scenarios**:
+
+1. **Scenario**: Mostrar progreso sin declarar estatus legal para UC079
+   - **Given** un prestador autorizado dispone de los datos de «Mostrar progreso sin declarar estatus legal»
+   - **When** ejecuta la acción «Mostrar progreso sin declarar estatus legal»
+   - **Then** el sistema muestra la información específica de «Mostrar progreso sin declarar estatus legal».
+
+2. **Scenario**: Datos insuficientes o actor no autorizado en UC079
+   - **Given** la solicitud de «Mostrar progreso sin declarar estatus legal» no identifica un registro válido o el actor no tiene el rol Prestador
+   - **When** intenta confirmar la operación
+   - **Then** el sistema rechaza la operación, no modifica el registro y comunica la causa
+
+### User Story 4 - Vincular ruta institucional futura <<Future>> [UC080] (Priority: P3)
+Como prestador, quiero vincular ruta institucional futura <<future>>, para gestionar específicamente vincular ruta institucional futura <<future>> dentro de CONectaSM.
+
+**Why this priority**: UC080 permite a Prestador vincular ruta institucional futura <<future>>; el resultado se limita a la operación descrita en el diagrama.
+
+**Independent Test**: Con una cuenta de prestador y un registro de prueba de «Vincular ruta institucional futura <<Future>>», verificar que UC080 muestra o guarda el resultado indicado sin ejecutar otro CU.
+
+**Acceptance Scenarios**:
+
+1. **Scenario**: Vincular ruta institucional futura <<Future>> para UC080
+   - **Given** un prestador autorizado dispone de los datos de «Vincular ruta institucional futura <<Future>>»
+   - **When** ejecuta la acción «Vincular ruta institucional futura <<Future>>»
+   - **Then** el sistema guarda «Vincular ruta institucional futura <<Future>>» en el registro seleccionado y muestra su nuevo estado.
+
+2. **Scenario**: Datos insuficientes o actor no autorizado en UC080
+   - **Given** la solicitud de «Vincular ruta institucional futura <<Future>>» no identifica un registro válido o el actor no tiene el rol Prestador
+   - **When** intenta confirmar la operación
+   - **Then** el sistema rechaza la operación, no modifica el registro y comunica la causa
 
 ---
 
 ### Edge Cases
 
-- Si faltan datos obligatorios, el sistema identifica cada campo pendiente y no crea un registro incompleto.
-- Si el actor pierde la sesión o la red falla, el sistema no confirma una operación que no haya sido persistida.
-- Si el estado del recurso cambió en otra operación, el sistema informa el conflicto y solicita consultar la información actualizada.
+- Un enlace oficial roto debe mostrarse como no disponible sin afirmar que el trámite fue completado.
+- La ruta es informativa y no declara estatus legal; los enlaces y la integración institucional futura requieren fuentes y políticas por definir.
 
 ## Requirements *(mandatory)*
 
 ### Functional Requirements
 
-- **FR-001**: El sistema DEBE mostrar una ruta de formalización con pasos comprensibles.
-- **FR-002**: El sistema DEBE mostrar progreso sin declarar ni certificar estatus legal.
-- **FR-003**: El sistema DEBE abrir enlaces oficiales configurados y vigentes.
-- **FR-004**: El sistema DEBE permitir vincular una ruta institucional futura sin bloquear el flujo actual.
-
+- **FR-077**: El sistema DEBE permitir que un Prestador ejecute «Consultar ruta de formalización» y debe mostrar o guardar el resultado específico de esa operación, sin concederla a otros roles. [UC077]
+- **FR-078**: El sistema DEBE permitir que un Prestador ejecute «Abrir enlaces oficiales de formalización» y debe mostrar o guardar el resultado específico de esa operación, sin concederla a otros roles. [UC078]
+- **FR-079**: El sistema DEBE permitir que un Prestador ejecute «Mostrar progreso sin declarar estatus legal» y debe mostrar o guardar el resultado específico de esa operación, sin concederla a otros roles. [UC079]
+- **FR-080**: El sistema DEBE permitir que un Prestador ejecute «Vincular ruta institucional futura <<Future>>» y debe mostrar o guardar el resultado específico de esa operación, sin concederla a otros roles. [UC080]
 ### Key Entities *(include if feature involves data)*
 
-- **Ruta de formalización**: pasos, orden, descripción, progreso y versión.
-- **Enlace oficial**: entidad, URL, vigencia, título y fecha de actualización.
-- **Vinculación institucional**: ruta, entidad, estado y referencia externa.
+- **Registro específico de Ruta de formalización**: información que los CUs (UC077,UC078,UC079,UC080) consultan, crean, actualizan o muestran.
+- **Actor asignado y autorización**: identidad del actor indicado en el diagrama y permiso requerido para cada operación.
+- **Estado y resultado de cada operación**: valor confirmado, mensaje mostrado y evidencia asociada; retención y formatos quedan [NEEDS CLARIFICATION: definir].
 
 ## Success Criteria *(mandatory)*
 
 ### Measurable Outcomes
 
-- **SC-001**: Un enlace inválido no se presenta como disponible.
-- **SC-002**: El progreso se conserva aunque un portal externo no responda.
-- **SC-003**: Ningún mensaje de la ruta se interpreta como certificación o asesoría legal.
-
-## Trazabilidad
-
-- **Diagrama de origen**: Casos de uso UC077–UC080.
-- **Alcance**: La especificación describe el comportamiento observable y no prescribe tecnologías ni rutas de implementación.
+- **SC-001**: El 100% de los CUs UC077,UC078,UC079,UC080 solo permite la acción al actor asignado en su diagrama y devuelve el resultado de su operación específica.
+- **SC-002**: Ante datos faltantes, registro inexistente o rol incorrecto, ninguna operación cambia datos y la interfaz informa la causa.
+- **SC-003**: Los estados, filtros, evidencias o políticas no definidos en los diagramas se presentan como [NEEDS CLARIFICATION: definir política antes de implementar].

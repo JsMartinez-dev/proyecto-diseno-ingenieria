@@ -1,62 +1,52 @@
 # Feature Specification: SPEC-20 — Pasarela de pagos futura
 
-**Creado**: 2026-09-16  
+**Creado**: 2026-09-16
 **Casos de uso cubiertos**: UC093
 
 ## User Scenarios & Testing *(mandatory)*
 
-### User Story 1 - Piloto de pago (Priority: P3)
+> Relaciones del diagrama: <<Future>> Esta capacidad no ejecuta cobros reales. El proveedor, moneda, conciliación y cumplimiento quedan [NEEDS CLARIFICATION: definir].
+### User Story 1 - Piloto de pasarela de pago <<Future>> [UC093] (Priority: P3)
+Como cliente o prestador, quiero una capacidad futura e informativa de piloto de pasarela de pago [UC093], para evaluar si CONectaSM debería ofrecerla; activación, disponibilidad, proveedor, moneda, datos financieros, pago, conciliación y cumplimiento quedan [NEEDS CLARIFICATION: definir].
 
-Como cliente, quiero disponer de una opción futura de pago para conocer cómo se formalizaría una transacción cuando la capacidad sea habilitada.
+**Why this priority**: UC093 es una capacidad <<Future>> para Cliente o Prestador; no implica habilitación, cobro, persistencia, transacción ni estado de pago.
 
-**Why this priority**: Esta funcionalidad aporta valor directo al flujo de la plataforma y su prioridad refleja su dependencia y relevancia para el alcance definido.
-
-**Independent Test**: Consultar el piloto o modo informativo sin ejecutar cobros reales ni alterar un servicio vigente.
+**Independent Test**: Con una cuenta de cliente o prestador, verificar que UC093 no se presenta como disponible mientras no exista una decisión de activación; si se habilitara, confirmar proveedor, datos financieros, moneda, pago y cumplimiento documentados [NEEDS CLARIFICATION: definir].
 
 **Acceptance Scenarios**:
 
-1. **Scenario**: Flujo exitoso de piloto de pago
-   - **Given** el actor tiene permisos y los datos requeridos son válidos
-   - **When** ejecuta la acción principal del caso de uso
-   - **Then** el sistema completa la operación y deja el resultado trazable
+1. **Scenario**: UC093 no habilitado
+   - **Given** la capacidad futura de piloto de pasarela de pago [UC093] no está habilitada
+   - **When** un cliente o prestador consulta las capacidades disponibles
+   - **Then** el sistema no la presenta como disponible ni simula pagos, cobros, registros o estados.
 
-2. **Scenario**: Datos inválidos o condición no permitida en piloto de pago
-   - **Given** falta un dato obligatorio o el estado no permite la operación
-   - **When** el actor intenta completar la acción
-   - **Then** el sistema rechaza la operación, explica el motivo y conserva la información válida
+2. **Scenario**: UC093 habilitado sin reglas definidas
+   - **Given** una activación de UC093 requiere decidir proveedor, moneda, datos financieros, pago, conciliación y cumplimiento
+   - **When** se intenta habilitarlo
+   - **Then** el sistema exige documentar esas decisiones [NEEDS CLARIFICATION: definir] y no afirma que ejecute cobros, guarde datos financieros o muestre estados antes de ello.
 
 ---
 
 ### Edge Cases
 
-- Si faltan datos obligatorios, el sistema identifica cada campo pendiente y no crea un registro incompleto.
-- Si el actor pierde la sesión o la red falla, el sistema no confirma una operación que no haya sido persistida.
-- Si el estado del recurso cambió en otra operación, el sistema informa el conflicto y solicita consultar la información actualizada.
+- Un intento de pago debe permanecer en modo informativo y no almacenar datos financieros reales hasta definir el alcance Future.
+- <<Future>> Esta capacidad no ejecuta cobros reales. El proveedor, moneda, conciliación y cumplimiento quedan [NEEDS CLARIFICATION: definir].
 
 ## Requirements *(mandatory)*
 
 ### Functional Requirements
 
-- **FR-001**: El sistema DEBE identificar la pasarela como capacidad futura mientras no esté habilitada.
-- **FR-002**: El sistema DEBE impedir cobros reales durante el piloto.
-- **FR-003**: El sistema DEBE informar al usuario del estado y alcance de la capacidad.
-- **FR-004**: El sistema DEBE conservar la separación entre el contrato del servicio y cualquier intento de pago futuro.
-
+- **FR-093**: El sistema DEBE tratar «Piloto de pasarela de pago <<Future>>» [UC093] como capacidad futura e informativa para Cliente o Prestador; si no está habilitada, no debe presentarla como disponible ni ejecutar cobros. Activación, proveedor, moneda, datos financieros, pago, conciliación y cumplimiento quedan [NEEDS CLARIFICATION: definir].
 ### Key Entities *(include if feature involves data)*
 
-- **Configuración de pasarela**: proveedor, estado, ambiente y fecha de habilitación.
-- **Intento de pago**: servicio, importe informativo, estado y fecha, sin datos financieros sensibles.
-- **Aviso de capacidad futura**: usuario, alcance y aceptación informativa.
+- **Registro específico de Pasarela de pagos futura**: entidad candidata asociada al CU (UC093); si se consulta, crea o actualiza información queda [NEEDS CLARIFICATION: definir].
+- **Actor asignado y autorización**: identidad del actor indicado en el diagrama y permiso requerido para cada operación.
+- **Estado y resultado de cada operación**: no definidos por el diagrama; cualquier transacción, pago, mensaje, evidencia, retención o formato queda [NEEDS CLARIFICATION: definir].
 
 ## Success Criteria *(mandatory)*
 
 ### Measurable Outcomes
 
-- **SC-001**: Ningún flujo del MVP crea un cargo real.
-- **SC-002**: Un intento de pago en modo futuro se marca como no ejecutado.
-- **SC-003**: El usuario recibe una explicación clara cuando la pasarela aún no está disponible.
-
-## Trazabilidad
-
-- **Diagrama de origen**: Casos de uso UC093.
-- **Alcance**: La especificación describe el comportamiento observable y no prescribe tecnologías ni rutas de implementación.
+- **SC-001**: El 100% de las superficies de CONectaSM no presenta UC093 como disponible mientras no exista una decisión de activación documentada.
+- **SC-002**: Si se evalúa su habilitación, ningún cobro, pago, transacción, dato financiero o estado se ejecuta, guarda o muestra sin reglas documentadas [NEEDS CLARIFICATION: definir].
+- **SC-003**: Los estados, filtros, evidencias o políticas no definidos en los diagramas se presentan como [NEEDS CLARIFICATION: definir política antes de implementar].

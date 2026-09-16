@@ -1,83 +1,72 @@
 # Feature Specification: SPEC-03 — Descubrimiento de prestadores
 
-**Creado**: 2026-09-16  
-**Casos de uso cubiertos**: UC014–UC015
+**Creado**: 2026-09-16
+**Casos de uso cubiertos**: UC014,UC015
 
 ## User Scenarios & Testing *(mandatory)*
 
-### User Story 1 - Búsqueda filtrada (Priority: P1)
+> Relaciones del diagrama: UC015 extiende UC014 para consultar el detalle desde resultados.
+### User Story 1 - Buscar prestadores por categoría y zona [UC014] (Priority: P1)
+Como cliente, quiero buscar prestadores por categoría y zona, para gestionar específicamente buscar prestadores por categoría y zona dentro de CONectaSM.
 
-Como cliente, quiero buscar prestadores por categoría y zona para encontrar opciones relevantes.
+**Why this priority**: UC014 permite a Cliente buscar prestadores por categoría y zona; el resultado se limita a la operación descrita en el diagrama.
 
-**Why this priority**: Esta funcionalidad aporta valor directo al flujo de la plataforma y su prioridad refleja su dependencia y relevancia para el alcance definido.
-
-**Independent Test**: Realizar una búsqueda con categoría y zona y comprobar que los resultados cumplen ambos filtros.
-
-**Acceptance Scenarios**:
-
-1. **Scenario**: Flujo exitoso de búsqueda filtrada
-   - **Given** el actor tiene permisos y los datos requeridos son válidos
-   - **When** ejecuta la acción principal del caso de uso
-   - **Then** el sistema completa la operación y deja el resultado trazable
-
-2. **Scenario**: Datos inválidos o condición no permitida en búsqueda filtrada
-   - **Given** falta un dato obligatorio o el estado no permite la operación
-   - **When** el actor intenta completar la acción
-   - **Then** el sistema rechaza la operación, explica el motivo y conserva la información válida
-
----
-
-### User Story 2 - Consulta de perfil público (Priority: P1)
-
-Como cliente, quiero consultar el perfil público de un prestador para evaluar su experiencia antes de contactarlo.
-
-**Why this priority**: Esta funcionalidad aporta valor directo al flujo de la plataforma y su prioridad refleja su dependencia y relevancia para el alcance definido.
-
-**Independent Test**: Abrir un perfil desde los resultados y verificar que solo muestra información pública.
+**Independent Test**: Con una cuenta de cliente y un registro de prueba de «Buscar prestadores por categoría y zona», verificar que UC014 muestra o guarda el resultado indicado sin ejecutar otro CU.
 
 **Acceptance Scenarios**:
 
-1. **Scenario**: Flujo exitoso de consulta de perfil público
-   - **Given** el actor tiene permisos y los datos requeridos son válidos
-   - **When** ejecuta la acción principal del caso de uso
-   - **Then** el sistema completa la operación y deja el resultado trazable
+1. **Scenario**: Buscar prestadores por categoría y zona para UC014
+   - **Given** un cliente autorizado dispone de los datos de «Buscar prestadores por categoría y zona»
+   - **When** ejecuta la acción «Buscar prestadores por categoría y zona»
+   - **Then** el sistema muestra la información específica de «Buscar prestadores por categoría y zona».
 
-2. **Scenario**: Datos inválidos o condición no permitida en consulta de perfil público
-   - **Given** falta un dato obligatorio o el estado no permite la operación
-   - **When** el actor intenta completar la acción
-   - **Then** el sistema rechaza la operación, explica el motivo y conserva la información válida
+2. **Scenario**: Datos insuficientes o actor no autorizado en UC014
+   - **Given** la solicitud de «Buscar prestadores por categoría y zona» no identifica un registro válido o el actor no tiene el rol Cliente
+   - **When** intenta confirmar la operación
+   - **Then** el sistema rechaza la operación, no modifica el registro y comunica la causa
+
+### User Story 2 - Consultar perfil público del prestador [UC015] (Priority: P1)
+Como cliente, quiero consultar perfil público del prestador, para gestionar específicamente consultar perfil público del prestador dentro de CONectaSM.
+
+**Why this priority**: UC015 permite a Cliente consultar perfil público del prestador; el resultado se limita a la operación descrita en el diagrama.
+
+**Independent Test**: Con una cuenta de cliente y un registro de prueba de «Consultar perfil público del prestador», verificar que UC015 muestra o guarda el resultado indicado sin ejecutar otro CU.
+
+**Acceptance Scenarios**:
+
+1. **Scenario**: Consultar perfil público del prestador para UC015
+   - **Given** un cliente autorizado dispone de los datos de «Consultar perfil público del prestador»
+   - **When** ejecuta la acción «Consultar perfil público del prestador»
+   - **Then** el sistema muestra la información específica de «Consultar perfil público del prestador».
+
+2. **Scenario**: Datos insuficientes o actor no autorizado en UC015
+   - **Given** la solicitud de «Consultar perfil público del prestador» no identifica un registro válido o el actor no tiene el rol Cliente
+   - **When** intenta confirmar la operación
+   - **Then** el sistema rechaza la operación, no modifica el registro y comunica la causa
 
 ---
 
 ### Edge Cases
 
-- Si faltan datos obligatorios, el sistema identifica cada campo pendiente y no crea un registro incompleto.
-- Si el actor pierde la sesión o la red falla, el sistema no confirma una operación que no haya sido persistida.
-- Si el estado del recurso cambió en otra operación, el sistema informa el conflicto y solicita consultar la información actualizada.
+- Un resultado sin perfil público disponible debe indicar que el detalle no está disponible sin revelar datos privados.
+- El descubrimiento debe conservar la privacidad de la ubicación y distinguir resultados de perfiles públicos.
 
 ## Requirements *(mandatory)*
 
 ### Functional Requirements
 
-- **FR-001**: El sistema DEBE permitir buscar prestadores por categoría y zona aproximada.
-- **FR-002**: El sistema DEBE devolver resultados compatibles con los filtros seleccionados.
-- **FR-003**: El sistema DEBE permitir abrir el perfil público de un prestador desde los resultados.
-- **FR-004**: El sistema DEBE ocultar datos personales y direcciones que no sean públicos.
-
+- **FR-014**: El sistema DEBE permitir que cliente ejecute «Buscar prestadores por categoría y zona» y debe mostrar o guardar el resultado específico de esa operación, sin concederla a otros roles. [UC014]
+- **FR-015**: El sistema DEBE permitir que cliente ejecute «Consultar perfil público del prestador» y debe mostrar o guardar el resultado específico de esa operación, sin concederla a otros roles. [UC015]
 ### Key Entities *(include if feature involves data)*
 
-- **Índice de prestadores**: categoría, zona, disponibilidad y estado visible.
-- **Perfil público**: presentación, experiencia, portafolio y reputación visible.
+- **Registro específico de Descubrimiento de prestadores**: información que los CUs (UC014,UC015) consultan, crean, actualizan o muestran.
+- **Actor asignado y autorización**: identidad del actor indicado en el diagrama y permiso requerido para cada operación.
+- **Estado y resultado de cada operación**: valor confirmado, mensaje mostrado y evidencia asociada; retención y formatos quedan [NEEDS CLARIFICATION: definir].
 
 ## Success Criteria *(mandatory)*
 
 ### Measurable Outcomes
 
-- **SC-001**: Una búsqueda válida devuelve resultados o informa claramente que no hay coincidencias.
-- **SC-002**: Los resultados se muestran en menos de 3 segundos en condiciones normales.
-- **SC-003**: El perfil público nunca expone la dirección exacta ni datos marcados como privados.
-
-## Trazabilidad
-
-- **Diagrama de origen**: Casos de uso UC014–UC015.
-- **Alcance**: La especificación describe el comportamiento observable y no prescribe tecnologías ni rutas de implementación.
+- **SC-001**: El 100% de los CUs UC014,UC015 solo permite la acción al actor asignado en su diagrama y devuelve el resultado de su operación específica.
+- **SC-002**: Ante datos faltantes, registro inexistente o rol incorrecto, ninguna operación cambia datos y la interfaz informa la causa.
+- **SC-003**: Los estados, filtros, evidencias o políticas no definidos en los diagramas se presentan como [NEEDS CLARIFICATION: definir política antes de implementar].
