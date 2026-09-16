@@ -7,33 +7,33 @@ skinparam shadowing false
 actor "Cliente" as Cliente
 
 rectangle "CONectaSM" {
-  usecase "Buscar prestadores\npor categoría y zona\n[US-026]" as UC026
-  usecase "Consultar perfil público\ndel prestador\n[US-024]" as UC024
+  usecase "Buscar prestadores\npor categoría y zona\n[US-026]" as UC014
+  usecase "Consultar perfil público\ndel prestador\n[US-024]" as UC015
 
-  usecase "Adjuntar fotos\n[US-032]" as UC032
-  usecase "Definir zona aproximada\ny urgencia\n[US-033]" as UC033
-  usecase "Publicar solicitud\n[US-034]" as UC034
-  usecase "Conservar borrador\n[US-030]" as UC030
+  usecase "Adjuntar fotos\n[US-032]" as UC016
+  usecase "Definir zona aproximada\ny urgencia\n[US-033]" as UC017
+  usecase "Publicar solicitud\n[US-034]" as UC018
+  usecase "Conservar borrador\n[US-030]" as UC019
 
-  usecase "Editar solicitud abierta\n[US-035]" as UC035
-  usecase "Cancelar solicitud abierta\n[US-036]" as UC036
-  usecase "Consultar mis solicitudes\n[US-037]" as UC037
-  usecase "Consultar detalle y estado\nde solicitud\n[US-038]" as UC038
+  usecase "Editar solicitud abierta\n[US-035]" as UC020
+  usecase "Cancelar solicitud abierta\n[US-036]" as UC021
+  usecase "Consultar mis solicitudes\n[US-037]" as UC022
+  usecase "Consultar detalle y estado\nde solicitud\n[US-038]" as UC023
 }
 
-Cliente --> UC026
-Cliente --> UC024
-Cliente --> UC034
-Cliente --> UC035
-Cliente --> UC036
-Cliente --> UC037
-Cliente --> UC038
+Cliente --> UC014
+Cliente --> UC015
+Cliente --> UC018
+Cliente --> UC020
+Cliente --> UC021
+Cliente --> UC022
+Cliente --> UC023
 
-UC024 .> UC026 : <<extend>>
+UC015 .> UC014 : <<extend>>
 
-UC034 .> UC033 : <<include>>
-UC032 .> UC034 : <<extend>>
-UC030 .> UC034 : <<extend>>
+UC018 .> UC017 : <<include>>
+UC016 .> UC018 : <<extend>>
+UC019 .> UC018 : <<extend>>
 
 
 @enduml

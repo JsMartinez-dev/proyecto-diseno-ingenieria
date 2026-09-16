@@ -13,31 +13,31 @@ Usuario <|-- Cliente
 Usuario <|-- Prestador
 
 rectangle "CONectaSM" {
-  usecase "Consultar ruta de\nformalización\n[US-083]" as UC083
-  usecase "Abrir enlaces oficiales\nde formalización\n[US-086]" as UC086
-  usecase "Mostrar progreso sin declarar\nestatus legal\n[US-087]" as UC087
-  usecase "Vincular ruta institucional\nfutura\n[US-088]" as UC088
+  usecase "Consultar ruta de\nformalización\n[US-083]" as UC077
+  usecase "Abrir enlaces oficiales\nde formalización\n[US-086]" as UC078
+  usecase "Mostrar progreso sin declarar\nestatus legal\n[US-087]" as UC079
+  usecase "Vincular ruta institucional\nfutura\n[US-088]" as UC080
 
-  usecase "Configurar preferencias\nde notificación\n[US-091]" as UC091
-  usecase "Consultar historial\nde trabajos\n[US-092]" as UC092
-  usecase "Descargar historial\n[US-093]" as UC093
-  usecase "Consultar indicadores\nbásicos del prestador\n[US-094]" as UC094
-  usecase "Consultar actividad reciente\n[US-095]" as UC095
+  usecase "Configurar preferencias\nde notificación\n[US-091]" as UC081
+  usecase "Consultar historial\nde trabajos\n[US-092]" as UC082
+  usecase "Descargar historial\n[US-093]" as UC083
+  usecase "Consultar indicadores\nbásicos del prestador\n[US-094]" as UC084
+  usecase "Consultar actividad reciente\n[US-095]" as UC085
 }
 
-Prestador --> UC083
-Prestador --> UC086
-Prestador --> UC087
-Prestador --> UC088
-Prestador --> UC094
+Prestador --> UC077
+Prestador --> UC078
+Prestador --> UC079
+Prestador --> UC080
+Prestador --> UC084
 
-Usuario --> UC091
-Usuario --> UC092
-Usuario --> UC093
-Usuario --> UC095
+Usuario --> UC081
+Usuario --> UC082
+Usuario --> UC083
+Usuario --> UC085
 
-UC086 .> UC083 : <<extend>>
-UC093 .> UC092 : <<extend>>
+UC078 .> UC077 : <<extend>>
+UC083 .> UC082 : <<extend>>
 
 
 @enduml
