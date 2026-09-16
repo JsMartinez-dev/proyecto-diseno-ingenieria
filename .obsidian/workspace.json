@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "FASE-4-Prototipar/specs/README.md",
+                "file": "FASE-4-Prototipar/specs/spec-02-gestion-perfil-privacidad.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "README"
+              "title": "spec-02-gestion-perfil-privacidad"
             }
           }
         ]
@@ -189,8 +189,16 @@
       "bases:Crear nueva base": false
     }
   },
-  "active": "4fe7ee3994669842",
+  "active": "b7e62ab24abee435",
   "lastOpenFiles": [
+    "FASE-4-Prototipar/specs/spec-02-gestion-perfil-privacidad.md",
+    "FASE-4-Prototipar/specs/spec-02-gestion-perfil-privacidad.md",
+    "FASE-4-Prototipar/specs/spec-01-autenticacion-registro-control-acceso.md",
+    "FASE-4-Prototipar/specs/spec-04-gestion-solicitudes-servicio.md",
+    "templates/spec-template.md",
+    "FASE-4-Prototipar/specs/Sin confirmar 883328.crdownload",
+    "FASE-4-Prototipar/specs/Sin confirmar 932120.crdownload",
+    "FASE-4-Prototipar/specs/spec-03-descubrimiento-prestadores.md",
     "FASE-4-Prototipar/specs/README.md",
     "FASE-4-Prototipar/specs/spec-20-pasarela-pagos-futura.md",
     "FASE-4-Prototipar/specs/spec-19-referidos-e-idiomas.md",
@@ -208,16 +216,9 @@
     "FASE-4-Prototipar/specs/spec-07-creacion-gestion-propuestas.md",
     "FASE-4-Prototipar/specs/spec-06-compatibilidad-oportunidades.md",
     "FASE-4-Prototipar/specs/spec-05-perfil-profesional.md",
-    "FASE-4-Prototipar/specs/spec-04-gestion-solicitudes-servicio.md",
-    "FASE-4-Prototipar/specs/spec-03-descubrimiento-prestadores.md",
-    "FASE-4-Prototipar/specs/spec-02-gestion-perfil-privacidad.md",
-    "FASE-4-Prototipar/specs/spec-01-autenticacion-registro-control-acceso.md",
     "FASE-4-Prototipar/specs",
     "v2/Diagramas_Casos_Uso_CONectaSM_PlantUML/Diagramas_Casos_Uso_CONectaSM_PlantUML/spec-01-acceso-identidad-cuenta-privacidad.md",
     "FASE-4-Prototipar/08-Casos-de-Uso/Caso-de-uso-2/spec-02-cliente-descubrimiento-solicitudes.md",
-    "v2/Diagramas_Casos_Uso_CONectaSM_PlantUML/Diagramas_Casos_Uso_CONectaSM_PlantUML/spec-02-cliente-descubrimiento-solicitudes.md",
-    "FASE-4-Prototipar/08-Casos-de-Uso/Caso-de-uso-3/spec-03-prestador-perfil-oportunidades.md",
-    "v2/Diagramas_Casos_Uso_CONectaSM_PlantUML/Diagramas_Casos_Uso_CONectaSM_PlantUML/spec-03-prestador-perfil-oportunidades.md",
     "FASE-4-Prototipar/08-Casos-de-Uso/Caso-de-uso-7/07_evolucion_futura.puml",
     "FASE-4-Prototipar/08-Casos-de-Uso/Caso-de-uso-6/06_formalizacion_soporte.puml",
     "FASE-4-Prototipar/08-Casos-de-Uso/Caso-de-uso-5/05_confianza_moderacion_admin.puml",
@@ -225,8 +226,6 @@
     "FASE-4-Prototipar/08-Casos-de-Uso/Caso-de-uso-3/03_prestador_perfil_oportunidades.puml",
     "FASE-4-Prototipar/08-Casos-de-Uso/Caso-de-uso-2/02_cliente_descubrimiento_solicitudes.puml",
     "v2/Diagramas_Casos_Uso_CONectaSM_PlantUML/Diagramas_Casos_Uso_CONectaSM_PlantUML/02_cliente_descubrimiento_solicitudes.puml",
-    "v2/Diagramas_Casos_Uso_CONectaSM_PlantUML/Diagramas_Casos_Uso_CONectaSM_PlantUML/07_evolucion_futura.puml",
-    "v2/Diagramas_Casos_Uso_CONectaSM_PlantUML/Diagramas_Casos_Uso_CONectaSM_PlantUML/05_confianza_moderacion_admin.puml",
     "Pasted image 20260903191325.png",
     "assets/grafica_dispositivos_electronicos.png",
     "assets/grafica_trabajadores_propios.png",
