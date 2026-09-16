@@ -1,232 +1,182 @@
 # Feature Specification: SPEC-05 — Creación y gestión del perfil profesional
 
-**Creado**: 2026-09-16
-**Casos de uso cubiertos**: UC024,UC025,UC026,UC027,UC028,UC029,UC030,UC031,UC032,UC033
+**Creado**: 2026-09-16 
+**Casos de uso cubiertos**: UC024, UC025, UC026, UC027, UC028, UC029, UC030, UC031, UC032, UC033 
 
-## User Scenarios & Testing *(mandatory)*
+## User Scenarios & Testing _(mandatory)_
 
-> Relaciones del diagrama: UC027 y UC026 se incluyen al crear el perfil; UC028 puede extenderlo; la vista previa UC033 permite revisar antes de exponer.
-### User Story 1 - Crear perfil profesional [UC024] (Priority: P1)
-Como prestador, quiero crear perfil profesional, para gestionar específicamente crear perfil profesional dentro de CONectaSM.
+### User Story 1 - Crear el perfil profesional [UC024, UC026, UC027, UC028] (Priority: P1)
 
-**Why this priority**: UC024 permite a Prestador crear perfil profesional; el resultado se limita a la operación descrita en el diagrama.
+Como prestador, quiero crear mi perfil profesional definiendo obligatoriamente mis categorías de servicio y mis zonas de atención, y registrando mi experiencia si lo deseo, para que los clientes puedan encontrarme y confiar en la información que ven.
 
-**Independent Test**: Con una cuenta de prestador y un registro de prueba de «Crear perfil profesional», verificar que UC024 muestra o guarda el resultado indicado sin ejecutar otro CU.
+**Why this priority**: Sin un perfil creado, el Prestador no existe para el descubrimiento del Cliente  ni puede recibir oportunidades, es el requisito previo a cualquier otra capacidad de esta especificación.
 
-**Acceptance Scenarios**:
-
-1. **Scenario**: Crear perfil profesional para UC024
-   - **Given** un prestador autorizado dispone de los datos de «Crear perfil profesional»
-   - **When** ejecuta la acción «Crear perfil profesional»
-   - **Then** el sistema guarda «Crear perfil profesional» en el registro seleccionado y muestra su nuevo estado.
-
-2. **Scenario**: Datos insuficientes o actor no autorizado en UC024
-   - **Given** la solicitud de «Crear perfil profesional» no identifica un registro válido o el actor no tiene el rol Prestador
-   - **When** intenta confirmar la operación
-   - **Then** el sistema rechaza la operación, no modifica el registro y comunica la causa
-
-### User Story 2 - Editar perfil profesional [UC025] (Priority: P1)
-Como prestador, quiero editar perfil profesional, para gestionar específicamente editar perfil profesional dentro de CONectaSM.
-
-**Why this priority**: UC025 permite a Prestador editar perfil profesional; el resultado se limita a la operación descrita en el diagrama.
-
-**Independent Test**: Con una cuenta de prestador y un registro de prueba de «Editar perfil profesional», verificar que UC025 muestra o guarda el resultado indicado sin ejecutar otro CU.
+**Independent Test**: Con una cuenta de Prestador sin perfil, completar el formulario de creación sin categorías o sin zonas y verificar el rechazo, repetir completando ambos datos obligatorios sin experiencia y verificar que el perfil se crea,  repetir agregando experiencia profesional y verificar que también queda registrada.
 
 **Acceptance Scenarios**:
 
-1. **Scenario**: Editar perfil profesional para UC025
-   - **Given** un prestador autorizado dispone de los datos de «Editar perfil profesional»
-   - **When** ejecuta la acción «Editar perfil profesional»
-   - **Then** el sistema guarda «Editar perfil profesional» en el registro seleccionado y muestra su nuevo estado.
+1. **Scenario**: Creación completa con datos obligatorios [UC026 , UC027]
+    
+    - **Given** un Prestador sin perfil indica sus datos básicos, al menos una categoría de servicio y al menos una zona de atención
+    - **When** confirma la creación
+    - **Then** el sistema crea el perfil profesional con esas categorías y zonas asociadas
+2. **Scenario**: Intento de crear el perfil sin categorías o sin zonas
+    
+    - **Given** un Prestador intenta crear su perfil sin haber elegido ninguna categoría de servicio o ninguna zona de atención
+    - **When** confirma la creación
+    - **Then** el sistema rechaza la creación y señala el dato obligatorio faltante, sin dejar un perfil a medio crear
+3. **Scenario**: Registrar experiencia profesional de forma opcional [UC028]
+    
+    - **Given** un Prestador está creando su perfil
+    - **When** agrega su experiencia profesional antes de confirmar
+    - **Then** el sistema la asocia al perfil; si no la agrega, la creación se completa igualmente sin experiencia registrada
+4. **Scenario**: Actualizar categorías o experiencia después de creado el perfil [UC026, UC028]
+    
+    - **Given** un Prestador ya tiene un perfil creado
+    - **When** actualiza sus categorías de servicio o agrega nueva experiencia profesional de forma independiente, sin pasar por el flujo de creación
+    - **Then** el sistema guarda el cambio sobre el perfil existente sin crear un perfil nuevo
+5. **Scenario**: Actor no autorizado
+    
+    - **Given** un actor sin rol Prestador intenta crear o completar un perfil profesional
+    - **When** realiza la solicitud
+    - **Then** el sistema deniega la operación
 
-2. **Scenario**: Datos insuficientes o actor no autorizado en UC025
-   - **Given** la solicitud de «Editar perfil profesional» no identifica un registro válido o el actor no tiene el rol Prestador
-   - **When** intenta confirmar la operación
-   - **Then** el sistema rechaza la operación, no modifica el registro y comunica la causa
+### User Story 2 - Editar los datos generales del perfil [UC025] (Priority: P1)
 
-### User Story 3 - Escoger categorías de servicio al perfil [UC026] (Priority: P1)
-Como prestador, quiero escoger categorías de servicio al perfil, para gestionar específicamente escoger categorías de servicio al perfil dentro de CONectaSM.
+Como prestador, quiero editar los datos generales de mi perfil ya creado, para mantenerlo actualizado a medida que cambian mi información o mi forma de trabajar.
 
-**Why this priority**: UC026 permite a Prestador escoger categorías de servicio al perfil; el resultado se limita a la operación descrita en el diagrama.
+**Why this priority**: Un perfil desactualizado reduce la confianza del Cliente y puede mostrar información incorrecta durante el descubrimiento.
 
-**Independent Test**: Con una cuenta de prestador y un registro de prueba de «Escoger categorías de servicio al perfil», verificar que UC026 muestra o guarda el resultado indicado sin ejecutar otro CU.
-
-**Acceptance Scenarios**:
-
-1. **Scenario**: Escoger categorías de servicio al perfil para UC026
-   - **Given** un prestador autorizado dispone de los datos de «Escoger categorías de servicio al perfil»
-   - **When** ejecuta la acción «Escoger categorías de servicio al perfil»
-   - **Then** el sistema guarda «Escoger categorías de servicio al perfil» en el registro seleccionado y muestra su nuevo estado.
-
-2. **Scenario**: Datos insuficientes o actor no autorizado en UC026
-   - **Given** la solicitud de «Escoger categorías de servicio al perfil» no identifica un registro válido o el actor no tiene el rol Prestador
-   - **When** intenta confirmar la operación
-   - **Then** el sistema rechaza la operación, no modifica el registro y comunica la causa
-
-### User Story 4 - Configurar zonas de atención [UC027] (Priority: P1)
-Como prestador, quiero configurar zonas de atención, para gestionar específicamente configurar zonas de atención dentro de CONectaSM.
-
-**Why this priority**: UC027 permite a Prestador configurar zonas de atención; el resultado se limita a la operación descrita en el diagrama.
-
-**Independent Test**: Con una cuenta de prestador y un registro de prueba de «Configurar zonas de atención», verificar que UC027 muestra o guarda el resultado indicado sin ejecutar otro CU.
+**Independent Test**: Con un perfil ya creado, modificar uno de sus datos generales y verificar que el cambio se refleja; intentar editar un perfil inexistente o ajeno y verificar el rechazo.
 
 **Acceptance Scenarios**:
 
-1. **Scenario**: Configurar zonas de atención para UC027
-   - **Given** un prestador autorizado dispone de los datos de «Configurar zonas de atención»
-   - **When** ejecuta la acción «Configurar zonas de atención»
-   - **Then** el sistema guarda «Configurar zonas de atención» en el registro seleccionado y muestra su nuevo estado.
+1. **Scenario**: Edición exitosa
+    
+    - **Given** un Prestador tiene un perfil ya creado
+    - **When** modifica uno de sus datos generales y confirma
+    - **Then** el sistema guarda el cambio y muestra el estado actualizado del perfil
+2. **Scenario**: Edición de un perfil inexistente
+    
+    - **Given** un Prestador aún no tiene perfil creado
+    - **When** intenta editarlo
+    - **Then** el sistema rechaza la operación e indica que primero debe crear su perfil
+3. **Scenario**: Actor no autorizado
+    
+    - **Given** un actor sin rol Prestador, o un Prestador que intenta editar un perfil que no es el suyo
+    - **When** realiza la solicitud
+    - **Then** el sistema deniega la operación sin modificar ningún registro
 
-2. **Scenario**: Datos insuficientes o actor no autorizado en UC027
-   - **Given** la solicitud de «Configurar zonas de atención» no identifica un registro válido o el actor no tiene el rol Prestador
-   - **When** intenta confirmar la operación
-   - **Then** el sistema rechaza la operación, no modifica el registro y comunica la causa
+### User Story 3 - Gestionar el portafolio de servicios [UC029, UC030] (Priority: P1)
 
-### User Story 5 - Registrar experiencia profesional al perfil [UC028] (Priority: P1)
-Como prestador, quiero registrar experiencia profesional al perfil, para gestionar específicamente registrar experiencia profesional al perfil dentro de CONectaSM.
+Como prestador, quiero agregar o eliminar servicios de mi portafolio, para mostrar a los clientes ejemplos concretos de trabajos que ofrezco.
 
-**Why this priority**: UC028 permite a Prestador registrar experiencia profesional al perfil; el resultado se limita a la operación descrita en el diagrama.
+**Why this priority**: El portafolio es evidencia tangible de la calidad del trabajo del Prestador y complementa la información declarada del perfil.
 
-**Independent Test**: Con una cuenta de prestador y un registro de prueba de «Registrar experiencia profesional al perfil», verificar que UC028 muestra o guarda el resultado indicado sin ejecutar otro CU.
-
-**Acceptance Scenarios**:
-
-1. **Scenario**: Registrar experiencia profesional al perfil para UC028
-   - **Given** un prestador autorizado dispone de los datos de «Registrar experiencia profesional al perfil»
-   - **When** ejecuta la acción «Registrar experiencia profesional al perfil»
-   - **Then** el sistema guarda «Registrar experiencia profesional al perfil» en el registro seleccionado y muestra su nuevo estado.
-
-2. **Scenario**: Datos insuficientes o actor no autorizado en UC028
-   - **Given** la solicitud de «Registrar experiencia profesional al perfil» no identifica un registro válido o el actor no tiene el rol Prestador
-   - **When** intenta confirmar la operación
-   - **Then** el sistema rechaza la operación, no modifica el registro y comunica la causa
-
-### User Story 6 - Agregar servicio al portafolio [UC029] (Priority: P1)
-Como prestador, quiero agregar servicio al portafolio, para gestionar específicamente agregar servicio al portafolio dentro de CONectaSM.
-
-**Why this priority**: UC029 permite a Prestador agregar servicio al portafolio; el resultado se limita a la operación descrita en el diagrama.
-
-**Independent Test**: Con una cuenta de prestador y un registro de prueba de «Agregar servicio al portafolio», verificar que UC029 muestra o guarda el resultado indicado sin ejecutar otro CU.
+**Independent Test**: Con un perfil ya creado, agregar un servicio al portafolio y verificar que aparece disponible, eliminarlo y verificar que deja de mostrarse.
 
 **Acceptance Scenarios**:
 
-1. **Scenario**: Agregar servicio al portafolio para UC029
-   - **Given** un prestador autorizado dispone de los datos de «Agregar servicio al portafolio»
-   - **When** ejecuta la acción «Agregar servicio al portafolio»
-   - **Then** el sistema guarda «Agregar servicio al portafolio» en el registro seleccionado y muestra su nuevo estado.
+1. **Scenario**: Agregar un servicio al portafolio [UC029]
+    
+    - **Given** un Prestador con perfil creado agrega un servicio con su descripción y evidencia (por ejemplo, fotos)
+    - **When** confirma la operación
+    - **Then** el sistema guarda el servicio en el portafolio del Prestador
+2. **Scenario**: Eliminar un servicio del portafolio [UC030]
+    
+    - **Given** un Prestador tiene un servicio propio en su portafolio
+    - **When** solicita eliminarlo
+    - **Then** el sistema lo retira del portafolio visible, conservando el resto de los servicios sin cambios
+3. **Scenario**: Actor no autorizado o servicio ajeno
+    
+    - **Given** un actor sin rol Prestador, o un Prestador que intenta agregar o eliminar un servicio de un portafolio que no es el suyo
+    - **When** realiza la solicitud
+    - **Then** el sistema deniega la operación sin modificar el portafolio
 
-2. **Scenario**: Datos insuficientes o actor no autorizado en UC029
-   - **Given** la solicitud de «Agregar servicio al portafolio» no identifica un registro válido o el actor no tiene el rol Prestador
-   - **When** intenta confirmar la operación
-   - **Then** el sistema rechaza la operación, no modifica el registro y comunica la causa
+### User Story 4 - Configurar disponibilidad y gestionar la agenda [UC031, UC032] (Priority: P1)
 
-### User Story 7 - Eliminar servicio de portafolio [UC030] (Priority: P1)
-Como prestador, quiero eliminar servicio de portafolio, para gestionar específicamente eliminar servicio de portafolio dentro de CONectaSM.
+Como prestador, quiero configurar mi disponibilidad horaria y gestionar mi agenda, para organizar mis compromisos y que el sistema pueda evaluar correctamente qué oportunidades son compatibles conmigo.
 
-**Why this priority**: UC030 permite a Prestador eliminar servicio de portafolio; el resultado se limita a la operación descrita en el diagrama.
+**Why this priority**: La disponibilidad es uno de los tres criterios que SPEC-06 usa para determinar compatibilidad de oportunidades; sin ella, el tablero de oportunidades no puede filtrar correctamente.
 
-**Independent Test**: Con una cuenta de prestador y un registro de prueba de «Eliminar servicio de portafolio», verificar que UC030 muestra o guarda el resultado indicado sin ejecutar otro CU.
-
-**Acceptance Scenarios**:
-
-1. **Scenario**: Eliminar servicio de portafolio para UC030
-   - **Given** un prestador autorizado dispone de los datos de «Eliminar servicio de portafolio»
-   - **When** ejecuta la acción «Eliminar servicio de portafolio»
-   - **Then** el sistema aplica «Eliminar servicio de portafolio» al registro seleccionado y muestra su nuevo estado.
-
-2. **Scenario**: Datos insuficientes o actor no autorizado en UC030
-   - **Given** la solicitud de «Eliminar servicio de portafolio» no identifica un registro válido o el actor no tiene el rol Prestador
-   - **When** intenta confirmar la operación
-   - **Then** el sistema rechaza la operación, no modifica el registro y comunica la causa
-
-### User Story 8 - Configurar disponibilidad horaria [UC031] (Priority: P1)
-Como prestador, quiero configurar disponibilidad horaria, para gestionar específicamente configurar disponibilidad horaria dentro de CONectaSM.
-
-**Why this priority**: UC031 permite a Prestador configurar disponibilidad horaria; el resultado se limita a la operación descrita en el diagrama.
-
-**Independent Test**: Con una cuenta de prestador y un registro de prueba de «Configurar disponibilidad horaria», verificar que UC031 muestra o guarda el resultado indicado sin ejecutar otro CU.
+**Independent Test**: Con un perfil ya creado, configurar la disponibilidad horaria y verificar que queda guardada; registrar un compromiso en la agenda y verificar que aparece reflejado sin duplicar información.
 
 **Acceptance Scenarios**:
 
-1. **Scenario**: Configurar disponibilidad horaria para UC031
-   - **Given** un prestador autorizado dispone de los datos de «Configurar disponibilidad horaria»
-   - **When** ejecuta la acción «Configurar disponibilidad horaria»
-   - **Then** el sistema guarda «Configurar disponibilidad horaria» en el registro seleccionado y muestra su nuevo estado.
+1. **Scenario**: Configurar disponibilidad horaria [UC031]
+    
+    - **Given** un Prestador con perfil creado
+    - **When** define sus horarios disponibles
+    - **Then** el sistema guarda la disponibilidad y la deja lista para ser usada en la evaluación de compatibilidad
+2. **Scenario**: Gestionar la agenda [UC032]
+    
+    - **Given** un Prestador con disponibilidad configurada
+    - **When** agrega, modifica o consulta un compromiso en su agenda
+    - **Then** el sistema refleja el cambio sin afectar los demás compromisos existentes
+3. **Scenario**: Actor no autorizado
+    
+    - **Given** un actor sin rol Prestador intenta configurar disponibilidad o gestionar una agenda ajena
+    - **When** realiza la solicitud
+    - **Then** el sistema deniega la operación
 
-2. **Scenario**: Datos insuficientes o actor no autorizado en UC031
-   - **Given** la solicitud de «Configurar disponibilidad horaria» no identifica un registro válido o el actor no tiene el rol Prestador
-   - **When** intenta confirmar la operación
-   - **Then** el sistema rechaza la operación, no modifica el registro y comunica la causa
+### User Story 5 - Consultar la vista previa del perfil [UC033] (Priority: P1)
 
-### User Story 9 - Gestionar agenda [UC032] (Priority: P1)
-Como prestador, quiero gestionar agenda, para gestionar específicamente gestionar agenda dentro de CONectaSM.
+Como prestador, quiero consultar cómo ven mi perfil los clientes antes de que quede expuesto públicamente, para revisar que la información mostrada sea la correcta.
 
-**Why this priority**: UC032 permite a Prestador gestionar agenda; el resultado se limita a la operación descrita en el diagrama.
+**Why this priority**: Permite al Prestador validar que su información pública (SPEC-03) es la que realmente desea mostrar, sin necesidad de exponer datos incompletos o erróneos.
 
-**Independent Test**: Con una cuenta de prestador y un registro de prueba de «Gestionar agenda», verificar que UC032 muestra o guarda el resultado indicado sin ejecutar otro CU.
-
-**Acceptance Scenarios**:
-
-1. **Scenario**: Gestionar agenda para UC032
-   - **Given** un prestador autorizado dispone de los datos de «Gestionar agenda»
-   - **When** ejecuta la acción «Gestionar agenda»
-   - **Then** el sistema guarda «Gestionar agenda» en el registro seleccionado y muestra su nuevo estado.
-
-2. **Scenario**: Datos insuficientes o actor no autorizado en UC032
-   - **Given** la solicitud de «Gestionar agenda» no identifica un registro válido o el actor no tiene el rol Prestador
-   - **When** intenta confirmar la operación
-   - **Then** el sistema rechaza la operación, no modifica el registro y comunica la causa
-
-### User Story 10 - Consultar vista previa del perfil [UC033] (Priority: P1)
-Como prestador, quiero consultar vista previa del perfil, para gestionar específicamente consultar vista previa del perfil dentro de CONectaSM.
-
-**Why this priority**: UC033 permite a Prestador consultar vista previa del perfil; el resultado se limita a la operación descrita en el diagrama.
-
-**Independent Test**: Con una cuenta de prestador y un registro de prueba de «Consultar vista previa del perfil», verificar que UC033 muestra o guarda el resultado indicado sin ejecutar otro CU.
+**Independent Test**: Con un perfil ya creado, consultar su vista previa y verificar que coincide exactamente con lo que un Cliente vería al consultar ese mismo perfil (UC015 de SPEC-03).
 
 **Acceptance Scenarios**:
 
-1. **Scenario**: Consultar vista previa del perfil para UC033
-   - **Given** un prestador autorizado dispone de los datos de «Consultar vista previa del perfil»
-   - **When** ejecuta la acción «Consultar vista previa del perfil»
-   - **Then** el sistema muestra la información específica de «Consultar vista previa del perfil».
-
-2. **Scenario**: Datos insuficientes o actor no autorizado en UC033
-   - **Given** la solicitud de «Consultar vista previa del perfil» no identifica un registro válido o el actor no tiene el rol Prestador
-   - **When** intenta confirmar la operación
-   - **Then** el sistema rechaza la operación, no modifica el registro y comunica la causa
+1. **Scenario**: Vista previa disponible
+    
+    - **Given** un Prestador tiene un perfil creado
+    - **When** consulta su vista previa
+    - **Then** el sistema muestra el perfil exactamente como lo vería un Cliente, incluyendo únicamente la información configurada para exposición pública
+2. **Scenario**: Actor no autorizado
+    
+    - **Given** un actor sin rol Prestador, o un Prestador que intenta ver la vista previa de otro perfil
+    - **When** realiza la solicitud
+    - **Then** el sistema deniega el acceso
 
 ---
 
 ### Edge Cases
 
-- Una edición concurrente no debe dejar categorías, zonas o agenda en un estado parcialmente guardado.
-- El perfil público solo debe mostrar información que el prestador haya configurado para exposición.
+- Un prestador intenta crear su perfil sin haber elegido categorías de servicio o zonas de atención: el sistema debe rechazar la creación y señalar el dato obligatorio faltante, sin dejar un perfil a medio crear.
+- Un prestador edita categorías, zonas de atención o agenda y la operación se interrumpe a mitad de camino (por ejemplo, por pérdida de conexión): el sistema debe evitar guardar un estado parcial y conservar los últimos datos confirmados.
+- Un prestador configura una disponibilidad horaria que entra en conflicto con un compromiso ya registrado en su agenda: el sistema debe rechazar el cambio y advertir el conflicto.
 
-## Requirements *(mandatory)*
+## Requirements _(mandatory)_
 
 ### Functional Requirements
 
-- **FR-024**: El sistema DEBE permitir que un Prestador ejecute «Crear perfil profesional» y debe mostrar o guardar el resultado específico de esa operación, sin concederla a otros roles. [UC024]
-- **FR-025**: El sistema DEBE permitir que un Prestador ejecute «Editar perfil profesional» y debe mostrar o guardar el resultado específico de esa operación, sin concederla a otros roles. [UC025]
-- **FR-026**: El sistema DEBE permitir que un Prestador ejecute «Escoger categorías de servicio al perfil» y debe mostrar o guardar el resultado específico de esa operación, sin concederla a otros roles. [UC026]
-- **FR-027**: El sistema DEBE permitir que un Prestador ejecute «Configurar zonas de atención» y debe mostrar o guardar el resultado específico de esa operación, sin concederla a otros roles. [UC027]
-- **FR-028**: El sistema DEBE permitir que un Prestador ejecute «Registrar experiencia profesional al perfil» y debe mostrar o guardar el resultado específico de esa operación, sin concederla a otros roles. [UC028]
-- **FR-029**: El sistema DEBE permitir que un Prestador ejecute «Agregar servicio al portafolio» y debe mostrar o guardar el resultado específico de esa operación, sin concederla a otros roles. [UC029]
-- **FR-030**: El sistema DEBE permitir que un Prestador ejecute «Eliminar servicio de portafolio» y debe mostrar o guardar el resultado específico de esa operación, sin concederla a otros roles. [UC030]
-- **FR-031**: El sistema DEBE permitir que un Prestador ejecute «Configurar disponibilidad horaria» y debe mostrar o guardar el resultado específico de esa operación, sin concederla a otros roles. [UC031]
-- **FR-032**: El sistema DEBE permitir que un Prestador ejecute «Gestionar agenda» y debe mostrar o guardar el resultado específico de esa operación, sin concederla a otros roles. [UC032]
-- **FR-033**: El sistema DEBE permitir que un Prestador ejecute «Consultar vista previa del perfil» y debe mostrar o guardar el resultado específico de esa operación, sin concederla a otros roles. [UC033]
-### Key Entities *(include if feature involves data)*
+- **FR-024**: El sistema DEBE permitir que un Prestador cree su perfil profesional únicamente cuando incluya al menos una categoría de servicio y al menos una zona de atención, y DEBE rechazar la creación si falta alguno de estos datos obligatorios. _(UC024, incluye a UC026 y UC027)_
+- **FR-026**: El sistema DEBE permitir que un Prestador escoja o actualice sus categorías de servicio, tanto durante la creación del perfil como de forma independiente después de creado. _(UC026)_
+- **FR-027**: El sistema DEBE permitir que un Prestador configure sus zonas de atención como parte obligatoria de la creación del perfil. _(UC027, incluido en UC024)_
+- **FR-028**: El sistema DEBE permitir, de forma opcional, registrar experiencia profesional en el perfil, tanto durante su creación como de forma independiente después de creado, sin que su ausencia impida crear el perfil. _(UC028, extiende a UC024)_
+- **FR-025**: El sistema DEBE permitir que un Prestador edite los datos generales de un perfil ya creado, y DEBE rechazar la edición si el perfil no existe o no le pertenece. _(UC025)_
+- **FR-029**: El sistema DEBE permitir que un Prestador agregue un servicio, con su descripción y evidencia, al portafolio de su propio perfil. _(UC029)_
+- **FR-030**: El sistema DEBE permitir que un Prestador elimine un servicio de su propio portafolio sin afectar los demás servicios registrados. _(UC030)_
+- **FR-031**: El sistema DEBE permitir que un Prestador configure su disponibilidad horaria, dejándola disponible para el cálculo de compatibilidad de oportunidades. _(UC031)_
+- **FR-032**: El sistema DEBE permitir que un Prestador gestione los compromisos de su propia agenda sin afectar los de otros prestadores. _(UC032)_
+- **FR-033**: El sistema DEBE permitir que un Prestador consulte la vista previa de su propio perfil, mostrando exactamente la misma información pública que vería un Cliente. _(UC033)_
 
-- **Registro específico de Creación y gestión del perfil profesional**: información que los CUs (UC024,UC025,UC026,UC027,UC028,UC029,UC030,UC031,UC032,UC033) consultan, crean, actualizan o muestran.
-- **Actor asignado y autorización**: identidad del actor indicado en el diagrama y permiso requerido para cada operación.
-- **Estado y resultado de cada operación**: valor confirmado, mensaje mostrado y evidencia asociada; retención y formatos quedan [NEEDS CLARIFICATION: definir].
+### Key Entities _(include if feature involves data)_
 
-## Success Criteria *(mandatory)*
+- **Perfil profesional**: datos generales del Prestador, categorías de servicio, zonas de atención, experiencia profesional (opcional) y estado de exposición pública.
+- **Categoría de servicio:** corresponde a la especialidad o tipo de trabajo que identifica al prestador.
+* **Servicio:** corresponde a una actividad específica que el trabajador ofrece dentro de una categoría de servicio.
+- **Portafolio de servicios**: lista de servicios del Prestador, cada uno con descripción y evidencia asociada.
+- **Disponibilidad y agenda**: horarios disponibles declarados por el Prestador y compromisos registrados sobre esos horarios.
+- **Vista pública del perfil**: subconjunto del perfil profesional visible para los clientes, que solo incluye lo configurado explícitamente para exposición.
+
+## Success Criteria _(mandatory)_
 
 ### Measurable Outcomes
 
-- **SC-001**: El 100% de los CUs UC024,UC025,UC026,UC027,UC028,UC029,UC030,UC031,UC032,UC033 solo permite la acción al actor asignado en su diagrama y devuelve el resultado de su operación específica.
-- **SC-002**: Ante datos faltantes, registro inexistente o rol incorrecto, ninguna operación cambia datos y la interfaz informa la causa.
-- **SC-003**: Los estados, filtros, evidencias o políticas no definidos en los diagramas se presentan como [NEEDS CLARIFICATION: definir política antes de implementar].
+- **SC-001**: El 100% de los perfiles creados incluye al menos una categoría de servicio y una zona de atención; ninguno se crea sin estos datos.
+- **SC-002**: El 100% de las ediciones de categorías, zonas, experiencia, portafolio, disponibilidad o agenda solo afecta al perfil del Prestador autenticado que la solicita.
+- **SC-003**: La vista previa del perfil coincide, en el 100% de los casos de prueba, con la información pública que un Cliente ve al consultar ese mismo perfil.
+- **SC-004**: Ante datos obligatorios faltantes, registro inexistente o rol incorrecto, ninguna operación de esta especificación modifica datos y la interfaz informa la causa.

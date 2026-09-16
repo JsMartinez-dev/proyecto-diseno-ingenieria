@@ -1,72 +1,78 @@
 # Feature Specification: SPEC-03 — Descubrimiento de prestadores
 
-**Creado**: 2026-09-16
-**Casos de uso cubiertos**: UC014,UC015
+**Creado**: 2026-09-16 
+**Casos de uso cubiertos**: UC014, UC015 
 
-## User Scenarios & Testing *(mandatory)*
+## User Scenarios & Testing _(mandatory)_
 
-> Relaciones del diagrama: UC015 extiende UC014 para consultar el detalle desde resultados.
-### User Story 1 - Buscar prestadores por categoría y zona [UC014] (Priority: P1)
-Como cliente, quiero buscar prestadores por categoría y zona, para gestionar específicamente buscar prestadores por categoría y zona dentro de CONectaSM.
+### User Story 1 - Buscar y explorar prestadores [UC014, UC015] (Priority: P1)
 
-**Why this priority**: UC014 permite a Cliente buscar prestadores por categoría y zona; el resultado se limita a la operación descrita en el diagrama.
+Como cliente, quiero buscar prestadores por categoría y zona, y consultar el perfil público de cualquiera de ellos ya sea desde los resultados de la búsqueda o de forma directa, para decidir a quién contactar sin necesitar ni exponer ubicaciones exactas.
 
-**Independent Test**: Con una cuenta de cliente y un registro de prueba de «Buscar prestadores por categoría y zona», verificar que UC014 muestra o guarda el resultado indicado sin ejecutar otro CU.
+**Why this priority**: Es el punto de entrada al valor central de CONectaSM para el Cliente, sin descubrimiento no existe forma de llegar a publicar una solicitud dirigida ni de comparar prestadores antes de contratar.
 
-**Acceptance Scenarios**:
-
-1. **Scenario**: Buscar prestadores por categoría y zona para UC014
-   - **Given** un cliente autorizado dispone de los datos de «Buscar prestadores por categoría y zona»
-   - **When** ejecuta la acción «Buscar prestadores por categoría y zona»
-   - **Then** el sistema muestra la información específica de «Buscar prestadores por categoría y zona».
-
-2. **Scenario**: Datos insuficientes o actor no autorizado en UC014
-   - **Given** la solicitud de «Buscar prestadores por categoría y zona» no identifica un registro válido o el actor no tiene el rol Cliente
-   - **When** intenta confirmar la operación
-   - **Then** el sistema rechaza la operación, no modifica el registro y comunica la causa
-
-### User Story 2 - Consultar perfil público del prestador [UC015] (Priority: P1)
-Como cliente, quiero consultar perfil público del prestador, para gestionar específicamente consultar perfil público del prestador dentro de CONectaSM.
-
-**Why this priority**: UC015 permite a Cliente consultar perfil público del prestador; el resultado se limita a la operación descrita en el diagrama.
-
-**Independent Test**: Con una cuenta de cliente y un registro de prueba de «Consultar perfil público del prestador», verificar que UC015 muestra o guarda el resultado indicado sin ejecutar otro CU.
+**Independent Test**: Con una cuenta de Cliente, buscar por categoría y zona, abrir el perfil de un resultado de esa búsqueda, y además consultar un perfil por acceso directo (sin pasar por la búsqueda); verificar que ambos caminos muestran el mismo perfil público y que en ningún momento se revela información privada o ubicación exacta.
 
 **Acceptance Scenarios**:
 
-1. **Scenario**: Consultar perfil público del prestador para UC015
-   - **Given** un cliente autorizado dispone de los datos de «Consultar perfil público del prestador»
-   - **When** ejecuta la acción «Consultar perfil público del prestador»
-   - **Then** el sistema muestra la información específica de «Consultar perfil público del prestador».
-
-2. **Scenario**: Datos insuficientes o actor no autorizado en UC015
-   - **Given** la solicitud de «Consultar perfil público del prestador» no identifica un registro válido o el actor no tiene el rol Cliente
-   - **When** intenta confirmar la operación
-   - **Then** el sistema rechaza la operación, no modifica el registro y comunica la causa
+1. **Scenario**: Búsqueda con resultados [UC014]
+    
+    - **Given** un Cliente autenticado indica una categoría de servicio y una zona de Santa Marta
+    - **When** ejecuta la búsqueda
+    - **Then** el sistema devuelve la lista de prestadores que ofrecen esa categoría en esa zona, mostrando únicamente su zona de cobertura declarada, no su dirección exacta
+    
+2. **Scenario**: Búsqueda sin resultados [UC014]
+    
+    - **Given** un Cliente busca una combinación de categoría y zona sin prestadores disponibles
+    - **When** ejecuta la búsqueda
+    - **Then** el sistema indica que no hay resultados para esos criterios, sin producir un error, y permite ajustar la búsqueda
+3. **Scenario**: Consultar perfil desde un resultado de búsqueda [UC015]
+    
+    - **Given** un Cliente tiene una lista de resultados de UC014
+    - **When** selecciona uno de los prestadores listados
+    - **Then** el sistema muestra el perfil público de ese prestador (categorías que ofrece, reputación agregada, disponibilidad declarada) sin salir del contexto de la búsqueda
+4. **Scenario**: Consultar perfil por acceso directo [UC015]
+    
+    - **Given** un Cliente cuenta con la referencia a un prestador sin haber pasado por una búsqueda (por ejemplo, un enlace compartido o una solicitud previa)
+    - **When** consulta su perfil directamente
+    - **Then** el sistema muestra el mismo perfil público que vería desde el flujo de búsqueda
+5. **Scenario**: Perfil sin información pública disponible[UC015]
+    
+    - **Given** un prestador no ha completado o no tiene visible su perfil
+    - **When** un Cliente intenta consultarlo, por cualquiera de los dos caminos
+    - **Then** el sistema indica que el detalle no está disponible, sin distinguir si la causa es un perfil incompleto, oculto o inexistente
+6. **Scenario**: Actor no autorizado[UC015]
+    
+    - **Given** un actor sin rol Cliente (por ejemplo un Prestador, un Administrador o un visitante sin sesión) intenta buscar prestadores o consultar un perfil
+    - **When** realiza la solicitud
+    - **Then** el sistema deniega el acceso a la funcionalidad
 
 ---
 
 ### Edge Cases
 
-- Un resultado sin perfil público disponible debe indicar que el detalle no está disponible sin revelar datos privados.
-- El descubrimiento debe conservar la privacidad de la ubicación y distinguir resultados de perfiles públicos.
+- Un cliente consulta el perfil de un prestador que no tiene información pública disponible: el sistema debe indicar que el detalle no está disponible, sin revelar datos privados ni el motivo exacto de la falta de información.
+- Un cliente busca prestadores usando una categoría o zona que no existe en el catálogo vigente:  El sistema debe sugerir alternativas que se asemejan a lo consultado.
 
-## Requirements *(mandatory)*
+## Requirements _(mandatory)_
 
 ### Functional Requirements
 
-- **FR-014**: El sistema DEBE permitir que cliente ejecute «Buscar prestadores por categoría y zona» y debe mostrar o guardar el resultado específico de esa operación, sin concederla a otros roles. [UC014]
-- **FR-015**: El sistema DEBE permitir que cliente ejecute «Consultar perfil público del prestador» y debe mostrar o guardar el resultado específico de esa operación, sin concederla a otros roles. [UC015]
-### Key Entities *(include if feature involves data)*
+- **FR-014**: El sistema DEBE permitir que un Cliente busque prestadores filtrando por categoría de servicio y zona, devolviendo únicamente prestadores cuya zona de cobertura declarada coincida, sin revelar direcciones exactas ni concederla a otros roles. _(UC014)_
+- **FR-015**: El sistema DEBE permitir que un Cliente consulte el perfil público de un prestador, tanto desde un resultado de búsqueda (extensión de UC014) como por acceso directo, mostrando en ambos casos la misma información pública y sin exponer datos privados del prestador ni concederla a otros roles. _(UC015)_
 
-- **Registro específico de Descubrimiento de prestadores**: información que los CUs (UC014,UC015) consultan, crean, actualizan o muestran.
-- **Actor asignado y autorización**: identidad del actor indicado en el diagrama y permiso requerido para cada operación.
-- **Estado y resultado de cada operación**: valor confirmado, mensaje mostrado y evidencia asociada; retención y formatos quedan [NEEDS CLARIFICATION: definir].
+### Key Entities _(include if feature involves data)_
 
-## Success Criteria *(mandatory)*
+- **Prestador (vista pública)**: categorías que ofrece, zona de cobertura declarada, reputación/calificación agregada y disponibilidad declarada; excluye datos privados o de contacto directo.
+- **Criterio de búsqueda**: categoría de servicio y zona indicados por el Cliente.
+- **Resultado de búsqueda**: conjunto de prestadores coincidentes, incluyendo el caso de resultado vacío.
+
+## Success Criteria _(mandatory)_
 
 ### Measurable Outcomes
 
-- **SC-001**: El 100% de los CUs UC014,UC015 solo permite la acción al actor asignado en su diagrama y devuelve el resultado de su operación específica.
-- **SC-002**: Ante datos faltantes, registro inexistente o rol incorrecto, ninguna operación cambia datos y la interfaz informa la causa.
-- **SC-003**: Los estados, filtros, evidencias o políticas no definidos en los diagramas se presentan como [NEEDS CLARIFICATION: definir política antes de implementar].
+- **SC-001**: El 100% de las búsquedas ejecutadas por un Cliente devuelve únicamente prestadores que coinciden con la categoría y zona indicadas, sin exponer ubicación exacta.
+- **SC-002**: El 100% de las consultas de perfil, sin importar si se originan desde una búsqueda o de forma directa, muestra la misma información pública y ninguna información privada.
+- **SC-003**: El 100% de los intentos de búsqueda o consulta de perfil por un actor sin rol Cliente es denegado.
+- **SC-004**: Ante un perfil sin información pública disponible, el sistema informa la falta de detalle en el 100% de los casos sin revelar la causa específica.
+- **SC-005**: [NEEDS CLARIFICATION: definir] catálogo válido de categorías y zonas, y la política de coincidencia (exacta, parcial, por cercanía) antes de implementar.
