@@ -1,6 +1,3 @@
-separar el portafolio en pequenas acciones de crear el perfil profesional 
-
-
 @startuml
 title CONectaSM - UC-03 Prestador: perfil y oportunidades
 left to right direction
@@ -12,11 +9,11 @@ actor "Prestador" as Prestador
 rectangle "CONectaSM" {
   usecase "Crear perfil profesional\n[US-014]" as UC014
   usecase "Editar perfil profesional\n[US-015]" as UC015
-  usecase "Seleccionar categorías\nde servicio\n[US-016]" as UC016
+  usecase "Escoger categorías\nde servicio al perfil\n[US-016]" as UCAgregarCategoria
   usecase "Configurar zonas\nde atención\n[US-017]" as UC017
-  usecase "Registrar experiencia\nprofesional\n[US-018]" as UC018
-  usecase "Agregar servicio\nal portafolio\n[US-019]" as UC019
-  usecase "Eliminar servicio\nde portafolio\n[US-020]" as UC020
+  usecase "Registrar experiencia\nprofesional al perfil \n[US-018]" as UC018
+  usecase " Agregar servicio al portafolio\n[US-019]" as UC019
+  usecase "Eliminar servicio \nde portafolio\n[US-020]" as UC020
   usecase "Configurar disponibilidad horaria\n[US-021]" as UC021
   usecase "Gestionar agenda \n[US-022]" as UC022
   usecase "Consultar vista previa\ndel perfil\n[US-023]" as UC023
@@ -25,12 +22,13 @@ rectangle "CONectaSM" {
   usecase "Ver tablero de\noportunidades\n[US-040]" as UC040
   usecase "Filtrar oportunidades\n[US-041]" as UC041
   usecase "Consultar detalle\nde oportunidad\n[US-042]" as UC042
-  usecase "Validar elegibilidad\npara cotizar\n[US-043]" as UC043
   usecase "Notificar nueva oportunidad\ncompatible\n[US-044]" as UC044
 }
 
 Prestador --> UC014
+Prestador --> UC018
 Prestador --> UC015
+Prestador --> UCAgregarCategoria
 Prestador --> UC019
 Prestador --> UC020
 Prestador --> UC021
@@ -40,15 +38,12 @@ Prestador --> UC040
 Prestador --> UC041
 Prestador --> UC042
 
-UC014 .> UC016 : <<include>>
 UC014 .> UC017 : <<include>>
-UC014 .> UC018 : <<include>>
-UC015 .> UC016 : <<include>>
-UC015 .> UC017 : <<include>>
+UC014 .> UCAgregarCategoria : <<include>>
+
 
 UC040 .> UC039 : <<include>>
 UC041 .> UC040 : <<extend>>
-UC042 .> UC043 : <<include>>
-UC039 .> UC044 : <<extend>>
-
+UC044 .> UC039 : <<extend>>
+UC018 .> UC014 : <<extend>>
 @enduml

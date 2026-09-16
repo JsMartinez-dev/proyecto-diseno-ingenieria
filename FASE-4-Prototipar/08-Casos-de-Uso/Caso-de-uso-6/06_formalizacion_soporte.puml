@@ -14,8 +14,6 @@ Usuario <|-- Prestador
 
 rectangle "CONectaSM" {
   usecase "Consultar ruta de\nformalización\n[US-083]" as UC083
-  usecase "Consultar checklist por\ncuatro dimensiones\n[US-084]" as UC084
-  usecase "Registrar avance declarado\nen checklist\n[US-085]" as UC085
   usecase "Abrir enlaces oficiales\nde formalización\n[US-086]" as UC086
   usecase "Mostrar progreso sin declarar\nestatus legal\n[US-087]" as UC087
   usecase "Vincular ruta institucional\nfutura\n[US-088]" as UC088
@@ -28,8 +26,6 @@ rectangle "CONectaSM" {
 }
 
 Prestador --> UC083
-Prestador --> UC084
-Prestador --> UC085
 Prestador --> UC086
 Prestador --> UC087
 Prestador --> UC088
@@ -40,11 +36,8 @@ Usuario --> UC092
 Usuario --> UC093
 Usuario --> UC095
 
-UC083 .> UC084 : <<include>>
-UC084 .> UC085 : <<extend>>
-UC084 .> UC087 : <<include>>
-UC083 .> UC086 : <<extend>>
-UC092 .> UC093 : <<extend>>
+UC086 .> UC083 : <<extend>>
+UC093 .> UC092 : <<extend>>
 
 
 @enduml

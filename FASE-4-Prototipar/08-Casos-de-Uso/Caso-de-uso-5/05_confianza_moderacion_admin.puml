@@ -13,19 +13,22 @@ Usuario <|-- Cliente
 Usuario <|-- Prestador
 
 rectangle "CONectaSM" {
+
+
   usecase "Calificar servicio finalizado\n[US-065]" as UC065
-  usecase "Impedir calificación duplicada\n[US-066]" as UC066
   usecase "Agregar reseña textual\n[US-067]" as UC067
   usecase "Calcular reputación agregada\n[US-068]" as UC068
-  usecase "Mostrar nivel de verificación\ncon significado explícito\n[US-069]" as UC069
+  usecase "Mostrar nivel de verificación\n[US-069]" as UC069
   usecase "Solicitar verificación\ndocumental ampliada\n[US-070]" as UC070
-  usecase "Reportar reseña o reputación\nproblemática\n[US-071]" as UC071
+  usecase "Reportar reseña\nproblemática\n[US-071]" as UC071
+
 
   usecase "Reportar usuario\n[US-072]" as UC072
-  usecase "Reportar solicitud,\npropuesta o servicio\n[US-073]" as UC073
+  usecase "Reportar servicio\n[US-073]" as UC073
   usecase "Adjuntar evidencia\na reporte\n[US-074]" as UC074
 
-  usecase "Administrar categorías\n[US-028]" as UC028
+
+  usecase "Administrar categorías de servicios\n[US-028]" as UC028
   usecase "Administrar zonas\n[US-029]" as UC029
   usecase "Consultar cola de reportes\n[US-075]" as UC075
   usecase "Revisar detalle de reporte\n[US-076]" as UC076
@@ -33,23 +36,18 @@ rectangle "CONectaSM" {
   usecase "Bloquear preventivamente\nuna cuenta\n[US-078]" as UC078
   usecase "Moderar perfil o contenido\n[US-079]" as UC079
   usecase "Buscar usuarios y perfiles\n[US-080]" as UC080
-  usecase "Auditar acciones\nadministrativas\n[US-081]" as UC081
-  usecase "Gestionar categorías/servicios\nregulados o de alto riesgo\n[US-082]" as UC082
+  usecase "Gestionar servicios de alto riesgo\n[US-082]" as UC082
 }
 
+
 Cliente --> UC065
+
 Prestador --> UC070
+
 Usuario --> UC069
 Usuario --> UC071
 Usuario --> UC072
 Usuario --> UC073
-
-UC065 .> UC066 : <<include>>
-UC065 .> UC067 : <<extend>>
-UC065 .> UC068 : <<include>>
-UC071 .> UC074 : <<extend>>
-UC072 .> UC074 : <<extend>>
-UC073 .> UC074 : <<extend>>
 
 Admin --> UC028
 Admin --> UC029
@@ -61,13 +59,15 @@ Admin --> UC079
 Admin --> UC080
 Admin --> UC082
 
-UC075 .> UC076 : <<extend>>
-UC076 .> UC077 : <<extend>>
-UC077 .> UC081 : <<include>>
-UC078 .> UC081 : <<include>>
-UC079 .> UC081 : <<include>>
-UC028 .> UC081 : <<include>>
-UC029 .> UC081 : <<include>>
-UC082 .> UC081 : <<include>>
+
+UC067 .> UC065 : <<extend>>
+UC065 .> UC068 : <<include>>
+
+UC074 .> UC071 : <<extend>>
+UC074 .> UC072 : <<extend>>
+UC074 .> UC073 : <<extend>>
+
+UC076 .> UC075 : <<extend>>
+UC077 .> UC076 : <<extend>>
 
 @enduml
