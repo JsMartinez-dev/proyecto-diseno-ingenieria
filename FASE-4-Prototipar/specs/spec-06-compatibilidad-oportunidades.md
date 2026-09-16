@@ -1,85 +1,132 @@
 # Feature Specification: SPEC-06 — Compatibilidad y oportunidades de servicio
 
-**Creado**: 2026-09-16  
-**Casos de uso cubiertos**: UC034–UC038
+**Creado**: 2026-09-16
+**Casos de uso cubiertos**: UC034,UC035,UC036,UC037,UC038
 
 ## User Scenarios & Testing *(mandatory)*
 
-### User Story 1 - Determinación de compatibilidad (Priority: P1)
+> Relaciones del diagrama: UC034 se incluye en el tablero UC035; UC036 y UC038 extienden el tablero o la compatibilidad.
+### User Story 1 - Determinar compatibilidad de solicitudes [UC034] (Priority: P1)
+Como prestador, quiero determinar compatibilidad de solicitudes, para gestionar específicamente determinar compatibilidad de solicitudes dentro de CONectaSM.
 
-Como prestador, quiero que el sistema determine qué solicitudes coinciden con mis categorías, zona y disponibilidad.
+**Why this priority**: UC034 permite a Prestador determinar compatibilidad de solicitudes; el resultado se limita a la operación descrita en el diagrama.
 
-**Why this priority**: Esta funcionalidad aporta valor directo al flujo de la plataforma y su prioridad refleja su dependencia y relevancia para el alcance definido.
-
-**Independent Test**: Crear una solicitud compatible y comprobar que es identificada como oportunidad.
-
-**Acceptance Scenarios**:
-
-1. **Scenario**: Flujo exitoso de determinación de compatibilidad
-   - **Given** el actor tiene permisos y los datos requeridos son válidos
-   - **When** ejecuta la acción principal del caso de uso
-   - **Then** el sistema completa la operación y deja el resultado trazable
-
-2. **Scenario**: Datos inválidos o condición no permitida en determinación de compatibilidad
-   - **Given** falta un dato obligatorio o el estado no permite la operación
-   - **When** el actor intenta completar la acción
-   - **Then** el sistema rechaza la operación, explica el motivo y conserva la información válida
-
----
-
-### User Story 2 - Tablero de oportunidades (Priority: P1)
-
-Como prestador, quiero consultar, filtrar y abrir oportunidades para decidir cuáles atender.
-
-**Why this priority**: Esta funcionalidad aporta valor directo al flujo de la plataforma y su prioridad refleja su dependencia y relevancia para el alcance definido.
-
-**Independent Test**: Consultar el tablero, aplicar filtros y abrir el detalle de una oportunidad compatible.
+**Independent Test**: Con una cuenta de prestador y un registro de prueba de «Determinar compatibilidad de solicitudes», verificar que UC034 muestra o guarda el resultado indicado sin ejecutar otro CU.
 
 **Acceptance Scenarios**:
 
-1. **Scenario**: Flujo exitoso de tablero de oportunidades
-   - **Given** el actor tiene permisos y los datos requeridos son válidos
-   - **When** ejecuta la acción principal del caso de uso
-   - **Then** el sistema completa la operación y deja el resultado trazable
+1. **Scenario**: Determinar compatibilidad de solicitudes para UC034
+   - **Given** un prestador autorizado dispone de los datos de «Determinar compatibilidad de solicitudes»
+   - **When** ejecuta la acción «Determinar compatibilidad de solicitudes»
+   - **Then** el sistema guarda «Determinar compatibilidad de solicitudes» en el registro seleccionado y muestra su nuevo estado.
 
-2. **Scenario**: Datos inválidos o condición no permitida en tablero de oportunidades
-   - **Given** falta un dato obligatorio o el estado no permite la operación
-   - **When** el actor intenta completar la acción
-   - **Then** el sistema rechaza la operación, explica el motivo y conserva la información válida
+2. **Scenario**: Datos insuficientes o actor no autorizado en UC034
+   - **Given** la solicitud de «Determinar compatibilidad de solicitudes» no identifica un registro válido o el actor no tiene el rol Prestador
+   - **When** intenta confirmar la operación
+   - **Then** el sistema rechaza la operación, no modifica el registro y comunica la causa
+
+### User Story 2 - Ver tablero de oportunidades [UC035] (Priority: P1)
+Como prestador, quiero ver tablero de oportunidades, para gestionar específicamente ver tablero de oportunidades dentro de CONectaSM.
+
+**Why this priority**: UC035 permite a Prestador ver tablero de oportunidades; el resultado se limita a la operación descrita en el diagrama.
+
+**Independent Test**: Con una cuenta de prestador y un registro de prueba de «Ver tablero de oportunidades», verificar que UC035 muestra o guarda el resultado indicado sin ejecutar otro CU.
+
+**Acceptance Scenarios**:
+
+1. **Scenario**: Ver tablero de oportunidades para UC035
+   - **Given** un prestador autorizado dispone de los datos de «Ver tablero de oportunidades»
+   - **When** ejecuta la acción «Ver tablero de oportunidades»
+   - **Then** el sistema muestra la información específica de «Ver tablero de oportunidades».
+
+2. **Scenario**: Datos insuficientes o actor no autorizado en UC035
+   - **Given** la solicitud de «Ver tablero de oportunidades» no identifica un registro válido o el actor no tiene el rol Prestador
+   - **When** intenta confirmar la operación
+   - **Then** el sistema rechaza la operación, no modifica el registro y comunica la causa
+
+### User Story 3 - Filtrar oportunidades [UC036] (Priority: P1)
+Como prestador, quiero filtrar oportunidades, para gestionar específicamente filtrar oportunidades dentro de CONectaSM.
+
+**Why this priority**: UC036 permite a Prestador filtrar oportunidades; el resultado se limita a la operación descrita en el diagrama.
+
+**Independent Test**: Con una cuenta de prestador y un registro de prueba de «Filtrar oportunidades», verificar que UC036 muestra o guarda el resultado indicado sin ejecutar otro CU.
+
+**Acceptance Scenarios**:
+
+1. **Scenario**: Filtrar oportunidades para UC036
+   - **Given** un prestador autorizado dispone de los datos de «Filtrar oportunidades»
+   - **When** ejecuta la acción «Filtrar oportunidades»
+   - **Then** el sistema guarda «Filtrar oportunidades» en el registro seleccionado y muestra su nuevo estado.
+
+2. **Scenario**: Datos insuficientes o actor no autorizado en UC036
+   - **Given** la solicitud de «Filtrar oportunidades» no identifica un registro válido o el actor no tiene el rol Prestador
+   - **When** intenta confirmar la operación
+   - **Then** el sistema rechaza la operación, no modifica el registro y comunica la causa
+
+### User Story 4 - Consultar detalle de oportunidad [UC037] (Priority: P1)
+Como prestador, quiero consultar detalle de oportunidad, para gestionar específicamente consultar detalle de oportunidad dentro de CONectaSM.
+
+**Why this priority**: UC037 permite a Prestador consultar detalle de oportunidad; el resultado se limita a la operación descrita en el diagrama.
+
+**Independent Test**: Con una cuenta de prestador y un registro de prueba de «Consultar detalle de oportunidad», verificar que UC037 muestra o guarda el resultado indicado sin ejecutar otro CU.
+
+**Acceptance Scenarios**:
+
+1. **Scenario**: Consultar detalle de oportunidad para UC037
+   - **Given** un prestador autorizado dispone de los datos de «Consultar detalle de oportunidad»
+   - **When** ejecuta la acción «Consultar detalle de oportunidad»
+   - **Then** el sistema muestra la información específica de «Consultar detalle de oportunidad».
+
+2. **Scenario**: Datos insuficientes o actor no autorizado en UC037
+   - **Given** la solicitud de «Consultar detalle de oportunidad» no identifica un registro válido o el actor no tiene el rol Prestador
+   - **When** intenta confirmar la operación
+   - **Then** el sistema rechaza la operación, no modifica el registro y comunica la causa
+
+### User Story 5 - Notificar nueva oportunidad compatible [UC038] (Priority: P1)
+Como prestador, quiero notificar nueva oportunidad compatible, para gestionar específicamente notificar nueva oportunidad compatible dentro de CONectaSM.
+
+**Why this priority**: UC038 permite a Prestador notificar nueva oportunidad compatible; el resultado se limita a la operación descrita en el diagrama.
+
+**Independent Test**: Con una cuenta de prestador y un registro de prueba de «Notificar nueva oportunidad compatible», verificar que UC038 muestra o guarda el resultado indicado sin ejecutar otro CU.
+
+**Acceptance Scenarios**:
+
+1. **Scenario**: Notificar nueva oportunidad compatible para UC038
+   - **Given** un prestador autorizado dispone de los datos de «Notificar nueva oportunidad compatible»
+   - **When** ejecuta la acción «Notificar nueva oportunidad compatible»
+   - **Then** el sistema emite la notificación de «Notificar nueva oportunidad compatible» al destinatario definido.
+
+2. **Scenario**: Datos insuficientes o actor no autorizado en UC038
+   - **Given** la solicitud de «Notificar nueva oportunidad compatible» no identifica un registro válido o el actor no tiene el rol Prestador
+   - **When** intenta confirmar la operación
+   - **Then** el sistema rechaza la operación, no modifica el registro y comunica la causa
 
 ---
 
 ### Edge Cases
 
-- Si faltan datos obligatorios, el sistema identifica cada campo pendiente y no crea un registro incompleto.
-- Si el actor pierde la sesión o la red falla, el sistema no confirma una operación que no haya sido persistida.
-- Si el estado del recurso cambió en otra operación, el sistema informa el conflicto y solicita consultar la información actualizada.
+- Una solicitud sin datos suficientes para evaluar compatibilidad debe quedar identificada como no evaluable, no como compatible.
+- La compatibilidad debe usar únicamente los datos disponibles de categoría, zona y disponibilidad; los criterios no especificados quedan pendientes.
 
 ## Requirements *(mandatory)*
 
 ### Functional Requirements
 
-- **FR-001**: El sistema DEBE comparar categorías, zona y disponibilidad para determinar compatibilidad.
-- **FR-002**: El sistema DEBE mostrar oportunidades compatibles en un tablero del prestador.
-- **FR-003**: El sistema DEBE permitir filtrar oportunidades por criterios disponibles.
-- **FR-004**: El sistema DEBE mostrar el detalle de la oportunidad sin exponer la dirección exacta.
-- **FR-005**: El sistema DEBE notificar nuevas oportunidades compatibles según las preferencias vigentes.
-
+- **FR-034**: El sistema DEBE permitir que un Prestador ejecute «Determinar compatibilidad de solicitudes» y debe mostrar o guardar el resultado específico de esa operación, sin concederla a otros roles. [UC034]
+- **FR-035**: El sistema DEBE permitir que un Prestador ejecute «Ver tablero de oportunidades» y debe mostrar o guardar el resultado específico de esa operación, sin concederla a otros roles. [UC035]
+- **FR-036**: El sistema DEBE permitir que un Prestador ejecute «Filtrar oportunidades» y debe mostrar o guardar el resultado específico de esa operación, sin concederla a otros roles. [UC036]
+- **FR-037**: El sistema DEBE permitir que un Prestador ejecute «Consultar detalle de oportunidad» y debe mostrar o guardar el resultado específico de esa operación, sin concederla a otros roles. [UC037]
+- **FR-038**: El sistema DEBE permitir que un Prestador ejecute «Notificar nueva oportunidad compatible» y debe mostrar o guardar el resultado específico de esa operación, sin concederla a otros roles. [UC038]
 ### Key Entities *(include if feature involves data)*
 
-- **Regla de compatibilidad**: categorías, distancia aproximada, disponibilidad y estado.
-- **Oportunidad**: solicitud compatible, nivel de coincidencia y fecha de detección.
-- **Notificación**: destinatario, oportunidad, canal, fecha y estado de entrega.
+- **Registro específico de Compatibilidad y oportunidades de servicio**: información que los CUs (UC034,UC035,UC036,UC037,UC038) consultan, crean, actualizan o muestran.
+- **Actor asignado y autorización**: identidad del actor indicado en el diagrama y permiso requerido para cada operación.
+- **Estado y resultado de cada operación**: valor confirmado, mensaje mostrado y evidencia asociada; retención y formatos quedan [NEEDS CLARIFICATION: definir].
 
 ## Success Criteria *(mandatory)*
 
 ### Measurable Outcomes
 
-- **SC-001**: Una solicitud fuera de zona o categoría no aparece como oportunidad compatible.
-- **SC-002**: El tablero informa cuando no existen oportunidades en lugar de mostrar datos incompletos.
-- **SC-003**: Una nueva coincidencia genera como máximo una notificación por canal y evento.
-
-## Trazabilidad
-
-- **Diagrama de origen**: Casos de uso UC034–UC038.
-- **Alcance**: La especificación describe el comportamiento observable y no prescribe tecnologías ni rutas de implementación.
+- **SC-001**: El 100% de los CUs UC034,UC035,UC036,UC037,UC038 solo permite la acción al actor asignado en su diagrama y devuelve el resultado de su operación específica.
+- **SC-002**: Ante datos faltantes, registro inexistente o rol incorrecto, ninguna operación cambia datos y la interfaz informa la causa.
+- **SC-003**: Los estados, filtros, evidencias o políticas no definidos en los diagramas se presentan como [NEEDS CLARIFICATION: definir política antes de implementar].
