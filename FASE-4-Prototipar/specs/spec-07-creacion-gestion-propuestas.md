@@ -1,152 +1,134 @@
 # Feature Specification: SPEC-07 — Creación y gestión de propuestas
 
 **Creado**: 2026-09-16
-**Casos de uso cubiertos**: UC039,UC040,UC041,UC042,UC043,UC044
+**Casos de uso cubiertos**: UC039, UC040, UC041, UC042, UC043, UC044 
 
-## User Scenarios & Testing *(mandatory)*
+## User Scenarios & Testing _(mandatory)_
 
-> Relaciones del diagrama: UC040 se incluye al crear propuesta; UC041 y UC044 extienden ese flujo; UC046 incluye cierre UC047 y registro UC048/UC049.
-### User Story 1 - Crear propuesta [UC039] (Priority: P1)
-Como prestador, quiero crear propuesta, para gestionar específicamente crear propuesta dentro de CONectaSM.
+### User Story 1 - Crear una propuesta para una solicitud [UC039, UC040, UC041, UC044] (Priority: P1)
 
-**Why this priority**: UC039 permite a Prestador crear propuesta; el resultado se limita a la operación descrita en el diagrama.
+Como prestador, quiero crear una propuesta para una solicitud publicada indicando obligatoriamente mi disponibilidad, y agregar un mensaje si lo considero útil, para que el cliente reciba una propuesta completa y sea notificado de inmediato.
 
-**Independent Test**: Con una cuenta de prestador y un registro de prueba de «Crear propuesta», verificar que UC039 muestra o guarda el resultado indicado sin ejecutar otro CU.
+**Why this priority**: Es la acción con la que un Prestador convierte una oportunidad compatible (SPEC-06) en una posibilidad real de contratación; sin ella no hay nada que el Cliente pueda comparar ni aceptar.
 
-**Acceptance Scenarios**:
-
-1. **Scenario**: Crear propuesta para UC039
-   - **Given** un prestador autorizado dispone de los datos de «Crear propuesta»
-   - **When** ejecuta la acción «Crear propuesta»
-   - **Then** el sistema guarda «Crear propuesta» en el registro seleccionado y muestra su nuevo estado.
-
-2. **Scenario**: Datos insuficientes o actor no autorizado en UC039
-   - **Given** la solicitud de «Crear propuesta» no identifica un registro válido o el actor no tiene el rol Prestador
-   - **When** intenta confirmar la operación
-   - **Then** el sistema rechaza la operación, no modifica el registro y comunica la causa
-
-### User Story 2 - Indicar disponibilidad [UC040] (Priority: P1)
-Como prestador, quiero indicar disponibilidad, para gestionar específicamente indicar disponibilidad dentro de CONectaSM.
-
-**Why this priority**: UC040 permite a Prestador indicar disponibilidad; el resultado se limita a la operación descrita en el diagrama.
-
-**Independent Test**: Con una cuenta de prestador y un registro de prueba de «Indicar disponibilidad», verificar que UC040 muestra o guarda el resultado indicado sin ejecutar otro CU.
+**Independent Test**: Con una solicitud abierta compatible con un Prestador, crear una propuesta indicando disponibilidad sin mensaje y verificar que se crea y notifica igual; repetir agregando un mensaje y verificar que también queda incluido; intentar crear la propuesta sin disponibilidad y verificar el rechazo.
 
 **Acceptance Scenarios**:
 
-1. **Scenario**: Indicar disponibilidad para UC040
-   - **Given** un prestador autorizado dispone de los datos de «Indicar disponibilidad»
-   - **When** ejecuta la acción «Indicar disponibilidad»
-   - **Then** el sistema guarda «Indicar disponibilidad» en el registro seleccionado y muestra su nuevo estado.
+1. **Scenario**: Creación completa con disponibilidad obligatoria [UC040]
+    
+    - **Given** un Prestador tiene una solicitud abierta y compatible con su perfil
+    - **When** crea una propuesta indicando su disponibilidad para atenderla
+    - **Then** el sistema guarda la propuesta vinculada a esa solicitud, en estado activo
+2. **Scenario**: Intento de crear una propuesta sin disponibilidad
+    
+    - **Given** un Prestador intenta crear una propuesta sin indicar su disponibilidad
+    - **When** confirma la operación
+    - **Then** el sistema rechaza la creación y señala el dato obligatorio faltante
+3. **Scenario**: Agregar un mensaje de forma opcional [UC041]
+    
+    - **Given** un Prestador está creando su propuesta
+    - **When** agrega un mensaje adicional para el Cliente
+    - **Then** el sistema lo asocia a la propuesta; si no agrega ningún mensaje, la propuesta se crea igualmente sin él
+4. **Scenario**: Notificar al cliente sobre la nueva propuesta [UC044 ]
+    
+    - **Given** un Prestador crea una propuesta para la solicitud de un Cliente
+    - **When** la propuesta queda registrada
+    - **Then** el sistema notifica automáticamente al Cliente sobre la propuesta recibida, sin que ningún actor deba disparar esa notificación por separado
+5. **Scenario**: Propuesta sobre una solicitud que ya no está abierta
+    
+    - **Given** una solicitud ya fue cancelada o ya tiene un servicio contratado
+    - **When** un Prestador intenta crear una propuesta para ella
+    - **Then** el sistema rechaza la creación e indica que la solicitud ya no admite nuevas propuestas
+6. **Scenario**: Actor no autorizado
+    
+    - **Given** un actor sin rol Prestador intenta crear una propuesta
+    - **When** realiza la solicitud
+    - **Then** el sistema deniega la operación
 
-2. **Scenario**: Datos insuficientes o actor no autorizado en UC040
-   - **Given** la solicitud de «Indicar disponibilidad» no identifica un registro válido o el actor no tiene el rol Prestador
-   - **When** intenta confirmar la operación
-   - **Then** el sistema rechaza la operación, no modifica el registro y comunica la causa
+### User Story 2 - Editar una propuesta activa [UC042] (Priority: P1)
 
-### User Story 3 - Agregar mensaje [UC041] (Priority: P1)
-Como prestador, quiero agregar mensaje, para gestionar específicamente agregar mensaje dentro de CONectaSM.
+Como prestador, quiero editar una propuesta que sigue activa, para corregir o ajustar su contenido antes de que el cliente decida.
 
-**Why this priority**: UC041 permite a Prestador agregar mensaje; el resultado se limita a la operación descrita en el diagrama.
+**Why this priority**: Las condiciones de una propuesta pueden cambiar (disponibilidad, mensaje) mientras el Cliente aún no ha decidido, y el Prestador necesita poder reflejarlo sin crear una propuesta duplicada.
 
-**Independent Test**: Con una cuenta de prestador y un registro de prueba de «Agregar mensaje», verificar que UC041 muestra o guarda el resultado indicado sin ejecutar otro CU.
-
-**Acceptance Scenarios**:
-
-1. **Scenario**: Agregar mensaje para UC041
-   - **Given** un prestador autorizado dispone de los datos de «Agregar mensaje»
-   - **When** ejecuta la acción «Agregar mensaje»
-   - **Then** el sistema guarda «Agregar mensaje» en el registro seleccionado y muestra su nuevo estado.
-
-2. **Scenario**: Datos insuficientes o actor no autorizado en UC041
-   - **Given** la solicitud de «Agregar mensaje» no identifica un registro válido o el actor no tiene el rol Prestador
-   - **When** intenta confirmar la operación
-   - **Then** el sistema rechaza la operación, no modifica el registro y comunica la causa
-
-### User Story 4 - Editar propuesta activa [UC042] (Priority: P1)
-Como prestador, quiero editar propuesta activa, para gestionar específicamente editar propuesta activa dentro de CONectaSM.
-
-**Why this priority**: UC042 permite a Prestador editar propuesta activa; el resultado se limita a la operación descrita en el diagrama.
-
-**Independent Test**: Con una cuenta de prestador y un registro de prueba de «Editar propuesta activa», verificar que UC042 muestra o guarda el resultado indicado sin ejecutar otro CU.
-
-**Acceptance Scenarios**:
-
-1. **Scenario**: Editar propuesta activa para UC042
-   - **Given** un prestador autorizado dispone de los datos de «Editar propuesta activa»
-   - **When** ejecuta la acción «Editar propuesta activa»
-   - **Then** el sistema guarda «Editar propuesta activa» en el registro seleccionado y muestra su nuevo estado.
-
-2. **Scenario**: Datos insuficientes o actor no autorizado en UC042
-   - **Given** la solicitud de «Editar propuesta activa» no identifica un registro válido o el actor no tiene el rol Prestador
-   - **When** intenta confirmar la operación
-   - **Then** el sistema rechaza la operación, no modifica el registro y comunica la causa
-
-### User Story 5 - Retirar propuesta [UC043] (Priority: P1)
-Como prestador, quiero retirar propuesta, para gestionar específicamente retirar propuesta dentro de CONectaSM.
-
-**Why this priority**: UC043 permite a Prestador retirar propuesta; el resultado se limita a la operación descrita en el diagrama.
-
-**Independent Test**: Con una cuenta de prestador y un registro de prueba de «Retirar propuesta», verificar que UC043 muestra o guarda el resultado indicado sin ejecutar otro CU.
+**Independent Test**: Con una propuesta propia en estado activo, editar uno de sus datos y verificar el cambio; intentar editar una propuesta ya retirada o una que ya fue aceptada/rechazada y verificar el rechazo.
 
 **Acceptance Scenarios**:
 
-1. **Scenario**: Retirar propuesta para UC043
-   - **Given** un prestador autorizado dispone de los datos de «Retirar propuesta»
-   - **When** ejecuta la acción «Retirar propuesta»
-   - **Then** el sistema aplica «Retirar propuesta» al registro seleccionado y muestra su nuevo estado.
+1. **Scenario**: Edición exitosa
+    
+    - **Given** un Prestador tiene una propuesta propia en estado activo
+    - **When** modifica su disponibilidad o su mensaje y confirma
+    - **Then** el sistema guarda el cambio y muestra el estado actualizado de la propuesta
+2. **Scenario**: Intento de editar una propuesta que ya no está activa
+    
+    - **Given** una propuesta propia ya fue retirada, aceptada o cerrada
+    - **When** el Prestador intenta editarla
+    - **Then** el sistema rechaza la edición e indica que la propuesta ya no admite cambios
+3. **Scenario**: Actor no autorizado o propuesta ajena
+    
+    - **Given** un actor sin rol Prestador, o un Prestador que intenta editar una propuesta que no es suya
+    - **When** realiza la solicitud
+    - **Then** el sistema deniega la operación sin modificar ningún registro
 
-2. **Scenario**: Datos insuficientes o actor no autorizado en UC043
-   - **Given** la solicitud de «Retirar propuesta» no identifica un registro válido o el actor no tiene el rol Prestador
-   - **When** intenta confirmar la operación
-   - **Then** el sistema rechaza la operación, no modifica el registro y comunica la causa
+### User Story 3 - Retirar una propuesta [UC043] (Priority: P1)
 
-### User Story 6 - Notificar propuesta recibida [UC044] (Priority: P1)
-Como prestador, quiero notificar propuesta recibida, para gestionar específicamente notificar propuesta recibida dentro de CONectaSM.
+Como prestador, quiero retirar una propuesta que ya no puedo o no quiero cumplir, para que el cliente no la considere entre sus opciones.
 
-**Why this priority**: UC044 permite a Prestador notificar propuesta recibida; el resultado se limita a la operación descrita en el diagrama.
+**Why this priority**: Sin poder retirarla, el Cliente podría aceptar una propuesta que el Prestador ya no está en condiciones de atender.
 
-**Independent Test**: Con una cuenta de prestador y un registro de prueba de «Notificar propuesta recibida», verificar que UC044 muestra o guarda el resultado indicado sin ejecutar otro CU.
+**Independent Test**: Con una propuesta propia activa, retirarla y verificar que deja de estar disponible para el Cliente; intentar retirarla nuevamente y verificar el rechazo.
 
 **Acceptance Scenarios**:
 
-1. **Scenario**: Notificar propuesta recibida para UC044
-   - **Given** un prestador autorizado dispone de los datos de «Notificar propuesta recibida»
-   - **When** ejecuta la acción «Notificar propuesta recibida»
-   - **Then** el sistema emite la notificación de «Notificar propuesta recibida» al destinatario definido.
-
-2. **Scenario**: Datos insuficientes o actor no autorizado en UC044
-   - **Given** la solicitud de «Notificar propuesta recibida» no identifica un registro válido o el actor no tiene el rol Prestador
-   - **When** intenta confirmar la operación
-   - **Then** el sistema rechaza la operación, no modifica el registro y comunica la causa
+1. **Scenario**: Retiro exitoso
+    
+    - **Given** un Prestador tiene una propuesta propia activa
+    - **When** confirma su retiro
+    - **Then** el sistema marca la propuesta como retirada y deja de mostrarla como opción para el Cliente
+2. **Scenario**: Intento de retirar una propuesta ya inactiva
+    
+    - **Given** una propuesta propia ya fue retirada, aceptada o cerrada previamente
+    - **When** el Prestador intenta retirarla de nuevo
+    - **Then** el sistema rechaza la operación sin cambiar el estado actual
+3. **Scenario**: Actor no autorizado o propuesta ajena
+    
+    - **Given** un actor sin rol Prestador, o un Prestador que intenta retirar una propuesta que no es suya
+    - **When** realiza la solicitud
+    - **Then** el sistema deniega la operación
 
 ---
 
 ### Edge Cases
 
-- Una propuesta retirada o inactiva no debe volver a editarse ni notificarse como nueva.
-- La propuesta se vincula a una solicitud y sus extensiones son opcionales según el diagrama: mensaje y notificación no deben impedir el flujo base.
+- Un prestador intenta editar una propuesta, o el sistema intenta notificarla como nueva, después de que ya fue retirada: el sistema debe rechazar la edición y no debe generar una notificación de propuesta nueva sobre una propuesta inactiva.
+- Un prestador crea una propuesta sin agregar mensaje: el sistema debe completar la creación igualmente, mostrando la propuesta sin mensaje adicional.
+- Un prestador intenta crear una propuesta para una solicitud que ya no está abierta: el sistema debe rechazar la creación e indicar que la solicitud ya no admite nuevas propuestas.
+- Se pierde la conexión mientras un prestador edita o retira una propuesta: El sistema conserva el último estado confirmado sin duplicar la propuesta ni dejarla en un estado ambiguo.
 
-## Requirements *(mandatory)*
+## Requirements _(mandatory)_
 
 ### Functional Requirements
 
-- **FR-039**: El sistema DEBE permitir que un Prestador ejecute «Crear propuesta» y debe mostrar o guardar el resultado específico de esa operación, sin concederla a otros roles. [UC039]
-- **FR-040**: El sistema DEBE permitir que un Prestador ejecute «Indicar disponibilidad» y debe mostrar o guardar el resultado específico de esa operación, sin concederla a otros roles. [UC040]
-- **FR-041**: El sistema DEBE permitir que un Prestador ejecute «Agregar mensaje» y debe mostrar o guardar el resultado específico de esa operación, sin concederla a otros roles. [UC041]
-- **FR-042**: El sistema DEBE permitir que un Prestador ejecute «Editar propuesta activa» y debe mostrar o guardar el resultado específico de esa operación, sin concederla a otros roles. [UC042]
-- **FR-043**: El sistema DEBE permitir que un Prestador ejecute «Retirar propuesta» y debe mostrar o guardar el resultado específico de esa operación, sin concederla a otros roles. [UC043]
-- **FR-044**: El sistema DEBE permitir que un Prestador ejecute «Notificar propuesta recibida» y debe mostrar o guardar el resultado específico de esa operación, sin concederla a otros roles. [UC044]
-### Key Entities *(include if feature involves data)*
+- **FR-039**: El sistema DEBE permitir que un Prestador cree una propuesta vinculada a una solicitud abierta y compatible con su perfil, únicamente si incluye su disponibilidad, y DEBE rechazar la creación si la solicitud ya no está abierta. _(UC039, incluye a UC040)_
+- **FR-040**: El sistema DEBE exigir la disponibilidad del Prestador como dato obligatorio de toda propuesta creada. _(UC040, incluido en UC039)_
+- **FR-041**: El sistema DEBE permitir, de forma opcional, agregar un mensaje a la propuesta al momento de crearla, sin que su ausencia impida crearla. _(UC041, extiende a UC039)_
+- **FR-044**: El sistema DEBE notificar automáticamente al Cliente propietario de la solicitud cuando se cree una nueva propuesta para ella, sin que ningún actor deba solicitar esa notificación por separado. _(UC044, extiende a UC039)_
+- **FR-042**: El sistema DEBE permitir que un Prestador edite una propuesta propia mientras esté activa, y DEBE rechazar la edición si la propuesta ya no está activa o no le pertenece. _(UC042)_
+- **FR-043**: El sistema DEBE permitir que un Prestador retire una propuesta propia mientras esté activa, y DEBE rechazar el retiro si la propuesta ya no está activa o no le pertenece. _(UC043)_
 
-- **Registro específico de Creación y gestión de propuestas**: información que los CUs (UC039,UC040,UC041,UC042,UC043,UC044) consultan, crean, actualizan o muestran.
-- **Actor asignado y autorización**: identidad del actor indicado en el diagrama y permiso requerido para cada operación.
-- **Estado y resultado de cada operación**: valor confirmado, mensaje mostrado y evidencia asociada; retención y formatos quedan [NEEDS CLARIFICATION: definir].
+### Key Entities _(include if feature involves data)_
 
-## Success Criteria *(mandatory)*
+- **Propuesta**: solicitud a la que responde, Prestador que la crea, disponibilidad indicada, mensaje opcional y estado (activa, editada, retirada, aceptada, cerrada).
+- **Actor asignado y autorización**: solo el Prestador propietario de una propuesta puede editarla o retirarla.
+- **Notificación de propuesta recibida**: aviso generado hacia el Cliente al crearse una propuesta.
+
+## Success Criteria _(mandatory)_
 
 ### Measurable Outcomes
 
-- **SC-001**: El 100% de los CUs UC039,UC040,UC041,UC042,UC043,UC044 solo permite la acción al actor asignado en su diagrama y devuelve el resultado de su operación específica.
-- **SC-002**: Ante datos faltantes, registro inexistente o rol incorrecto, ninguna operación cambia datos y la interfaz informa la causa.
-- **SC-003**: Los estados, filtros, evidencias o políticas no definidos en los diagramas se presentan como [NEEDS CLARIFICATION: definir política antes de implementar].
+- **SC-001**: El 100% de las propuestas creadas incluye disponibilidad del Prestador; ninguna se crea sin este dato.
+- **SC-002**: El 100% de las propuestas creadas para una solicitud que ya no está abierta es rechazada.
+- **SC-003**: El 100% de las propuestas nuevas genera una notificación hacia el Cliente correspondiente.
+- **SC-004**: El 100% de los intentos de editar o retirar una propuesta ajena o ya inactiva es rechazado sin modificar ningún registro.

@@ -1,72 +1,92 @@
 # Feature Specification: SPEC-09 — Notificaciones de propuestas y servicios
 
 **Creado**: 2026-09-16
-**Casos de uso cubiertos**: UC057,UC058
+**Casos de uso cubiertos**: UC057, UC058
 
-## User Scenarios & Testing *(mandatory)*
+## User Scenarios & Testing _(mandatory)_
 
-> Relaciones del diagrama: UC057 extiende la aceptación UC046 y UC058 extiende UC051–UC054.
-### User Story 1 - Notificar aceptación de propuesta [UC057] (Priority: P1)
-Como [NEEDS CLARIFICATION: el diagrama no asigna actor directo a UC057], quiero notificar aceptación de propuesta, para gestionar específicamente notificar aceptación de propuesta dentro de CONectaSM.
+### User Story 1 - Notificar la aceptación de una propuesta [UC057] (Priority: P1)
 
-**Why this priority**: UC057 permite a [NEEDS CLARIFICATION: el diagrama no asigna actor directo a UC057] notificar aceptación de propuesta; el resultado se limita a la operación descrita en el diagrama.
+Como prestador, quiero ser notificado automáticamente cuando un cliente acepta mi propuesta, para saber sin demora que debo iniciar el servicio contratado.
 
-**Independent Test**: Con una cuenta de [NEEDS CLARIFICATION: el diagrama no asigna actor directo a UC057] y un registro de prueba de «Notificar aceptación de propuesta», verificar que UC057 muestra o guarda el resultado indicado sin ejecutar otro CU.
+**Why this priority**: Sin esta notificación, el Prestador dependería de consultar manualmente el estado de cada propuesta enviada para saber si fue aceptada.
+
+**Independent Test**: Con una propuesta activa de un Prestador, hacer que un Cliente la acepte (UC046) y verificar que el Prestador recibe la notificación correspondiente; simular una falla en el canal de entrega y verificar que el evento de aceptación sigue siendo consultable sin duplicar el aviso al recuperarse.
 
 **Acceptance Scenarios**:
 
-1. **Scenario**: Notificar aceptación de propuesta para UC057
-   - **Given** un [NEEDS CLARIFICATION: el diagrama no asigna actor directo a UC057] autorizado dispone de los datos de «Notificar aceptación de propuesta»
-   - **When** ejecuta la acción «Notificar aceptación de propuesta»
-   - **Then** el sistema emite la notificación de «Notificar aceptación de propuesta» al destinatario definido.
-
-2. **Scenario**: Datos insuficientes o actor no autorizado en UC057
-   - **Given** la solicitud de «Notificar aceptación de propuesta» no identifica un registro válido o el actor no tiene el rol [NEEDS CLARIFICATION: el diagrama no asigna actor directo a UC057]
-   - **When** intenta confirmar la operación
-   - **Then** el sistema rechaza la operación, no modifica el registro y comunica la causa
+1. **Scenario**: Notificación disparada por la aceptación [UC057]
+    
+    - **Given** un Cliente acepta la propuesta de un Prestador
+    - **When** la aceptación se confirma
+    - **Then** el sistema notifica automáticamente al Prestador seleccionado, sin que ningún actor deba solicitar esa notificación por separado
+2. **Scenario**: Falla en el canal de notificación
+    
+    - **Given** el canal de entrega de notificaciones falla en el momento de la aceptación
+    - **When** el canal se recupera
+    - **Then** el evento de aceptación permanece consultable por el Prestador (por ejemplo, en el detalle del servicio) y el sistema no duplica el aviso al reintentar la entrega
+3. **Scenario**: Intento de generar la notificación sin una aceptación real
+    
+    - **Given** no ha ocurrido ninguna aceptación de propuesta
+    - **When** se intenta generar o forzar una notificación de aceptación
+    - **Then** el sistema no permite crear una notificación de aceptación sin una aceptación real asociada
 
 ### User Story 2 - Notificar cambios de estado del servicio [UC058] (Priority: P1)
-Como [NEEDS CLARIFICATION: el diagrama no asigna actor directo a UC058], quiero notificar cambios de estado del servicio, para gestionar específicamente notificar cambios de estado del servicio dentro de CONectaSM.
 
-**Why this priority**: UC058 permite a [NEEDS CLARIFICATION: el diagrama no asigna actor directo a UC058] notificar cambios de estado del servicio; el resultado se limita a la operación descrita en el diagrama.
+Como cliente o prestador, quiero ser notificado automáticamente cuando la otra parte cambie el estado del servicio contratado, para conocer su avance sin tener que consultarlo manualmente cada vez.
 
-**Independent Test**: Con una cuenta de [NEEDS CLARIFICATION: el diagrama no asigna actor directo a UC058] y un registro de prueba de «Notificar cambios de estado del servicio», verificar que UC058 muestra o guarda el resultado indicado sin ejecutar otro CU.
+**Why this priority**: El ciclo de vida del servicio (SPEC-08) involucra a ambas partes; sin notificaciones, cada cambio de estado quedaría oculto para quien no lo ejecutó hasta que decida consultarlo.
+
+**Independent Test**: Con un servicio contratado entre un Cliente y un Prestador, hacer que el Prestador lo marque en ejecución y verificar que el Cliente es notificado; repetir para terminado, confirmación de finalización y cancelación, verificando en cada caso que se notifica a la contraparte de quien ejecutó la acción.
 
 **Acceptance Scenarios**:
 
-1. **Scenario**: Notificar cambios de estado del servicio para UC058
-   - **Given** un [NEEDS CLARIFICATION: el diagrama no asigna actor directo a UC058] autorizado dispone de los datos de «Notificar cambios de estado del servicio»
-   - **When** ejecuta la acción «Notificar cambios de estado del servicio»
-   - **Then** el sistema emite la notificación de «Notificar cambios de estado del servicio» al destinatario definido.
-
-2. **Scenario**: Datos insuficientes o actor no autorizado en UC058
-   - **Given** la solicitud de «Notificar cambios de estado del servicio» no identifica un registro válido o el actor no tiene el rol [NEEDS CLARIFICATION: el diagrama no asigna actor directo a UC058]
-   - **When** intenta confirmar la operación
-   - **Then** el sistema rechaza la operación, no modifica el registro y comunica la causa
+1. **Scenario**: Notificación por una transición ejecutada por el Prestador [UC058]
+    
+    - **Given** un Prestador marca su servicio contratado como en ejecución o como terminado
+    - **When** la transición se confirma
+    - **Then** el sistema notifica automáticamente al Cliente de ese servicio sobre el nuevo estado
+2. **Scenario**: Notificación por una transición ejecutada por el Cliente [UC058]
+    
+    - **Given** un Cliente confirma la finalización de su servicio
+    - **When** la confirmación se registra
+    - **Then** el sistema notifica automáticamente al Prestador sobre el cierre del servicio
+3. **Scenario**: Notificación por cancelación [UC058 ]
+    
+    - **Given** un Cliente o un Prestador cancela un servicio contratado
+    - **When** la cancelación se confirma
+    - **Then** el sistema notifica automáticamente a la otra parte sobre la cancelación
+4. **Scenario**: Falla en el canal de notificación
+    
+    - **Given** el canal de entrega falla al momento de un cambio de estado
+    - **When** el canal se recupera
+    - **Then** el evento de cambio de estado permanece consultable (por ejemplo, en el historial de estados) y el sistema no duplica el aviso
 
 ---
 
 ### Edge Cases
 
-- Si un canal de notificación falla, el evento de aceptación o estado debe permanecer consultable sin duplicar avisos.
-- Las notificaciones son extensiones de eventos de aceptación y cambios de estado; su configuración o entrega no debe alterar el estado fuente.
+- El canal de notificación falla en el momento de una aceptación o de un cambio de estado: el sistema debe mantener el evento consultable en su origen y no debe duplicar el aviso al reintentar la entrega.
+- Se intenta generar una notificación de aceptación o de cambio de estado sin que haya ocurrido el evento que la origina: el sistema debe impedirlo, dado que estas notificaciones son siempre una extensión de un evento real, nunca una acción independiente.
 
-## Requirements *(mandatory)*
+## Requirements _(mandatory)_
 
 ### Functional Requirements
 
-- **FR-057**: El sistema DEBE permitir que [NEEDS CLARIFICATION: el diagrama no asigna actor directo a UC057] ejecute «Notificar aceptación de propuesta» y debe mostrar o guardar el resultado específico de esa operación, sin concederla a otros roles. [UC057]
-- **FR-058**: El sistema DEBE permitir que [NEEDS CLARIFICATION: el diagrama no asigna actor directo a UC058] ejecute «Notificar cambios de estado del servicio» y debe mostrar o guardar el resultado específico de esa operación, sin concederla a otros roles. [UC058]
-### Key Entities *(include if feature involves data)*
+- **FR-057**: El sistema DEBE notificar automáticamente al Prestador cuya propuesta fue aceptada, disparado exclusivamente por la aceptación de esa propuesta, sin que ningún actor lo ejecute como acción independiente. _(UC057, extiende a UC046)_
+- **FR-058**: El sistema DEBE notificar automáticamente a la contraparte del servicio (Cliente o Prestador) cuando este cambie de estado por marcar en ejecución, marcar como terminado, confirmar finalización o cancelar, disparado exclusivamente por esas transiciones. _(UC058, extiende a UC051, UC052, UC053 y UC054)_
 
-- **Registro específico de Notificaciones de propuestas y servicios**: información que los CUs (UC057,UC058) consultan, crean, actualizan o muestran.
-- **Actor asignado y autorización**: identidad del actor indicado en el diagrama y permiso requerido para cada operación.
-- **Estado y resultado de cada operación**: valor confirmado, mensaje mostrado y evidencia asociada; retención y formatos quedan [NEEDS CLARIFICATION: definir].
+### Key Entities _(include if feature involves data)_
 
-## Success Criteria *(mandatory)*
+- **Notificación de aceptación**: aviso generado hacia el Prestador cuando su propuesta es aceptada; incluye referencia al servicio contratado resultante.
+- **Notificación de cambio de estado**: aviso generado hacia la contraparte de quien ejecuta una transición del servicio; incluye el nuevo estado y referencia al servicio.
+- **Canal de entrega**: mecanismo por el cual el actor "Proveedor de notificaciones" hace llegar estos avisos.
+
+## Success Criteria _(mandatory)_
 
 ### Measurable Outcomes
 
-- **SC-001**: El 100% de los CUs UC057,UC058 solo permite la acción al actor asignado en su diagrama y devuelve el resultado de su operación específica.
-- **SC-002**: Ante datos faltantes, registro inexistente o rol incorrecto, ninguna operación cambia datos y la interfaz informa la causa.
-- **SC-003**: Los estados, filtros, evidencias o políticas no definidos en los diagramas se presentan como [NEEDS CLARIFICATION: definir política antes de implementar].
+- **SC-001**: El 100% de las aceptaciones de propuesta genera una notificación hacia el Prestador correspondiente.
+- **SC-002**: El 100% de las transiciones de estado del servicio (en ejecución, terminado, finalización confirmada, cancelado) genera una notificación hacia la contraparte de quien la ejecutó.
+- **SC-003**: Ante una falla del canal de entrega, el 100% de los eventos de aceptación o cambio de estado permanece consultable en su origen sin generar avisos duplicados al recuperarse.
+- **SC-004**: El 100% de los intentos de generar una notificación sin un evento real asociado es rechazado.

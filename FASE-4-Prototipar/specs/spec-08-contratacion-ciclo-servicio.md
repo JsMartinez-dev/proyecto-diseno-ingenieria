@@ -1,212 +1,198 @@
 # Feature Specification: SPEC-08 — Contratación y ciclo de vida del servicio
 
 **Creado**: 2026-09-16
-**Casos de uso cubiertos**: UC048,UC049,UC050,UC051,UC052,UC053,UC054,UC055,UC056
+**Casos de uso cubiertos**: UC045, UC046, UC047, UC048, UC049, UC050, UC051, UC052, UC053, UC054, UC055, UC056
 
-## User Scenarios & Testing *(mandatory)*
+## User Scenarios & Testing _(mandatory)_
 
-> Relaciones del diagrama: UC048–UC049 se incluyen al aceptar; UC056 extiende la habilitación de comunicación; UC058 extiende cambios de estado.
-### User Story 1 - Registrar servicio contratado [UC048] (Priority: P1)
-Como cliente o prestador, quiero registrar servicio contratado, para gestionar específicamente registrar servicio contratado dentro de CONectaSM.
+### User Story 1 - Consultar y aceptar propuestas recibidas [UC045, UC046, UC047, UC048, UC049] (Priority: P1)
 
-**Why this priority**: UC048 permite a Cliente o Prestador registrar servicio contratado; el resultado se limita a la operación descrita en el diagrama.
+Como cliente, quiero consultar las propuestas que recibí para mi solicitud y aceptar la que prefiera, para que se registre el servicio contratado, se cierren automáticamente las demás propuestas y quede habilitada la comunicación con el prestador elegido.
 
-**Independent Test**: Con una cuenta de cliente o prestador y un registro de prueba de «Registrar servicio contratado», verificar que UC048 muestra o guarda el resultado indicado sin ejecutar otro CU.
+**Why this priority**: Es el punto donde una oportunidad  y una propuesta se convierten en un compromiso real entre Cliente y Prestador; sin esta aceptación no existe contratación.
 
-**Acceptance Scenarios**:
-
-1. **Scenario**: Registrar servicio contratado para UC048
-   - **Given** un cliente o prestador autorizado dispone de los datos de «Registrar servicio contratado»
-   - **When** ejecuta la acción «Registrar servicio contratado»
-   - **Then** el sistema guarda «Registrar servicio contratado» en el registro seleccionado y muestra su nuevo estado.
-
-2. **Scenario**: Datos insuficientes o actor no autorizado en UC048
-   - **Given** la solicitud de «Registrar servicio contratado» no identifica un registro válido o el actor no tiene el rol Cliente o Prestador
-   - **When** intenta confirmar la operación
-   - **Then** el sistema rechaza la operación, no modifica el registro y comunica la causa
-
-### User Story 2 - Habilitar datos de comunicación [UC049] (Priority: P1)
-Como cliente o prestador, quiero habilitar datos de comunicación, para gestionar específicamente habilitar datos de comunicación dentro de CONectaSM.
-
-**Why this priority**: UC049 permite a Cliente o Prestador habilitar datos de comunicación; el resultado se limita a la operación descrita en el diagrama.
-
-**Independent Test**: Con una cuenta de cliente o prestador y un registro de prueba de «Habilitar datos de comunicación», verificar que UC049 muestra o guarda el resultado indicado sin ejecutar otro CU.
+**Independent Test**: Con una solicitud propia que tiene varias propuestas activas, aceptar una de ellas y verificar que el servicio queda registrado, las demás propuestas quedan cerradas y los datos de comunicación quedan habilitados; intentar aceptar dos propuestas para la misma solicitud y verificar que la segunda es rechazada.
 
 **Acceptance Scenarios**:
 
-1. **Scenario**: Habilitar datos de comunicación para UC049
-   - **Given** un cliente o prestador autorizado dispone de los datos de «Habilitar datos de comunicación»
-   - **When** ejecuta la acción «Habilitar datos de comunicación»
-   - **Then** el sistema guarda «Habilitar datos de comunicación» en el registro seleccionado y muestra su nuevo estado.
+1. **Scenario**: Consultar propuestas recibidas [UC045]
+    
+    - **Given** un Cliente tiene una solicitud publicada con una o más propuestas activas
+    - **When** consulta las propuestas recibidas para esa solicitud
+    - **Then** el sistema muestra todas las propuestas activas, con la disponibilidad y el mensaje de cada Prestador
+2. **Scenario**: Aceptar una propuesta [UC046]
+    
+    - **Given** un Cliente tiene varias propuestas activas para su solicitud
+    - **When** acepta una de ellas
+    - **Then** el sistema registra el servicio contratado con el Prestador seleccionado y habilita los datos de comunicación entre ambos, en una sola operación consistente
+3. **Scenario**: Cerrar automáticamente las propuestas no seleccionadas [UC047]
+    
+    - **Given** un Cliente acepta una propuesta entre varias recibidas para la misma solicitud
+    - **When** la aceptación se confirma
+    - **Then** el sistema cierra automáticamente el resto de las propuestas de esa solicitud, sin que el Cliente deba rechazarlas una por una
+4. **Scenario**: Intento de aceptar una segunda propuesta para la misma solicitud
+    
+    - **Given** un Cliente ya aceptó una propuesta para su solicitud
+    - **When** intenta aceptar otra propuesta de la misma solicitud
+    - **Then** el sistema rechaza la operación, indicando que la solicitud ya tiene un servicio contratado
+5. **Scenario**: Actor no autorizado o propuesta ajena
+    
+    - **Given** un actor sin rol Cliente, o un Cliente que intenta consultar o aceptar propuestas de una solicitud que no le pertenece
+    - **When** realiza la solicitud
+    - **Then** el sistema deniega la operación
 
-2. **Scenario**: Datos insuficientes o actor no autorizado en UC049
-   - **Given** la solicitud de «Habilitar datos de comunicación» no identifica un registro válido o el actor no tiene el rol Cliente o Prestador
-   - **When** intenta confirmar la operación
-   - **Then** el sistema rechaza la operación, no modifica el registro y comunica la causa
+### User Story 2 - Consultar el detalle del servicio contratado [UC050] (Priority: P1)
 
-### User Story 3 - Consultar detalle del servicio [UC050] (Priority: P1)
-Como cliente o prestador, quiero consultar detalle del servicio, para gestionar específicamente consultar detalle del servicio dentro de CONectaSM.
+Como cliente o prestador, quiero consultar el detalle del servicio que contraté o que me contrataron, para conocer en todo momento sus condiciones y su estado actual.
 
-**Why this priority**: UC050 permite a Cliente o Prestador consultar detalle del servicio; el resultado se limita a la operación descrita en el diagrama.
+**Why this priority**: Ambas partes necesitan una referencia única y confiable del compromiso, en lugar de depender de lo acordado informalmente en mensajes.
 
-**Independent Test**: Con una cuenta de cliente o prestador y un registro de prueba de «Consultar detalle del servicio», verificar que UC050 muestra o guarda el resultado indicado sin ejecutar otro CU.
-
-**Acceptance Scenarios**:
-
-1. **Scenario**: Consultar detalle del servicio para UC050
-   - **Given** un cliente o prestador autorizado dispone de los datos de «Consultar detalle del servicio»
-   - **When** ejecuta la acción «Consultar detalle del servicio»
-   - **Then** el sistema muestra la información específica de «Consultar detalle del servicio».
-
-2. **Scenario**: Datos insuficientes o actor no autorizado en UC050
-   - **Given** la solicitud de «Consultar detalle del servicio» no identifica un registro válido o el actor no tiene el rol Cliente o Prestador
-   - **When** intenta confirmar la operación
-   - **Then** el sistema rechaza la operación, no modifica el registro y comunica la causa
-
-### User Story 4 - Marcar servicio en ejecución [UC051] (Priority: P1)
-Como prestador, quiero marcar servicio en ejecución, para gestionar específicamente marcar servicio en ejecución dentro de CONectaSM.
-
-**Why this priority**: UC051 permite a Prestador marcar servicio en ejecución; el resultado se limita a la operación descrita en el diagrama.
-
-**Independent Test**: Con una cuenta de prestador y un registro de prueba de «Marcar servicio en ejecución», verificar que UC051 muestra o guarda el resultado indicado sin ejecutar otro CU.
+**Independent Test**: Con un servicio contratado entre un Cliente y un Prestador, ambos consultan su detalle y verifican que ven la misma información; un tercero intenta consultarlo y es rechazado.
 
 **Acceptance Scenarios**:
 
-1. **Scenario**: Marcar servicio en ejecución para UC051
-   - **Given** un prestador autorizado dispone de los datos de «Marcar servicio en ejecución»
-   - **When** ejecuta la acción «Marcar servicio en ejecución»
-   - **Then** el sistema guarda «Marcar servicio en ejecución» en el registro seleccionado y muestra su nuevo estado.
+1. **Scenario**: Consulta exitosa por cualquiera de las dos partes
+    
+    - **Given** existe un servicio contratado entre un Cliente y un Prestador
+    - **When** cualquiera de los dos consulta su detalle
+    - **Then** el sistema muestra la solicitud original, la propuesta aceptada y el estado actual del servicio
+2. **Scenario**: Consulta por un actor ajeno al servicio
+    
+    - **Given** un actor que no es ni el Cliente ni el Prestador de ese servicio intenta consultar su detalle
+    - **When** realiza la solicitud
+    - **Then** el sistema deniega el acceso
 
-2. **Scenario**: Datos insuficientes o actor no autorizado en UC051
-   - **Given** la solicitud de «Marcar servicio en ejecución» no identifica un registro válido o el actor no tiene el rol Prestador
-   - **When** intenta confirmar la operación
-   - **Then** el sistema rechaza la operación, no modifica el registro y comunica la causa
+### User Story 3 - Gestionar el ciclo de vida del servicio contratado [UC051, UC052, UC053, UC054] (Priority: P1)
 
-### User Story 5 - Marcar servicio como terminado [UC052] (Priority: P1)
-Como prestador, quiero marcar servicio como terminado, para gestionar específicamente marcar servicio como terminado dentro de CONectaSM.
+Como prestador, quiero marcar el servicio en ejecución y como terminado, y como cliente quiero confirmar su finalización o, si es necesario, cancelar el servicio contratado, para que el estado del servicio refleje siempre la realidad de lo que está ocurriendo.
 
-**Why this priority**: UC052 permite a Prestador marcar servicio como terminado; el resultado se limita a la operación descrita en el diagrama.
+**Why this priority**: Sin estados claros, ninguna de las partes puede saber si el servicio ya empezó, si ya terminó o si sigue pendiente, reintroduciendo la fragmentación que el proyecto busca resolver.
 
-**Independent Test**: Con una cuenta de prestador y un registro de prueba de «Marcar servicio como terminado», verificar que UC052 muestra o guarda el resultado indicado sin ejecutar otro CU.
-
-**Acceptance Scenarios**:
-
-1. **Scenario**: Marcar servicio como terminado para UC052
-   - **Given** un prestador autorizado dispone de los datos de «Marcar servicio como terminado»
-   - **When** ejecuta la acción «Marcar servicio como terminado»
-   - **Then** el sistema guarda «Marcar servicio como terminado» en el registro seleccionado y muestra su nuevo estado.
-
-2. **Scenario**: Datos insuficientes o actor no autorizado en UC052
-   - **Given** la solicitud de «Marcar servicio como terminado» no identifica un registro válido o el actor no tiene el rol Prestador
-   - **When** intenta confirmar la operación
-   - **Then** el sistema rechaza la operación, no modifica el registro y comunica la causa
-
-### User Story 6 - Confirmar finalización [UC053] (Priority: P1)
-Como cliente, quiero confirmar finalización, para gestionar específicamente confirmar finalización dentro de CONectaSM.
-
-**Why this priority**: UC053 permite a Cliente confirmar finalización; el resultado se limita a la operación descrita en el diagrama.
-
-**Independent Test**: Con una cuenta de cliente y un registro de prueba de «Confirmar finalización», verificar que UC053 muestra o guarda el resultado indicado sin ejecutar otro CU.
+**Independent Test**: Con un servicio recién contratado, marcarlo en ejecución, luego como terminado, y confirmar su finalización como Cliente, verificando en cada paso el estado resultante; en un servicio distinto, cancelarlo antes de finalizar y verificar que ya no admite otras transiciones.
 
 **Acceptance Scenarios**:
 
-1. **Scenario**: Confirmar finalización para UC053
-   - **Given** un cliente autorizado dispone de los datos de «Confirmar finalización»
-   - **When** ejecuta la acción «Confirmar finalización»
-   - **Then** el sistema guarda «Confirmar finalización» en el registro seleccionado y muestra su nuevo estado.
+1. **Scenario**: Marcar el servicio en ejecución [UC051]
+    
+    - **Given** un Prestador tiene un servicio contratado pendiente de iniciar
+    - **When** lo marca como en ejecución
+    - **Then** el sistema actualiza el estado del servicio y lo refleja para ambas partes
+2. **Scenario**: Marcar el servicio como terminado [UC052]
+    
+    - **Given** un Prestador tiene un servicio en ejecución
+    - **When** lo marca como terminado
+    - **Then** el sistema actualiza el estado del servicio, dejándolo pendiente de confirmación por el Cliente
+3. **Scenario**: Confirmar la finalización [UC053]
+    
+    - **Given** un Cliente tiene un servicio marcado como terminado por el Prestador
+    - **When** confirma su finalización
+    - **Then** el sistema cierra el servicio como finalizado de forma definitiva
+4. **Scenario**: Cancelar un servicio contratado [UC054]
+    
+    - **Given** un Cliente o un Prestador tiene un servicio contratado que aún no ha sido confirmado como finalizado
+    - **When** solicita su cancelación
+    - **Then** el sistema marca el servicio como cancelado y lo deja fuera de cualquier transición posterior
+5. **Scenario**: Intento de cancelar un servicio ya finalizado
+    
+    - **Given** un servicio ya fue confirmado como finalizado
+    - **When** el Cliente o el Prestador intenta cancelarlo
+    - **Then** el sistema rechaza la cancelación y conserva el estado finalizado
+6. **Scenario**: Transiciones simultáneas sobre el mismo servicio
+    
+    - **Given** ambas partes intentan cambiar el estado del mismo servicio al mismo tiempo (por ejemplo, terminar y cancelar)
+    - **When** ambas solicitudes llegan casi al mismo momento
+    - **Then** el sistema aplica una sola transición válida, conserva un historial ordenado y rechaza la otra sin dejar el servicio en un estado ambiguo
+7. **Scenario**: Actor no autorizado
+    
+    - **Given** un actor ajeno al servicio, o con un rol que no corresponde a la transición solicitada, intenta cambiar su estado
+    - **When** realiza la solicitud
+    - **Then** el sistema deniega la operación
 
-2. **Scenario**: Datos insuficientes o actor no autorizado en UC053
-   - **Given** la solicitud de «Confirmar finalización» no identifica un registro válido o el actor no tiene el rol Cliente
-   - **When** intenta confirmar la operación
-   - **Then** el sistema rechaza la operación, no modifica el registro y comunica la causa
+### User Story 4 - Consultar el historial de estados del servicio [UC055] (Priority: P1)
 
-### User Story 7 - Cancelar servicio contratado [UC054] (Priority: P1)
-Como cliente o prestador, quiero cancelar servicio contratado, para gestionar específicamente cancelar servicio contratado dentro de CONectaSM.
+Como cliente o prestador, quiero consultar el historial completo de estados de mi servicio contratado, para verificar cómo evolucionó desde su contratación hasta su cierre.
 
-**Why this priority**: UC054 permite a Cliente o Prestador cancelar servicio contratado; el resultado se limita a la operación descrita en el diagrama.
+**Why this priority**: Da trazabilidad a ambas partes ante cualquier desacuerdo sobre cuándo ocurrió cada transición.
 
-**Independent Test**: Con una cuenta de cliente o prestador y un registro de prueba de «Cancelar servicio contratado», verificar que UC054 muestra o guarda el resultado indicado sin ejecutar otro CU.
-
-**Acceptance Scenarios**:
-
-1. **Scenario**: Cancelar servicio contratado para UC054
-   - **Given** un cliente o prestador autorizado dispone de los datos de «Cancelar servicio contratado»
-   - **When** ejecuta la acción «Cancelar servicio contratado»
-   - **Then** el sistema aplica «Cancelar servicio contratado» al registro seleccionado y muestra su nuevo estado.
-
-2. **Scenario**: Datos insuficientes o actor no autorizado en UC054
-   - **Given** la solicitud de «Cancelar servicio contratado» no identifica un registro válido o el actor no tiene el rol Cliente o Prestador
-   - **When** intenta confirmar la operación
-   - **Then** el sistema rechaza la operación, no modifica el registro y comunica la causa
-
-### User Story 8 - Consultar historial de estados del servicio [UC055] (Priority: P1)
-Como cliente o prestador, quiero consultar historial de estados del servicio, para gestionar específicamente consultar historial de estados del servicio dentro de CONectaSM.
-
-**Why this priority**: UC055 permite a Cliente o Prestador consultar historial de estados del servicio; el resultado se limita a la operación descrita en el diagrama.
-
-**Independent Test**: Con una cuenta de cliente o prestador y un registro de prueba de «Consultar historial de estados del servicio», verificar que UC055 muestra o guarda el resultado indicado sin ejecutar otro CU.
-
-**Acceptance Scenarios**:
-
-1. **Scenario**: Consultar historial de estados del servicio para UC055
-   - **Given** un cliente o prestador autorizado dispone de los datos de «Consultar historial de estados del servicio»
-   - **When** ejecuta la acción «Consultar historial de estados del servicio»
-   - **Then** el sistema muestra la información específica de «Consultar historial de estados del servicio».
-
-2. **Scenario**: Datos insuficientes o actor no autorizado en UC055
-   - **Given** la solicitud de «Consultar historial de estados del servicio» no identifica un registro válido o el actor no tiene el rol Cliente o Prestador
-   - **When** intenta confirmar la operación
-   - **Then** el sistema rechaza la operación, no modifica el registro y comunica la causa
-
-### User Story 9 - Usar canal de comunicación autorizado [UC056] (Priority: P1)
-Como cliente o prestador, quiero usar canal de comunicación autorizado, para gestionar específicamente usar canal de comunicación autorizado dentro de CONectaSM.
-
-**Why this priority**: UC056 permite a Cliente o Prestador usar canal de comunicación autorizado; el resultado se limita a la operación descrita en el diagrama.
-
-**Independent Test**: Con una cuenta de cliente o prestador y un registro de prueba de «Usar canal de comunicación autorizado», verificar que UC056 muestra o guarda el resultado indicado sin ejecutar otro CU.
+**Independent Test**: Con un servicio que pasó por varias transiciones de estado, consultar su historial y verificar que aparecen todas en orden; un actor ajeno al servicio intenta consultarlo y es rechazado.
 
 **Acceptance Scenarios**:
 
-1. **Scenario**: Usar canal de comunicación autorizado para UC056
-   - **Given** un cliente o prestador autorizado dispone de los datos de «Usar canal de comunicación autorizado»
-   - **When** ejecuta la acción «Usar canal de comunicación autorizado»
-   - **Then** el sistema guarda «Usar canal de comunicación autorizado» en el registro seleccionado y muestra su nuevo estado.
+1. **Scenario**: Historial disponible
+    
+    - **Given** un servicio contratado registró una o más transiciones de estado
+    - **When** el Cliente o el Prestador de ese servicio consulta su historial
+    - **Then** el sistema muestra cada transición en el orden en que ocurrió
+2. **Scenario**: Actor no autorizado
+    
+    - **Given** un actor ajeno al servicio intenta consultar su historial
+    - **When** realiza la solicitud
+    - **Then** el sistema deniega el acceso
 
-2. **Scenario**: Datos insuficientes o actor no autorizado en UC056
-   - **Given** la solicitud de «Usar canal de comunicación autorizado» no identifica un registro válido o el actor no tiene el rol Cliente o Prestador
-   - **When** intenta confirmar la operación
-   - **Then** el sistema rechaza la operación, no modifica el registro y comunica la causa
+### User Story 5 - Usar el canal de comunicación autorizado [UC056] (Priority: P1)
+
+Como cliente o prestador, quiero usar el canal de comunicación autorizado una vez contratado el servicio, para coordinar los detalles necesarios sin exponer mis datos de contacto personales.
+
+**Why this priority**: Permite coordinar el servicio sin depender de canales informales ni de revelar información de contacto directo entre las partes.
+
+**Independent Test**: Con un servicio recién contratado (datos de comunicación habilitados por UC049), enviar un mensaje por el canal autorizado y verificar que llega a la otra parte; intentar usarlo antes de que la propuesta haya sido aceptada y verificar el rechazo.
+
+**Acceptance Scenarios**:
+
+1. **Scenario**: Uso del canal tras la habilitación [UC056]
+    
+    - **Given** un servicio contratado ya tiene sus datos de comunicación habilitados
+    - **When** el Cliente o el Prestador envían un mensaje por el canal autorizado
+    - **Then** el sistema lo entrega a la otra parte sin exponer datos de contacto personales de ninguna de las dos
+2. **Scenario**: Intento de uso antes de la habilitación
+    
+    - **Given** una propuesta aún no ha sido aceptada
+    - **When** el Cliente o el Prestador intentan usar el canal de comunicación autorizado
+    - **Then** el sistema bloquea el uso hasta que la aceptación de la propuesta habilite los datos de comunicación
+3. **Scenario**: Actor ajeno al servicio
+    
+    - **Given** un actor que no es parte de ese servicio contratado intenta usar su canal de comunicación
+    - **When** realiza la solicitud
+    - **Then** el sistema deniega el acceso
 
 ---
 
 ### Edge Cases
 
-- Dos transiciones simultáneas deben resolverse conservando un único historial ordenado y sin inventar una transición no autorizada.
-- Aceptar una propuesta incluye registrar el servicio y habilitar comunicación; las transiciones deben conservar su historial sin inventar condiciones de cancelación.
+- Dos transiciones de estado del mismo servicio se intentan de forma simultánea: el sistema debe resolverlas conservando un único historial ordenado, sin aplicar ninguna transición no autorizada.
+- Un cliente o un prestador intenta cancelar un servicio que ya fue confirmado como finalizado: el sistema debe rechazar la cancelación y conservar el estado finalizado.
+- Se intenta usar el canal de comunicación autorizado antes de que la propuesta haya sido aceptada: el sistema debe bloquear su uso hasta que los datos de comunicación queden habilitados.
+- Un prestador marca un servicio como terminado sin haberlo marcado antes en ejecución: El sistema exige pasar primero por "en ejecución" o permite marcarlo terminado directamente.
 
-## Requirements *(mandatory)*
+## Requirements _(mandatory)_
 
 ### Functional Requirements
 
-- **FR-048**: El sistema DEBE permitir que un Cliente o Prestador ejecute «Registrar servicio contratado» y debe mostrar o guardar el resultado específico de esa operación, sin concederla a otros roles. [UC048]
-- **FR-049**: El sistema DEBE permitir que un Cliente o Prestador ejecute «Habilitar datos de comunicación» y debe mostrar o guardar el resultado específico de esa operación, sin concederla a otros roles. [UC049]
-- **FR-050**: El sistema DEBE permitir que un Cliente o Prestador ejecute «Consultar detalle del servicio» y debe mostrar o guardar el resultado específico de esa operación, sin concederla a otros roles. [UC050]
-- **FR-051**: El sistema DEBE permitir que un Prestador ejecute «Marcar servicio en ejecución» y debe mostrar o guardar el resultado específico de esa operación, sin concederla a otros roles. [UC051]
-- **FR-052**: El sistema DEBE permitir que un Prestador ejecute «Marcar servicio como terminado» y debe mostrar o guardar el resultado específico de esa operación, sin concederla a otros roles. [UC052]
-- **FR-053**: El sistema DEBE permitir que cliente ejecute «Confirmar finalización» y debe mostrar o guardar el resultado específico de esa operación, sin concederla a otros roles. [UC053]
-- **FR-054**: El sistema DEBE permitir que un Cliente o Prestador ejecute «Cancelar servicio contratado» y debe mostrar o guardar el resultado específico de esa operación, sin concederla a otros roles. [UC054]
-- **FR-055**: El sistema DEBE permitir que un Cliente o Prestador ejecute «Consultar historial de estados del servicio» y debe mostrar o guardar el resultado específico de esa operación, sin concederla a otros roles. [UC055]
-- **FR-056**: El sistema DEBE permitir que un Cliente o Prestador ejecute «Usar canal de comunicación autorizado» y debe mostrar o guardar el resultado específico de esa operación, sin concederla a otros roles. [UC056]
-### Key Entities *(include if feature involves data)*
+- **FR-045**: El sistema DEBE permitir que un Cliente consulte todas las propuestas activas recibidas para una solicitud propia. _(UC045)_
+- **FR-046**: El sistema DEBE permitir que un Cliente acepte una propuesta activa de su solicitud, y DEBE rechazar una segunda aceptación si la solicitud ya tiene un servicio contratado. _(UC046, incluye a UC047, UC048 y UC049)_
+- **FR-047**: El sistema DEBE cerrar automáticamente, como parte de la aceptación, todas las demás propuestas activas de la misma solicitud. _(UC047, incluido en UC046)_
+- **FR-048**: El sistema DEBE registrar, como parte de la aceptación, un servicio contratado vinculado a la solicitud, la propuesta aceptada, el Cliente y el Prestador. _(UC048, incluido en UC046)_
+- **FR-049**: El sistema DEBE habilitar, como parte de la aceptación, los datos de comunicación necesarios entre el Cliente y el Prestador de ese servicio. _(UC049, incluido en UC046)_
+- **FR-050**: El sistema DEBE permitir que el Cliente o el Prestador de un servicio contratado consulten su detalle completo, y DEBE denegar el acceso a cualquier otro actor. _(UC050)_
+- **FR-051**: El sistema DEBE permitir que el Prestador de un servicio contratado lo marque como en ejecución. _(UC051)_
+- **FR-052**: El sistema DEBE permitir que el Prestador de un servicio en ejecución lo marque como terminado. _(UC052)_
+- **FR-053**: El sistema DEBE permitir que el Cliente de un servicio marcado como terminado confirme su finalización, cerrándolo de forma definitiva. _(UC053)_
+- **FR-054**: El sistema DEBE permitir que el Cliente o el Prestador de un servicio contratado lo cancelen mientras no haya sido confirmado como finalizado, y DEBE rechazar la cancelación si ya fue finalizado. _(UC054)_
+- **FR-055**: El sistema DEBE permitir que el Cliente o el Prestador de un servicio consulten su historial completo de transiciones de estado, en orden. _(UC055)_
+- **FR-056**: El sistema DEBE permitir el uso del canal de comunicación autorizado únicamente después de que los datos de comunicación del servicio hayan sido habilitados, sin exponer datos de contacto personales de ninguna de las partes. _(UC056, extiende a UC049)_
 
-- **Registro específico de Contratación y ciclo de vida del servicio**: información que los CUs (UC048,UC049,UC050,UC051,UC052,UC053,UC054,UC055,UC056) consultan, crean, actualizan o muestran.
-- **Actor asignado y autorización**: identidad del actor indicado en el diagrama y permiso requerido para cada operación.
-- **Estado y resultado de cada operación**: valor confirmado, mensaje mostrado y evidencia asociada; retención y formatos quedan [NEEDS CLARIFICATION: definir].
+### Key Entities _(include if feature involves data)_
 
-## Success Criteria *(mandatory)*
+- **Servicio contratado**: solicitud de origen, propuesta aceptada, Cliente, Prestador, estado (contratado, en ejecución, terminado, finalizado, cancelado) e historial ordenado de esas transiciones.
+- **Datos de comunicación habilitados**: información mínima necesaria para que Cliente y Prestador se comuniquen a través del canal autorizado, sin exponer datos de contacto personales.
+- **Actor asignado y autorización**: solo el Cliente y el Prestador de un servicio contratado pueden consultarlo, cambiarlo de estado o usar su canal de comunicación.
+
+## Success Criteria _(mandatory)_
 
 ### Measurable Outcomes
 
-- **SC-001**: El 100% de los CUs UC048,UC049,UC050,UC051,UC052,UC053,UC054,UC055,UC056 solo permite la acción al actor asignado en su diagrama y devuelve el resultado de su operación específica.
-- **SC-002**: Ante datos faltantes, registro inexistente o rol incorrecto, ninguna operación cambia datos y la interfaz informa la causa.
-- **SC-003**: Los estados, filtros, evidencias o políticas no definidos en los diagramas se presentan como [NEEDS CLARIFICATION: definir política antes de implementar].
+- **SC-001**: El 100% de las aceptaciones de propuesta produce, en una sola operación, el cierre de las demás propuestas, el registro del servicio y la habilitación de comunicación.
+- **SC-002**: El 100% de los intentos de aceptar una segunda propuesta para una solicitud ya contratada es rechazado.
+- **SC-003**: El 100% de las transiciones de estado del servicio queda registrada en un historial ordenado, incluso ante intentos simultáneos.
+- **SC-004**: El 100% de los intentos de cancelar un servicio ya finalizado es rechazado sin cambiar su estado.
+- **SC-005**: El 100% de los usos del canal de comunicación autorizado ocurre solo después de que los datos de comunicación fueron habilitados, y ninguno expone datos de contacto personales.
