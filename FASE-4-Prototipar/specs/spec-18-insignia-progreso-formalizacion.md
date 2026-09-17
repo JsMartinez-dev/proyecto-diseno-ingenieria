@@ -1,52 +1,56 @@
 # Feature Specification: SPEC-18 — Insignia y progreso de formalización
 
 **Creado**: 2026-09-16
-**Casos de uso cubiertos**: UC088
+**Casos de uso cubiertos**: UC088 
+## User Scenarios & Testing _(mandatory)_
 
-## User Scenarios & Testing *(mandatory)*
+### User Story 1 - Insignia de progreso de formalización `<<Could>>` [UC088] (Priority: P3)
 
-> Relaciones del diagrama: <<Could>> La insignia es informativa y no equivale a certificación o estatus legal.
-### User Story 1 - Insignia de progreso de formalización <<Could>> [UC088] (Priority: P2)
-Como cliente o prestador, quiero una capacidad candidata de insignia de progreso de formalización [UC088], para evaluar si CONectaSM debería ofrecerla; disponibilidad, criterios, elegibilidad, fuente de datos y tratamiento de la insignia quedan [NEEDS CLARIFICATION: definir].
+Como Cliente o Prestador, quiero ver una insignia que resuma el progreso de formalización de un Prestador, para tener una referencia visual rápida sin leer el detalle completo de su ruta.
 
-**Why this priority**: UC088 es una capacidad informativa <<Could>> para Cliente o Prestador; no implica habilitación, certificación, estatus legal, persistencia ni estado de progreso.
+**Why this priority**: Es una capa visual de conveniencia sobre datos que ya existirían en `spec-13`; no aporta información nueva, solo la resume.
 
-**Independent Test**: Con una cuenta de cliente o prestador, verificar que, si UC088 no está habilitado, no se presenta como disponible; si se habilitara, confirmar criterios y reglas documentadas [NEEDS CLARIFICATION: definir].
+**Independent Test**: Con un Prestador con distintos niveles de progreso de formalización, mostrar su insignia y verificar que nunca se presenta como una certificación.
 
 **Acceptance Scenarios**:
 
-1. **Scenario**: UC088 no habilitado
-   - **Given** la capacidad candidata de insignia de progreso de formalización [UC088] no está habilitada
-   - **When** un cliente o prestador consulta las capacidades disponibles
-   - **Then** el sistema no la presenta como disponible ni simula insignias, progreso o estados.
-
-2. **Scenario**: UC088 habilitado sin reglas definidas
-   - **Given** una activación de UC088 requiere decidir disponibilidad, criterios, elegibilidad, fuente y tratamiento de datos
-   - **When** se intenta habilitarlo
-   - **Then** el sistema exige documentar esas decisiones [NEEDS CLARIFICATION: definir] y no afirma que calcule, guarde o muestre progreso antes de ello.
+1. **Scenario**: Capacidad deshabilitada (comportamiento por defecto)
+    
+    - **Given** la insignia no está habilitada
+    - **When** un Cliente o Prestador consulta un perfil
+    - **Then** el sistema no la presenta como disponible; el progreso detallado sigue siendo consultable en `spec-13`
+2. **Scenario**: Insignia no engañosa
+    
+    - **Given** la insignia está habilitada y un Prestador tiene progreso declarado en `spec-13`
+    - **When** se muestra su insignia
+    - **Then** el sistema la presenta junto con una indicación explícita de que representa progreso orientativo y no una certificación o estatus legal
+3. **Scenario**: Progreso al máximo nivel
+    
+    - **Given** un Prestador alcanza el nivel más alto de progreso definido
+    - **When** se muestra su insignia
+    - **Then** el sistema mantiene la misma indicación de que no equivale a certificación, igual que en cualquier otro nivel
 
 ---
 
 ### Edge Cases
 
-- Recalcular progreso no debe convertir una insignia en certificación legal.
-- <<Could>> La insignia es informativa y no equivale a certificación o estatus legal.
+- Recalcular el progreso base no debe convertir retroactivamente ninguna insignia histórica en una certificación.
+- Si el progreso base se elimina o resetea, la insignia debe reflejar el nuevo valor de inmediato, no un valor cacheado.
 
-## Requirements *(mandatory)*
+## Requirements _(mandatory)_
 
 ### Functional Requirements
 
-- **FR-088**: El sistema DEBE tratar «Insignia de progreso de formalización <<Could>>» [UC088] como capacidad candidata e informativa para Cliente o Prestador; si no está habilitada, no debe presentarla como disponible. Criterios, elegibilidad, fuente y tratamiento de datos quedan [NEEDS CLARIFICATION: definir], y no equivale a certificación o estatus legal.
-### Key Entities *(include if feature involves data)*
+- **FR-088**: El sistema PUEDE mostrar una insignia de progreso de formalización derivada del progreso definido en `spec-13` (UC079), pero NO DEBE representarla como estado legal o certificación en ningún nivel, y DEBE permanecer deshabilitada sin afectar `spec-13` mientras no exista aprobación explícita. [UC088]
 
-- **Registro específico de Insignia y progreso de formalización**: entidad candidata asociada al CU (UC088); si se consulta, crea o actualiza información queda [NEEDS CLARIFICATION: definir].
-- **Actor asignado y autorización**: identidad del actor indicado en el diagrama y permiso requerido para cada operación.
-- **Estado y resultado de cada operación**: no definidos por el diagrama; cualquier insignia, progreso, mensaje, evidencia, retención o formato queda [NEEDS CLARIFICATION: definir].
+### Key Entities _(include if feature involves data)_
 
-## Success Criteria *(mandatory)*
+- **Insignia de formalización**: representación visual resumida del progreso definido en `spec-13`; no es una entidad de datos independiente, sino una vista derivada.
+
+## Success Criteria _(mandatory)_
 
 ### Measurable Outcomes
 
-- **SC-001**: El 100% de las superficies de CONectaSM no presenta UC088 como disponible mientras no exista una decisión de habilitación documentada.
-- **SC-002**: Si se evalúa su habilitación, ninguna insignia, progreso o estado se calcula, muestra o guarda sin reglas documentadas [NEEDS CLARIFICATION: definir].
-- **SC-003**: Los estados, filtros, evidencias o políticas no definidos en los diagramas se presentan como [NEEDS CLARIFICATION: definir política antes de implementar].
+- **SC-001**: El 100% de las insignias mostradas incluye la indicación de que no equivalen a certificación o estatus legal, en cualquier nivel de progreso.
+- **SC-002**: La desactivación de la insignia no impide consultar el progreso detallado definido en `spec-13`.
+

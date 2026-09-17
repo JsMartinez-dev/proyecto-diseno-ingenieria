@@ -1,72 +1,92 @@
 # Feature Specification: SPEC-19 — Programa de referidos e idiomas adicionales
 
-**Creado**: 2026-09-16
-**Casos de uso cubiertos**: UC089,UC092
+**Creado**: 2026-09-16 
+**Casos de uso cubiertos**: UC089, UC092
 
-## User Scenarios & Testing *(mandatory)*
+## User Scenarios & Testing _(mandatory)_
 
-> Relaciones del diagrama: <<Could>> Las reglas de elegibilidad, beneficios y traducciones quedan [NEEDS CLARIFICATION: definir antes de habilitar].
-### User Story 1 - Programa de referidos <<Could>> [UC089] (Priority: P2)
-Como usuario, quiero una capacidad candidata de programa de referidos [UC089], para evaluar si CONectaSM debería ofrecerla; disponibilidad, elegibilidad, beneficios, reglas anti-auto-referido y tratamiento de datos quedan [NEEDS CLARIFICATION: definir].
 
-**Why this priority**: UC089 es una capacidad informativa <<Could>> para Usuario; no implica habilitación, generación de beneficios, persistencia ni estado de referido.
 
-**Independent Test**: Con una cuenta de usuario, verificar que, si UC089 no está habilitado, no se presenta como disponible; si se habilitara, confirmar elegibilidad, beneficios y reglas documentadas [NEEDS CLARIFICATION: definir].
+### User Story 1 - Programa de referidos `<<Could>>` [UC089] (Priority: P3)
 
-**Acceptance Scenarios**:
+Como Usuario, quiero referir a otras personas a CONectaSM para apoyar el crecimiento de la plataforma y recibir el beneficio definido.
 
-1. **Scenario**: UC089 no habilitado
-   - **Given** la capacidad candidata de programa de referidos [UC089] no está habilitada
-   - **When** un usuario consulta las capacidades disponibles
-   - **Then** el sistema no la presenta como disponible ni simula invitaciones, beneficios, registros o estados.
+**Why this priority**: Es una capacidad de adquisición de usuarios, no necesaria para que el marketplace base funcione entre quienes ya están registrados.
 
-2. **Scenario**: UC089 habilitado sin reglas definidas
-   - **Given** una activación de UC089 requiere decidir canal, disponibilidad, elegibilidad, beneficios, anti-auto-referido y datos tratados
-   - **When** se intenta habilitarlo
-   - **Then** el sistema exige documentar esas decisiones [NEEDS CLARIFICATION: definir] y no afirma que genere beneficios o muestre estados antes de ello.
-
-### User Story 2 - Idiomas adicionales <<Could>> [UC092] (Priority: P2)
-Como usuario, quiero una capacidad candidata de idiomas adicionales [UC092], para evaluar si CONectaSM debería ofrecerla; disponibilidad, idiomas, cobertura, traducción, proveedor y tratamiento de contenido quedan [NEEDS CLARIFICATION: definir].
-
-**Why this priority**: UC092 es una capacidad informativa <<Could>> para Usuario; no implica habilitación, traducción disponible, persistencia ni estado de idioma.
-
-**Independent Test**: Con una cuenta de usuario, verificar que, si UC092 no está habilitado, no se presenta como disponible; si se habilitara, confirmar idiomas, cobertura y reglas documentadas [NEEDS CLARIFICATION: definir].
+**Independent Test**: Con el programa habilitado, generar una referencia válida y una inválida (auto-referido), y verificar que solo la primera genera atribución.
 
 **Acceptance Scenarios**:
 
-1. **Scenario**: UC092 no habilitado
-   - **Given** la capacidad candidata de idiomas adicionales [UC092] no está habilitada
-   - **When** un usuario consulta las capacidades disponibles
-   - **Then** el sistema no la presenta como disponible ni simula traducciones, contenido o estados.
+1. **Scenario**: Capacidad deshabilitada (comportamiento por defecto)
+    
+    - **Given** el programa de referidos no está habilitado
+    - **When** un Usuario busca esta opción
+    - **Then** el sistema no la presenta como disponible
+2. **Scenario**: Referido válido
+    
+    - **Given** el programa está habilitado y un Usuario comparte su mecanismo de referido con una persona sin cuenta previa
+    - **When** esa persona se registra usando el mecanismo de referido
+    - **Then** el sistema registra la atribución conforme a las reglas de campaña vigentes
+3. **Scenario**: Auto-referido o referido duplicado
+    
+    - **Given** un Usuario intenta usar su propio mecanismo de referido, o una cuenta ya registrada intenta ser referida de nuevo
+    - **When** se procesa el intento
+    - **Then** el sistema no genera ningún beneficio ni atribución
 
-2. **Scenario**: UC092 habilitado sin reglas definidas
-   - **Given** una activación de UC092 requiere decidir idiomas, cobertura, proveedor, traducción y datos tratados
-   - **When** se intenta habilitarlo
-   - **Then** el sistema exige documentar esas decisiones [NEEDS CLARIFICATION: definir] y no afirma que traduzca, guarde o muestre estados antes de ello.
+
+---
+
+### User Story 2 - Idiomas adicionales `<<Could>>` [UC092] (Priority: P3)
+
+Como Usuario, quiero usar la plataforma en un idioma adicional al español, para mejorar mi accesibilidad lingüística.
+
+**Why this priority**: Mejora la accesibilidad para un segmento de usuarios, pero el problema central del proyecto (gestión de oportunidades en Santa Marta) no depende de soporte multilenguaje para su validación inicial.
+
+**Independent Test**: Con al menos un idioma adicional habilitado y parcialmente traducido, cambiar la preferencia de idioma y verificar el contenido traducido y el comportamiento de fallback donde falte traducción.
+
+**Acceptance Scenarios**:
+
+1. **Scenario**: Capacidad deshabilitada (comportamiento por defecto)
+    
+    - **Given** no hay idiomas adicionales habilitados
+    - **When** un Usuario busca esta opción
+    - **Then** el sistema no la presenta como disponible y opera únicamente en español
+2. **Scenario**: Cambio de idioma soportado
+    
+    - **Given** un idioma adicional está habilitado y soportado
+    - **When** el Usuario lo selecciona
+    - **Then** el contenido traducido dentro del alcance definido se presenta en ese idioma
+3. **Scenario**: Texto sin traducción disponible
+    
+    - **Given** el Usuario seleccionó un idioma soportado
+    - **When** el sistema debe mostrar un texto que no tiene traducción disponible en ese idioma
+    - **Then** el sistema muestra ese texto puntual en español como respaldo, sin mezclar idiomas de forma confusa en el resto de la pantalla
+
 
 ---
 
 ### Edge Cases
 
-- Un referido propio o duplicado no debe generar un beneficio; la política exacta queda [NEEDS CLARIFICATION: definir].
-- <<Could>> Las reglas de elegibilidad, beneficios y traducciones quedan [NEEDS CLARIFICATION: definir antes de habilitar].
+- Un mismo dispositivo o persona genera múltiples cuentas para explotar el programa de referidos: requiere controles antifraude definidos antes del lanzamiento (más allá del bloqueo de auto-referido directo).
+- Un idioma se retira del catálogo de soportados mientras usuarios lo tienen seleccionado como preferencia: debe definirse el idioma de respaldo aplicado automáticamente.
 
-## Requirements *(mandatory)*
+## Requirements _(mandatory)_
 
 ### Functional Requirements
 
-- **FR-089**: El sistema DEBE tratar «Programa de referidos <<Could>>» [UC089] como capacidad candidata e informativa para Usuario; si no está habilitada, no debe presentarla como disponible. Canal, disponibilidad, elegibilidad, beneficios, reglas anti-auto-referido y tratamiento de datos quedan [NEEDS CLARIFICATION: definir].
-- **FR-092**: El sistema DEBE tratar «Idiomas adicionales <<Could>>» [UC092] como capacidad candidata e informativa para Usuario; si no está habilitada, no debe presentarla como disponible. Idiomas, cobertura, proveedor, traducción y tratamiento de contenido quedan [NEEDS CLARIFICATION: definir].
-### Key Entities *(include if feature involves data)*
+- **FR-089**: El sistema PUEDE implementar un programa de referidos, sujeto a reglas explícitas de elegibilidad, atribución y prevención de auto-referido/duplicados, y DEBE permanecer deshabilitado sin afectar el MVP mientras no exista aprobación explícita. [UC089]
+- **FR-092**: El sistema PUEDE admitir idiomas adicionales, con un comportamiento de respaldo en español para cualquier texto sin traducción disponible, y DEBE permanecer deshabilitado (operando solo en español) sin afectar el MVP mientras no exista aprobación explícita. [UC092]
 
-- **Registro específico de Programa de referidos e idiomas adicionales**: entidad candidata asociada a los CUs (UC089,UC092); si se consulta, crea o actualiza información queda [NEEDS CLARIFICATION: definir].
-- **Actor asignado y autorización**: identidad del actor indicado en el diagrama y permiso requerido para cada operación.
-- **Estado y resultado de cada operación**: no definidos por el diagrama; cualquier beneficio, traducción, mensaje, evidencia, retención o formato queda [NEEDS CLARIFICATION: definir].
+### Key Entities _(include if feature involves data)_
 
-## Success Criteria *(mandatory)*
+- **Referido**: usuario referente, invitado, mecanismo usado, estado de atribución.
+- **Preferencia de idioma**: idioma seleccionado por el usuario, dentro del conjunto soportado.
+
+## Success Criteria _(mandatory)_
 
 ### Measurable Outcomes
 
-- **SC-001**: El 100% de las superficies de CONectaSM no presenta UC089 ni UC092 como disponibles mientras no exista una decisión de habilitación documentada.
-- **SC-002**: Si se evalúa su habilitación, ninguna invitación, beneficio, traducción, cambio de datos o estado se genera sin reglas documentadas [NEEDS CLARIFICATION: definir].
-- **SC-003**: Los estados, filtros, evidencias o políticas no definidos en los diagramas se presentan como [NEEDS CLARIFICATION: definir política antes de implementar].
+- **SC-001**: 0 beneficios de referido se otorgan por auto-referido o cuentas duplicadas, en el 100% de los casos de prueba.
+- **SC-002**: El 100% de los textos sin traducción disponible se muestra con el respaldo en español, sin mezclar idiomas de forma confusa.
+- **SC-003**: La desactivación de ambas capacidades no impide completar ningún flujo comprometido en UC-01 a UC-06.
+

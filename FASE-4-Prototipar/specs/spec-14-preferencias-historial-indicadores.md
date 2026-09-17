@@ -1,132 +1,156 @@
 # Feature Specification: SPEC-14 — Preferencias, historial e indicadores
 
 **Creado**: 2026-09-16
-**Casos de uso cubiertos**: UC081,UC082,UC083,UC084,UC085
+**Casos de uso cubiertos**: UC081, UC082, UC083, UC084, UC085 
 
-## User Scenarios & Testing *(mandatory)*
+## User Scenarios & Testing _(mandatory)_
 
-> Relaciones del diagrama: UC083 extiende la consulta de historial UC082.
+
+
 ### User Story 1 - Configurar preferencias de notificación [UC081] (Priority: P1)
-Como usuario, quiero configurar preferencias de notificación, para gestionar específicamente configurar preferencias de notificación dentro de CONectaSM.
 
-**Why this priority**: UC081 permite a Usuario configurar preferencias de notificación; el resultado se limita a la operación descrita en el diagrama.
+Como Usuario, quiero configurar mis preferencias de notificación para decidir qué avisos recibir y por qué canales.
 
-**Independent Test**: Con una cuenta de usuario y un registro de prueba de «Configurar preferencias de notificación», verificar que UC081 muestra o guarda el resultado indicado sin ejecutar otro CU.
+**Why this priority**: Controla la experiencia de avisos usada transversalmente por otros módulos (oportunidades, propuestas, cambios de estado); es una configuración base.
+
+**Independent Test**: Cambiar una preferencia y disparar un evento afectado, verificando que el sistema respeta la configuración.
 
 **Acceptance Scenarios**:
 
-1. **Scenario**: Configurar preferencias de notificación para UC081
-   - **Given** un usuario autorizado dispone de los datos de «Configurar preferencias de notificación»
-   - **When** ejecuta la acción «Configurar preferencias de notificación»
-   - **Then** el sistema guarda «Configurar preferencias de notificación» en el registro seleccionado y muestra su nuevo estado.
+1. **Scenario**: Preferencia aplicada [UC081]
+    
+    - **Given** un Usuario tiene una preferencia de notificación configurable
+    - **When** la modifica
+    - **Then** los eventos posteriores respetan esa configuración, dentro de los tipos de notificación marcados como configurables
+2. **Scenario**: Intento de desactivar una notificación obligatoria
+    
+    - **Given** un tipo de notificación está marcado como no configurable (ej. avisos de seguridad de la cuenta)
+    - **When** el Usuario intenta desactivarlo
+    - **Then** el sistema no permite la desactivación y explica que ese tipo de aviso es obligatorio
 
-2. **Scenario**: Datos insuficientes o actor no autorizado en UC081
-   - **Given** la solicitud de «Configurar preferencias de notificación» no identifica un registro válido o el actor no tiene el rol Usuario
-   - **When** intenta confirmar la operación
-   - **Then** el sistema rechaza la operación, no modifica el registro y comunica la causa
+---
 
 ### User Story 2 - Consultar historial de trabajos [UC082] (Priority: P1)
-Como usuario, quiero consultar historial de trabajos, para gestionar específicamente consultar historial de trabajos dentro de CONectaSM.
 
-**Why this priority**: UC082 permite a Usuario consultar historial de trabajos; el resultado se limita a la operación descrita en el diagrama.
+Como Usuario, quiero consultar mi historial de trabajos para revisar los servicios en los que participé.
 
-**Independent Test**: Con una cuenta de usuario y un registro de prueba de «Consultar historial de trabajos», verificar que UC082 muestra o guarda el resultado indicado sin ejecutar otro CU.
+**Why this priority**: Aporta trazabilidad directa al problema original del proyecto: la falta de historial de trabajos realizados identificada en las entrevistas (ej. Richard Núñez, Jorge Ortiz).
 
-**Acceptance Scenarios**:
-
-1. **Scenario**: Consultar historial de trabajos para UC082
-   - **Given** un usuario autorizado dispone de los datos de «Consultar historial de trabajos»
-   - **When** ejecuta la acción «Consultar historial de trabajos»
-   - **Then** el sistema muestra la información específica de «Consultar historial de trabajos».
-
-2. **Scenario**: Datos insuficientes o actor no autorizado en UC082
-   - **Given** la solicitud de «Consultar historial de trabajos» no identifica un registro válido o el actor no tiene el rol Usuario
-   - **When** intenta confirmar la operación
-   - **Then** el sistema rechaza la operación, no modifica el registro y comunica la causa
-
-### User Story 3 - Descargar historial [UC083] (Priority: P1)
-Como usuario, quiero descargar historial, para gestionar específicamente descargar historial dentro de CONectaSM.
-
-**Why this priority**: UC083 permite a Usuario descargar historial; el resultado se limita a la operación descrita en el diagrama.
-
-**Independent Test**: Con una cuenta de usuario y un registro de prueba de «Descargar historial», verificar que UC083 muestra o guarda el resultado indicado sin ejecutar otro CU.
+**Independent Test**: Con una cuenta que participó en varios servicios, consultar el historial y verificar que solo aparecen los servicios vinculados a esa cuenta.
 
 **Acceptance Scenarios**:
 
-1. **Scenario**: Descargar historial para UC083
-   - **Given** un usuario autorizado dispone de los datos de «Descargar historial»
-   - **When** ejecuta la acción «Descargar historial»
-   - **Then** el sistema guarda «Descargar historial» en el registro seleccionado y muestra su nuevo estado.
+1. **Scenario**: Historial propio [UC082]
+    
+    - **Given** un Usuario participó en uno o más servicios (como Cliente o como Prestador)
+    - **When** consulta su historial
+    - **Then** el sistema muestra únicamente los servicios asociados a su propia cuenta
+2. **Scenario**: Usuario sin servicios previos
+    
+    - **Given** un Usuario no ha participado en ningún servicio todavía
+    - **When** consulta su historial
+    - **Then** el sistema muestra un historial vacío, sin error
 
-2. **Scenario**: Datos insuficientes o actor no autorizado en UC083
-   - **Given** la solicitud de «Descargar historial» no identifica un registro válido o el actor no tiene el rol Usuario
-   - **When** intenta confirmar la operación
-   - **Then** el sistema rechaza la operación, no modifica el registro y comunica la causa
+
+
+---
+
+### User Story 3 - Descargar historial [UC083 ] (Priority: P2)
+
+Como Usuario, quiero descargar mi historial para conservarlo o usarlo fuera de la plataforma.
+
+**Why this priority**: Es una extensión opcional sobre un historial que ya es consultable en pantalla (UC082); no es indispensable para el valor central del historial.
+
+**Independent Test**: Solicitar la descarga del historial de una cuenta con varios registros y verificar que el archivo entregado coincide exactamente con lo consultable en pantalla.
+
+**Acceptance Scenarios**:
+
+1. **Scenario**: Descarga exitosa [UC083]
+    
+    - **Given** un Usuario tiene elementos en su historial
+    - **When** solicita descargarlo
+    - **Then** el sistema entrega un archivo descargable que contiene únicamente los registros autorizados de esa cuenta
+2. **Scenario**: Descarga interrumpida
+    
+    - **Given** una descarga de historial se interrumpe a mitad de proceso (ej. pérdida de conexión)
+    - **When** el Usuario reintenta
+    - **Then** el sistema genera una descarga íntegra nuevamente, sin haber alterado el historial original ni expuesto registros de otro usuario
+
+
+---
 
 ### User Story 4 - Consultar indicadores básicos del prestador [UC084] (Priority: P1)
-Como prestador, quiero consultar indicadores básicos del prestador, para gestionar específicamente consultar indicadores básicos del prestador dentro de CONectaSM.
 
-**Why this priority**: UC084 permite a Prestador consultar indicadores básicos del prestador; el resultado se limita a la operación descrita en el diagrama.
+Como Prestador, quiero consultar indicadores básicos de mi actividad para entender mi desempeño y la rentabilidad de mi trabajo en la plataforma.
 
-**Independent Test**: Con una cuenta de prestador y un registro de prueba de «Consultar indicadores básicos del prestador», verificar que UC084 muestra o guarda el resultado indicado sin ejecutar otro CU.
+**Why this priority**: Responde directamente a una necesidad expresada en las entrevistas (Richard Núñez: "sería útil tener una bitácora... para saber si el trabajo me está resultando rentable").
 
-**Acceptance Scenarios**:
-
-1. **Scenario**: Consultar indicadores básicos del prestador para UC084
-   - **Given** un prestador autorizado dispone de los datos de «Consultar indicadores básicos del prestador»
-   - **When** ejecuta la acción «Consultar indicadores básicos del prestador»
-   - **Then** el sistema muestra la información específica de «Consultar indicadores básicos del prestador».
-
-2. **Scenario**: Datos insuficientes o actor no autorizado en UC084
-   - **Given** la solicitud de «Consultar indicadores básicos del prestador» no identifica un registro válido o el actor no tiene el rol Prestador
-   - **When** intenta confirmar la operación
-   - **Then** el sistema rechaza la operación, no modifica el registro y comunica la causa
-
-### User Story 5 - Consultar actividad reciente [UC085] (Priority: P1)
-Como usuario, quiero consultar actividad reciente, para gestionar específicamente consultar actividad reciente dentro de CONectaSM.
-
-**Why this priority**: UC085 permite a Usuario consultar actividad reciente; el resultado se limita a la operación descrita en el diagrama.
-
-**Independent Test**: Con una cuenta de usuario y un registro de prueba de «Consultar actividad reciente», verificar que UC085 muestra o guarda el resultado indicado sin ejecutar otro CU.
+**Independent Test**: Con datos de actividad conocidos para una cuenta de Prestador, consultar sus indicadores y verificar que el cálculo es reproducible.
 
 **Acceptance Scenarios**:
 
-1. **Scenario**: Consultar actividad reciente para UC085
-   - **Given** un usuario autorizado dispone de los datos de «Consultar actividad reciente»
-   - **When** ejecuta la acción «Consultar actividad reciente»
-   - **Then** el sistema muestra la información específica de «Consultar actividad reciente».
+1. **Scenario**: Indicadores calculados [UC084]
+    
+    - **Given** un Prestador tiene actividad registrada (servicios finalizados, calificaciones)
+    - **When** consulta sus indicadores
+    - **Then** el sistema muestra las métricas básicas definidas por el producto, calculadas únicamente sobre su propia actividad
+2. **Scenario**: Actividad con servicios cancelados o en moderación
+    
+    - **Given** parte de la actividad del Prestador incluye servicios cancelados o actualmente en revisión por un reporte
+    - **When** se calculan los indicadores
+    - **Then** los servicios se incluyen.
 
-2. **Scenario**: Datos insuficientes o actor no autorizado en UC085
-   - **Given** la solicitud de «Consultar actividad reciente» no identifica un registro válido o el actor no tiene el rol Usuario
-   - **When** intenta confirmar la operación
-   - **Then** el sistema rechaza la operación, no modifica el registro y comunica la causa
+
+---
+
+### User Story 5 - Consultar actividad reciente [UC085] (Priority: P2)
+
+Como Usuario, quiero consultar mi actividad reciente para recordar eventos relevantes de mi cuenta sin tener que revisar todo el historial completo.
+
+**Why this priority**: Es un complemento de conveniencia sobre el historial (UC082) y las notificaciones (UC081), no un flujo crítico por sí solo.
+
+**Independent Test**: Generar varios eventos visibles para una cuenta y verificar que aparecen en orden y solo para esa cuenta.
+
+**Acceptance Scenarios**:
+
+1. **Scenario**: Actividad reciente propia [UC085]
+    - **Given** un Usuario tiene eventos recientes visibles (ej. nueva propuesta recibida, cambio de estado de un servicio)
+    - **When** abre su actividad reciente
+    - **Then** el sistema muestra esos eventos en orden cronológico, limitados a su propia cuenta
+
 
 ---
 
 ### Edge Cases
 
-- Una descarga interrumpida no debe cambiar el historial ni exponer registros de otro usuario.
-- Cada usuario solo consulta su información autorizada; el alcance y cálculo exacto de indicadores queda [NEEDS CLARIFICATION: definir métricas y periodo].
 
-## Requirements *(mandatory)*
+- La descarga del historial es solicitada por una cuenta con un volumen muy grande de registros: El sistema debe realizar paginación.
+- Un indicador depende de datos de servicios cancelados o moderados: la fórmula debe definir explícitamente su inclusión o exclusión antes de implementarse.
+- Dos eventos ocurren en el mismo instante para la actividad reciente: debe existir un criterio de desempate para el orden mostrado.
+
+## Requirements _(mandatory)_
 
 ### Functional Requirements
 
-- **FR-081**: El sistema DEBE permitir que un Usuario ejecute «Configurar preferencias de notificación» y debe mostrar o guardar el resultado específico de esa operación, sin concederla a otros roles. [UC081]
-- **FR-082**: El sistema DEBE permitir que un Usuario ejecute «Consultar historial de trabajos» y debe mostrar o guardar el resultado específico de esa operación, sin concederla a otros roles. [UC082]
-- **FR-083**: El sistema DEBE permitir que un Usuario ejecute «Descargar historial» y debe mostrar o guardar el resultado específico de esa operación, sin concederla a otros roles. [UC083]
-- **FR-084**: El sistema DEBE permitir que un Prestador ejecute «Consultar indicadores básicos del prestador» y debe mostrar o guardar el resultado específico de esa operación, sin concederla a otros roles. [UC084]
-- **FR-085**: El sistema DEBE permitir que un Usuario ejecute «Consultar actividad reciente» y debe mostrar o guardar el resultado específico de esa operación, sin concederla a otros roles. [UC085]
-### Key Entities *(include if feature involves data)*
+- **FR-081**: El sistema DEBE permitir que los Usuarios configuren sus preferencias de notificación para los tipos y canales marcados como configurables, sin permitir desactivar los obligatorios. [UC081]
+- **FR-082**: El sistema DEBE permitir que los Usuarios consulten únicamente el historial de servicios en los que estén autorizados como participantes. [UC082]
+- **FR-083**: El sistema DEBE permitir que los Usuarios descarguen su historial autorizado, garantizando que el contenido descargado coincida con el historial consultable. [UC083]
+- **FR-084**: El sistema DEBE permitir que los Prestadores consulten indicadores básicos definidos por el producto, calculados exclusivamente sobre su propia actividad. [UC084]
+- **FR-085**: El sistema DEBE permitir que los Usuarios consulten su actividad reciente autorizada, en orden cronológico. [UC085]
 
-- **Registro específico de Preferencias, historial e indicadores**: información que los CUs (UC081,UC082,UC083,UC084,UC085) consultan, crean, actualizan o muestran.
-- **Actor asignado y autorización**: identidad del actor indicado en el diagrama y permiso requerido para cada operación.
-- **Estado y resultado de cada operación**: valor confirmado, mensaje mostrado y evidencia asociada; retención y formatos quedan [NEEDS CLARIFICATION: definir].
+### Key Entities _(include if feature involves data)_
 
-## Success Criteria *(mandatory)*
+- **Preferencia de notificación**: tipo de aviso, canal, configurable u obligatorio, usuario asociado.
+- **Historial de trabajos**: colección de servicios vinculados a un usuario (como Cliente o Prestador).
+- **Descarga de historial**: archivo generado a partir del historial, fecha de generación.
+- **Indicador básico**: métrica aprobada de actividad del Prestador, con fórmula y periodo de cálculo.
+- **Actividad reciente**: eventos visibles vinculados a la cuenta del usuario, con marca de tiempo.
+
+## Success Criteria _(mandatory)_
 
 ### Measurable Outcomes
 
-- **SC-001**: El 100% de los CUs UC081,UC082,UC083,UC084,UC085 solo permite la acción al actor asignado en su diagrama y devuelve el resultado de su operación específica.
-- **SC-002**: Ante datos faltantes, registro inexistente o rol incorrecto, ninguna operación cambia datos y la interfaz informa la causa.
-- **SC-003**: Los estados, filtros, evidencias o políticas no definidos en los diagramas se presentan como [NEEDS CLARIFICATION: definir política antes de implementar].
+- **SC-001**: El 100% de las consultas y descargas de historial está limitado a servicios autorizados para el usuario solicitante.
+- **SC-002**: Los indicadores básicos producen resultados reproducibles para el 100% de los conjuntos de datos de prueba definidos, una vez resuelta la política de inclusión/exclusión de la Historia 4.
+- **SC-003**: Los eventos de notificación configurables respetan las preferencias activas del usuario en el 100% de los casos de prueba.
+- **SC-004**: El contenido de toda descarga de historial coincide exactamente con el historial consultable en pantalla para la misma cuenta, en el 100% de los casos.

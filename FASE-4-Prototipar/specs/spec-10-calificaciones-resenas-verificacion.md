@@ -1,152 +1,163 @@
 # Feature Specification: SPEC-10 — Calificaciones, reseñas y verificación
 
-**Creado**: 2026-09-16
-**Casos de uso cubiertos**: UC059,UC060,UC061,UC062,UC063,UC064
+**Creado**: 2026-09-16 
+**Casos de uso cubiertos**: UC059, UC060, UC061, UC062, UC063, UC064 
 
-## User Scenarios & Testing *(mandatory)*
+## User Scenarios & Testing _(mandatory)_
 
-> Relaciones del diagrama: UC059 incluye reputación UC061; UC060 extiende la calificación; UC063 y UC064 son flujos distintos de verificación y reporte.
-### User Story 1 - Calificar servicio finalizado [UC059] (Priority: P1)
-Como cliente, quiero calificar servicio finalizado, para gestionar específicamente calificar servicio finalizado dentro de CONectaSM.
 
-**Why this priority**: UC059 permite a Cliente calificar servicio finalizado; el resultado se limita a la operación descrita en el diagrama.
+### User Story 1 - Calificar servicio finalizado [UC059, UC061 ] (Priority: P1)
 
-**Independent Test**: Con una cuenta de cliente y un registro de prueba de «Calificar servicio finalizado», verificar que UC059 muestra o guarda el resultado indicado sin ejecutar otro CU.
+Como Cliente, quiero calificar un servicio ya finalizado para dejar constancia de mi experiencia y que la reputación del Prestador se actualice.
 
-**Acceptance Scenarios**:
+**Why this priority**: Es la base del sistema de confianza de la plataforma; sin calificaciones no existe reputación ni verificación posterior.
 
-1. **Scenario**: Calificar servicio finalizado para UC059
-   - **Given** un cliente autorizado dispone de los datos de «Calificar servicio finalizado»
-   - **When** ejecuta la acción «Calificar servicio finalizado»
-   - **Then** el sistema guarda «Calificar servicio finalizado» en el registro seleccionado y muestra su nuevo estado.
-
-2. **Scenario**: Datos insuficientes o actor no autorizado en UC059
-   - **Given** la solicitud de «Calificar servicio finalizado» no identifica un registro válido o el actor no tiene el rol Cliente
-   - **When** intenta confirmar la operación
-   - **Then** el sistema rechaza la operación, no modifica el registro y comunica la causa
-
-### User Story 2 - Agregar reseña textual [UC060] (Priority: P1)
-Como usuario, quiero agregar reseña textual, para gestionar específicamente agregar reseña textual dentro de CONectaSM.
-
-**Why this priority**: UC060 permite a Usuario agregar reseña textual; el resultado se limita a la operación descrita en el diagrama.
-
-**Independent Test**: Con una cuenta de usuario y un registro de prueba de «Agregar reseña textual», verificar que UC060 muestra o guarda el resultado indicado sin ejecutar otro CU.
+**Independent Test**: Con un servicio en estado "finalizado" asociado a un Cliente, calificarlo y verificar que la calificación queda registrada y la reputación agregada del Prestador se recalcula.
 
 **Acceptance Scenarios**:
 
-1. **Scenario**: Agregar reseña textual para UC060
-   - **Given** un usuario autorizado dispone de los datos de «Agregar reseña textual»
-   - **When** ejecuta la acción «Agregar reseña textual»
-   - **Then** el sistema guarda «Agregar reseña textual» en el registro seleccionado y muestra su nuevo estado.
+1. **Scenario**: Calificación exitosa de un servicio finalizado [UC059]
+    
+    - **Given** un Cliente tiene un servicio propio en estado "finalizado" sin calificación previa
+    - **When** asigna una calificación (ej. de 1 a 5)
+    - **Then** el sistema registra la calificación asociada a ese servicio y al Prestador correspondiente
+2. **Scenario**: Recálculo automático de reputación agregada [UC061]
+    
+    - **Given** se acaba de registrar una nueva calificación válida para un Prestador
+    - **When** la calificación se confirma
+    - **Then** el sistema recalcula automáticamente la reputación agregada del Prestador incluyendo el nuevo valor
+3. **Scenario**: Intento de calificar un servicio no finalizado
+    
+    - **Given** un Cliente intenta calificar un servicio que aún no está en estado "finalizado"
+    - **When** envía la calificación
+    - **Then** el sistema rechaza la operación y no altera la reputación del Prestador
+4. **Scenario**: Intento de calificación duplicada
+    
+    - **Given** un servicio ya fue calificado previamente por el Cliente
+    - **When** intenta calificarlo de nuevo
+    - **Then** el sistema rechaza la segunda calificación y conserva únicamente la primera
 
-2. **Scenario**: Datos insuficientes o actor no autorizado en UC060
-   - **Given** la solicitud de «Agregar reseña textual» no identifica un registro válido o el actor no tiene el rol Usuario
-   - **When** intenta confirmar la operación
-   - **Then** el sistema rechaza la operación, no modifica el registro y comunica la causa
+**
 
-### User Story 3 - Calcular reputación agregada [UC061] (Priority: P1)
-Como usuario, quiero calcular reputación agregada, para gestionar específicamente calcular reputación agregada dentro de CONectaSM.
+---
 
-**Why this priority**: UC061 permite a Usuario calcular reputación agregada; el resultado se limita a la operación descrita en el diagrama.
+### User Story 2 - Agregar reseña textual [UC060] (Priority: P2)
 
-**Independent Test**: Con una cuenta de usuario y un registro de prueba de «Calcular reputación agregada», verificar que UC061 muestra o guarda el resultado indicado sin ejecutar otro CU.
+Como Cliente, quiero agregar un comentario escrito a mi calificación para explicar mi experiencia con más detalle.
 
-**Acceptance Scenarios**:
+**Why this priority**: Es una extensión opcional de la calificación (UC059); aporta valor pero la plataforma es funcional sin ella.
 
-1. **Scenario**: Calcular reputación agregada para UC061
-   - **Given** un usuario autorizado dispone de los datos de «Calcular reputación agregada»
-   - **When** ejecuta la acción «Calcular reputación agregada»
-   - **Then** el sistema calcula y presenta «Calcular reputación agregada» usando los datos registrados.
-
-2. **Scenario**: Datos insuficientes o actor no autorizado en UC061
-   - **Given** la solicitud de «Calcular reputación agregada» no identifica un registro válido o el actor no tiene el rol Usuario
-   - **When** intenta confirmar la operación
-   - **Then** el sistema rechaza la operación, no modifica el registro y comunica la causa
-
-### User Story 4 - Mostrar nivel de verificación [UC062] (Priority: P1)
-Como usuario, quiero mostrar nivel de verificación, para gestionar específicamente mostrar nivel de verificación dentro de CONectaSM.
-
-**Why this priority**: UC062 permite a Usuario mostrar nivel de verificación; el resultado se limita a la operación descrita en el diagrama.
-
-**Independent Test**: Con una cuenta de usuario y un registro de prueba de «Mostrar nivel de verificación», verificar que UC062 muestra o guarda el resultado indicado sin ejecutar otro CU.
+**Independent Test**: Sobre una calificación ya existente del propio Cliente, agregar texto y verificar que queda asociado a esa calificación.
 
 **Acceptance Scenarios**:
 
-1. **Scenario**: Mostrar nivel de verificación para UC062
-   - **Given** un usuario autorizado dispone de los datos de «Mostrar nivel de verificación»
-   - **When** ejecuta la acción «Mostrar nivel de verificación»
-   - **Then** el sistema muestra la información específica de «Mostrar nivel de verificación».
+1. **Scenario**: Reseña agregada exitosamente [UC060]
+    
+    - **Given** un Cliente ya calificó un servicio finalizado (UC059)
+    - **When** agrega un comentario textual a esa calificación
+    - **Then** el sistema guarda la reseña asociada a la calificación y la muestra junto al Prestador calificado
+2. **Scenario**: Intento de reseña sin calificación previa
+    
+    - **Given** un servicio no ha sido calificado todavía
+    - **When** el Cliente intenta agregar una reseña textual directamente
+    - **Then** el sistema rechaza la operación, ya que la reseña depende de una calificación existente
 
-2. **Scenario**: Datos insuficientes o actor no autorizado en UC062
-   - **Given** la solicitud de «Mostrar nivel de verificación» no identifica un registro válido o el actor no tiene el rol Usuario
-   - **When** intenta confirmar la operación
-   - **Then** el sistema rechaza la operación, no modifica el registro y comunica la causa
 
-### User Story 5 - Solicitar verificación documental ampliada [UC063] (Priority: P1)
-Como prestador, quiero solicitar verificación documental ampliada, para gestionar específicamente solicitar verificación documental ampliada dentro de CONectaSM.
 
-**Why this priority**: UC063 permite a Prestador solicitar verificación documental ampliada; el resultado se limita a la operación descrita en el diagrama.
+---
 
-**Independent Test**: Con una cuenta de prestador y un registro de prueba de «Solicitar verificación documental ampliada», verificar que UC063 muestra o guarda el resultado indicado sin ejecutar otro CU.
+### User Story 3 - Mostrar nivel de verificación [UC062] (Priority: P1)
 
-**Acceptance Scenarios**:
+Como Usuario (Cliente o Prestador), quiero ver el nivel de verificación de un Prestador para decidir con más confianza si contratarlo.
 
-1. **Scenario**: Solicitar verificación documental ampliada para UC063
-   - **Given** un prestador autorizado dispone de los datos de «Solicitar verificación documental ampliada»
-   - **When** ejecuta la acción «Solicitar verificación documental ampliada»
-   - **Then** el sistema registra la solicitud «Solicitar verificación documental ampliada» asociada al usuario o servicio seleccionado.
+**Why this priority**: Es información de confianza consultada directamente por el Cliente antes de contratar; impacta la decisión comercial.
 
-2. **Scenario**: Datos insuficientes o actor no autorizado en UC063
-   - **Given** la solicitud de «Solicitar verificación documental ampliada» no identifica un registro válido o el actor no tiene el rol Prestador
-   - **When** intenta confirmar la operación
-   - **Then** el sistema rechaza la operación, no modifica el registro y comunica la causa
-
-### User Story 6 - Reportar reseña problemática [UC064] (Priority: P1)
-Como usuario, quiero reportar reseña problemática, para gestionar específicamente reportar reseña problemática dentro de CONectaSM.
-
-**Why this priority**: UC064 permite a Usuario reportar reseña problemática; el resultado se limita a la operación descrita en el diagrama.
-
-**Independent Test**: Con una cuenta de usuario y un registro de prueba de «Reportar reseña problemática», verificar que UC064 muestra o guarda el resultado indicado sin ejecutar otro CU.
+**Independent Test**: Consultar el perfil de un Prestador con un nivel de verificación conocido y comprobar que se muestra correctamente.
 
 **Acceptance Scenarios**:
 
-1. **Scenario**: Reportar reseña problemática para UC064
-   - **Given** un usuario autorizado dispone de los datos de «Reportar reseña problemática»
-   - **When** ejecuta la acción «Reportar reseña problemática»
-   - **Then** el sistema registra la solicitud «Reportar reseña problemática» asociada al usuario o servicio seleccionado.
+1. **Scenario**: Nivel de verificación visible [UC062]
+    - **Given** un Prestador tiene un nivel de verificación asignado
+    - **When** un Usuario consulta su perfil
+    - **Then** el sistema muestra el nivel de verificación vigente de ese Prestador
 
-2. **Scenario**: Datos insuficientes o actor no autorizado en UC064
-   - **Given** la solicitud de «Reportar reseña problemática» no identifica un registro válido o el actor no tiene el rol Usuario
-   - **When** intenta confirmar la operación
-   - **Then** el sistema rechaza la operación, no modifica el registro y comunica la causa
+
+---
+
+### User Story 4 - Solicitar verificación documental ampliada [UC063] (Priority: P1)
+
+Como Prestador, quiero solicitar una verificación documental ampliada para aumentar mi nivel de confianza frente a los Clientes.
+
+**Why this priority**: Es la vía formal para que un Prestador mejore su nivel de verificación (UC062); sin esta solicitud, el nivel de verificación no puede evolucionar.
+
+**Independent Test**: Con una cuenta de Prestador, iniciar una solicitud de verificación ampliada y comprobar que queda registrada en estado pendiente.
+
+**Acceptance Scenarios**:
+
+1. **Scenario**: Solicitud registrada exitosamente [UC063]
+    
+    - **Given** un Prestador autenticado no tiene una solicitud de verificación ampliada en curso
+    - **When** envía su solicitud con los documentos requeridos
+    - **Then** el sistema la registra en estado pendiente de revisión
+2. **Scenario**: Solicitud duplicada mientras hay una pendiente
+    
+    - **Given** un Prestador ya tiene una solicitud de verificación ampliada pendiente
+    - **When** intenta enviar una nueva solicitud
+    - **Then** el sistema la rechaza e indica que ya existe una en curso
+
+
+
+---
+
+### User Story 5 - Reportar reseña problemática [UC064] (Priority: P2)
+
+Como Usuario, quiero reportar una reseña que considero falsa, ofensiva o injusta para que sea revisada por un Administrador.
+
+**Why this priority**: Protege la integridad del sistema de reputación, pero depende de que ya existan reseñas publicadas (UC060).
+
+**Independent Test**: Sobre una reseña existente, generar un reporte y comprobar que queda registrado y disponible para moderación (SPEC-12).
+
+**Acceptance Scenarios**:
+
+1. **Scenario**: Reporte de reseña registrado [UC064]
+    - **Given** existe una reseña textual publicada
+    - **When** un Usuario la reporta indicando un motivo
+    - **Then** el sistema registra el reporte y lo pone a disposición de la cola de moderación
 
 ---
 
 ### Edge Cases
 
-- Una calificación de un servicio no finalizado o duplicada debe rechazarse sin alterar la reputación.
-- La reputación y la verificación deben distinguirse: ninguna reseña o nivel mostrado implica una certificación legal no definida.
+- Un Cliente intenta calificar un servicio que fue cancelado en lugar de finalizado: la calificación debe rechazarse igual que un servicio no finalizado.
+- Se reporta una reseña que ya fue eliminada previamente por moderación: el sistema debe evitar reportes duplicados sobre contenido inexistente.
+- Un Prestador alcanza el nivel máximo de verificación y vuelve a solicitar verificación ampliada: El sistema debe notar el tope de nivel máximo de verificación y rechazar la solicitud.
 
-## Requirements *(mandatory)*
+## Requirements _(mandatory)_
 
 ### Functional Requirements
 
-- **FR-059**: El sistema DEBE permitir que cliente ejecute «Calificar servicio finalizado» y debe mostrar o guardar el resultado específico de esa operación, sin concederla a otros roles. [UC059]
-- **FR-060**: El sistema DEBE permitir que un Usuario ejecute «Agregar reseña textual» y debe mostrar o guardar el resultado específico de esa operación, sin concederla a otros roles. [UC060]
-- **FR-061**: El sistema DEBE permitir que un Usuario ejecute «Calcular reputación agregada» y debe mostrar o guardar el resultado específico de esa operación, sin concederla a otros roles. [UC061]
-- **FR-062**: El sistema DEBE permitir que un Usuario ejecute «Mostrar nivel de verificación» y debe mostrar o guardar el resultado específico de esa operación, sin concederla a otros roles. [UC062]
-- **FR-063**: El sistema DEBE permitir que un Prestador ejecute «Solicitar verificación documental ampliada» y debe mostrar o guardar el resultado específico de esa operación, sin concederla a otros roles. [UC063]
-- **FR-064**: El sistema DEBE permitir que un Usuario ejecute «Reportar reseña problemática» y debe mostrar o guardar el resultado específico de esa operación, sin concederla a otros roles. [UC064]
-### Key Entities *(include if feature involves data)*
+- **FR-059**: El sistema DEBE permitir que un Cliente califique un servicio propio únicamente cuando esté en estado "finalizado", y como máximo una vez por servicio. [UC059]
+- **FR-060**: El sistema DEBE permitir agregar una reseña textual únicamente sobre una calificación ya existente del mismo Cliente. [UC060]
+- **FR-061**: El sistema DEBE recalcular automáticamente la reputación agregada del Prestador cada vez que se registra una nueva calificación válida. [UC061]
+- **FR-062**: El sistema DEBE mostrar el nivel de verificación vigente de un Prestador a cualquier Usuario que consulte su perfil. [UC062]
+- **FR-063**: El sistema DEBE permitir que un Prestador solicite verificación documental ampliada, sin admitir una segunda solicitud mientras haya una pendiente. [UC063]
+- **FR-064**: El sistema DEBE permitir que un Usuario reporte una reseña existente, registrando el reporte para su revisión posterior. [UC064]
 
-- **Registro específico de Calificaciones, reseñas y verificación**: información que los CUs (UC059,UC060,UC061,UC062,UC063,UC064) consultan, crean, actualizan o muestran.
-- **Actor asignado y autorización**: identidad del actor indicado en el diagrama y permiso requerido para cada operación.
-- **Estado y resultado de cada operación**: valor confirmado, mensaje mostrado y evidencia asociada; retención y formatos quedan [NEEDS CLARIFICATION: definir].
+### Key Entities _(include if feature involves data)_
 
-## Success Criteria *(mandatory)*
+- **Calificación**: valor numérico, servicio asociado, Cliente autor, fecha.
+- **Reseña**: texto asociado a una calificación existente.
+- **Reputación agregada**: valor calculado por Prestador, derivado del conjunto de sus calificaciones.
+- **Nivel de verificación**: estado asignado a un Prestador (básico/ampliado, según resultado de revisión documental).
+- **Solicitud de verificación ampliada**: Prestador, documentos adjuntos, estado (pendiente/aprobada/rechazada).
+- **Reporte de reseña**: reseña reportada, motivo, usuario reportante, estado.
+
+## Success Criteria _(mandatory)_
 
 ### Measurable Outcomes
 
-- **SC-001**: El 100% de los CUs UC059,UC060,UC061,UC062,UC063,UC064 solo permite la acción al actor asignado en su diagrama y devuelve el resultado de su operación específica.
-- **SC-002**: Ante datos faltantes, registro inexistente o rol incorrecto, ninguna operación cambia datos y la interfaz informa la causa.
-- **SC-003**: Los estados, filtros, evidencias o políticas no definidos en los diagramas se presentan como [NEEDS CLARIFICATION: definir política antes de implementar].
+- **SC-001**: El 100% de los servicios no finalizados o ya calificados rechaza intentos adicionales de calificación.
+- **SC-002**: El 100% de las calificaciones nuevas produce un recálculo verificable de la reputación agregada del Prestador correspondiente.
+- **SC-003**: Ningún nivel de verificación se presenta junto a lenguaje que sugiera una certificación legal.
+- **SC-004**: El 100% de los reportes de reseña queda disponible en la cola de moderación (SPEC-12) inmediatamente después de registrarse.
+

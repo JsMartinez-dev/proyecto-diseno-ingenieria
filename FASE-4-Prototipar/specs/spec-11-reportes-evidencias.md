@@ -1,92 +1,106 @@
 # Feature Specification: SPEC-11 — Reportes y evidencias
 
 **Creado**: 2026-09-16
-**Casos de uso cubiertos**: UC065,UC066,UC067
+**Casos de uso cubiertos**: UC065, UC066, UC067
 
-## User Scenarios & Testing *(mandatory)*
+## User Scenarios & Testing _(mandatory)_
 
-> Relaciones del diagrama: UC067 extiende UC064, UC065 o UC066.
 ### User Story 1 - Reportar usuario [UC065] (Priority: P1)
-Como usuario, quiero reportar usuario, para gestionar específicamente reportar usuario dentro de CONectaSM.
 
-**Why this priority**: UC065 permite a Usuario reportar usuario; el resultado se limita a la operación descrita en el diagrama.
+Como Usuario, quiero reportar a otro usuario (Cliente o Prestador) por un comportamiento indebido, para que sea revisado por un Administrador.
 
-**Independent Test**: Con una cuenta de usuario y un registro de prueba de «Reportar usuario», verificar que UC065 muestra o guarda el resultado indicado sin ejecutar otro CU.
+**Why this priority**: Es uno de los mecanismos base de confianza de la plataforma; sin poder reportar usuarios, no hay forma de escalar un mal comportamiento.
+
+**Independent Test**: Generar un reporte contra una cuenta existente y comprobar que queda registrado y disponible en la cola de moderación.
 
 **Acceptance Scenarios**:
 
-1. **Scenario**: Reportar usuario para UC065
-   - **Given** un usuario autorizado dispone de los datos de «Reportar usuario»
-   - **When** ejecuta la acción «Reportar usuario»
-   - **Then** el sistema registra la solicitud «Reportar usuario» asociada al usuario o servicio seleccionado.
+1. **Scenario**: Reporte de usuario registrado [UC065]
+    
+    - **Given** un Usuario identifica a otra cuenta con un comportamiento indebido
+    - **When** la reporta indicando un motivo
+    - **Then** el sistema registra el reporte asociado a la cuenta reportada y lo pone a disposición de la cola de moderación
+2. **Scenario**: Reporte sin motivo indicado
+    
+    - **Given** un Usuario intenta reportar a otra cuenta sin seleccionar un motivo
+    - **When** envía el reporte
+    - **Then** el sistema rechaza la operación y solicita indicar un motivo
 
-2. **Scenario**: Datos insuficientes o actor no autorizado en UC065
-   - **Given** la solicitud de «Reportar usuario» no identifica un registro válido o el actor no tiene el rol Usuario
-   - **When** intenta confirmar la operación
-   - **Then** el sistema rechaza la operación, no modifica el registro y comunica la causa
+
+---
 
 ### User Story 2 - Reportar servicio [UC066] (Priority: P1)
-Como usuario, quiero reportar servicio, para gestionar específicamente reportar servicio dentro de CONectaSM.
 
-**Why this priority**: UC066 permite a Usuario reportar servicio; el resultado se limita a la operación descrita en el diagrama.
+Como Usuario, quiero reportar un servicio específico (contratado o en curso) que considero problemático, para que sea revisado por un Administrador.
 
-**Independent Test**: Con una cuenta de usuario y un registro de prueba de «Reportar servicio», verificar que UC066 muestra o guarda el resultado indicado sin ejecutar otro CU.
+**Why this priority**: Permite escalar problemas concretos de una transacción, distintos de un problema general de comportamiento de una cuenta.
 
-**Acceptance Scenarios**:
-
-1. **Scenario**: Reportar servicio para UC066
-   - **Given** un usuario autorizado dispone de los datos de «Reportar servicio»
-   - **When** ejecuta la acción «Reportar servicio»
-   - **Then** el sistema registra la solicitud «Reportar servicio» asociada al usuario o servicio seleccionado.
-
-2. **Scenario**: Datos insuficientes o actor no autorizado en UC066
-   - **Given** la solicitud de «Reportar servicio» no identifica un registro válido o el actor no tiene el rol Usuario
-   - **When** intenta confirmar la operación
-   - **Then** el sistema rechaza la operación, no modifica el registro y comunica la causa
-
-### User Story 3 - Adjuntar evidencia a reporte [UC067] (Priority: P1)
-Como usuario, quiero adjuntar evidencia a reporte, para gestionar específicamente adjuntar evidencia a reporte dentro de CONectaSM.
-
-**Why this priority**: UC067 permite a Usuario adjuntar evidencia a reporte; el resultado se limita a la operación descrita en el diagrama.
-
-**Independent Test**: Con una cuenta de usuario y un registro de prueba de «Adjuntar evidencia a reporte», verificar que UC067 muestra o guarda el resultado indicado sin ejecutar otro CU.
+**Independent Test**: Generar un reporte sobre un servicio existente y comprobar que queda registrado y disponible en la cola de moderación.
 
 **Acceptance Scenarios**:
 
-1. **Scenario**: Adjuntar evidencia a reporte para UC067
-   - **Given** un usuario autorizado dispone de los datos de «Adjuntar evidencia a reporte»
-   - **When** ejecuta la acción «Adjuntar evidencia a reporte»
-   - **Then** el sistema guarda «Adjuntar evidencia a reporte» en el registro seleccionado y muestra su nuevo estado.
+1. **Scenario**: Reporte de servicio registrado [UC066]
+    - **Given** un Usuario participó en un servicio que considera problemático
+    - **When** lo reporta indicando un motivo
+    - **Then** el sistema registra el reporte asociado a ese servicio y lo pone a disposición de la cola de moderación
 
-2. **Scenario**: Datos insuficientes o actor no autorizado en UC067
-   - **Given** la solicitud de «Adjuntar evidencia a reporte» no identifica un registro válido o el actor no tiene el rol Usuario
-   - **When** intenta confirmar la operación
-   - **Then** el sistema rechaza la operación, no modifica el registro y comunica la causa
+**
+
+---
+
+### User Story 3 - Adjuntar evidencia a un reporte [UC067] (Priority: P2)
+
+Como Usuario, quiero adjuntar evidencia (capturas, fotos, documentos) a un reporte ya creado, para respaldar mi reclamo.
+
+**Why this priority**: Es una extensión opcional que mejora la calidad de la revisión administrativa, pero el reporte ya es válido y procesable sin ella.
+
+**Independent Test**: Sobre un reporte existente (de usuario, de servicio o de reseña), adjuntar un archivo y comprobar que queda asociado a ese reporte.
+
+**Acceptance Scenarios**:
+
+1. **Scenario**: Evidencia adjuntada exitosamente [UC067]
+    
+    - **Given** existe un reporte previamente creado (UC064, UC065 o UC066) y el usuario reportante lo puede editar
+    - **When** adjunta un archivo de evidencia
+    - **Then** el sistema lo asocia al reporte y lo deja disponible para el Administrador que lo revise
+2. **Scenario**: Intento de adjuntar evidencia sin un reporte previo
+    
+    - **Given** no existe un reporte creado
+    - **When** se intenta adjuntar un archivo de evidencia de forma aislada
+    - **Then** el sistema rechaza la operación, ya que la evidencia depende de un reporte existente
+3. **Scenario**: Archivo no compatible o demasiado grande
+    
+    - **Given** un usuario intenta adjuntar un archivo que excede el formato o tamaño permitido
+    - **When** lo sube
+    - **Then** el sistema rechaza el archivo sin afectar el reporte ya guardado
+
 
 ---
 
 ### Edge Cases
 
-- Un archivo incompatible o demasiado grande debe rechazarse sin perder el reporte ya guardado; límites concretos quedan [NEEDS CLARIFICATION: definir].
-- La evidencia es una extensión opcional del reporte y debe conservar asociación con el objetivo reportado.
+- Un mismo Usuario reporta al mismo objetivo (cuenta o servicio) más de una vez por el mismo motivo: El sistema debe consolidarlo como un solo reporte con evidencias acumuladas.
+- Formatos y tamaño máximo de archivo de evidencia: El sistema debe definir límites concretos antes de implementar.
+- Un reporte es resuelto por el Administrador mientras el reportante intenta adjuntar evidencia adicional: El sistema debe rechazar dicha evidencia adicional debido a que el reporte ya cerró.
 
-## Requirements *(mandatory)*
+## Requirements _(mandatory)_
 
 ### Functional Requirements
 
-- **FR-065**: El sistema DEBE permitir que un Usuario ejecute «Reportar usuario» y debe mostrar o guardar el resultado específico de esa operación, sin concederla a otros roles. [UC065]
-- **FR-066**: El sistema DEBE permitir que un Usuario ejecute «Reportar servicio» y debe mostrar o guardar el resultado específico de esa operación, sin concederla a otros roles. [UC066]
-- **FR-067**: El sistema DEBE permitir que un Usuario ejecute «Adjuntar evidencia a reporte» y debe mostrar o guardar el resultado específico de esa operación, sin concederla a otros roles. [UC067]
-### Key Entities *(include if feature involves data)*
+- **FR-065**: El sistema DEBE permitir que un Usuario reporte a otra cuenta indicando un motivo obligatorio, dejando el reporte disponible para moderación. [UC065]
+- **FR-066**: El sistema DEBE permitir que un Usuario reporte un servicio específico indicando un motivo obligatorio, dejando el reporte disponible para moderación. [UC066]
+- **FR-067**: El sistema DEBE permitir adjuntar evidencia únicamente a un reporte ya existente, sin importar si el reporte es de usuario, de servicio o de reseña (SPEC-10, UC064). [UC067]
 
-- **Registro específico de Reportes y evidencias**: información que los CUs (UC065,UC066,UC067) consultan, crean, actualizan o muestran.
-- **Actor asignado y autorización**: identidad del actor indicado en el diagrama y permiso requerido para cada operación.
-- **Estado y resultado de cada operación**: valor confirmado, mensaje mostrado y evidencia asociada; retención y formatos quedan [NEEDS CLARIFICATION: definir].
+### Key Entities _(include if feature involves data)_
 
-## Success Criteria *(mandatory)*
+- **Reporte de usuario**: cuenta reportada, motivo, usuario reportante, estado.
+- **Reporte de servicio**: servicio reportado, motivo, usuario reportante, estado.
+- **Evidencia**: archivo adjunto, reporte asociado (de cualquiera de los tres tipos), fecha de carga.
+
+## Success Criteria _(mandatory)_
 
 ### Measurable Outcomes
 
-- **SC-001**: El 100% de los CUs UC065,UC066,UC067 solo permite la acción al actor asignado en su diagrama y devuelve el resultado de su operación específica.
-- **SC-002**: Ante datos faltantes, registro inexistente o rol incorrecto, ninguna operación cambia datos y la interfaz informa la causa.
-- **SC-003**: Los estados, filtros, evidencias o políticas no definidos en los diagramas se presentan como [NEEDS CLARIFICATION: definir política antes de implementar].
+- **SC-001**: El 100% de los reportes de usuario y de servicio queda disponible en la cola de moderación (SPEC-12) inmediatamente después de registrarse.
+- **SC-002**: Ningún reporte se crea sin un motivo indicado.
+- **SC-003**: El 100% de las evidencias adjuntadas queda asociada a un reporte válido y preexistente; ninguna evidencia queda huérfana.

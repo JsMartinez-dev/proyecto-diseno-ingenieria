@@ -1,52 +1,61 @@
 # Feature Specification: SPEC-20 — Pasarela de pagos futura
 
-**Creado**: 2026-09-16
-**Casos de uso cubiertos**: UC093
+**Creado**: 2026-09-16 
+**Casos de uso cubiertos**: UC093 
 
-## User Scenarios & Testing *(mandatory)*
+## User Scenarios & Testing _(mandatory)_
 
-> Relaciones del diagrama: <<Future>> Esta capacidad no ejecuta cobros reales. El proveedor, moneda, conciliación y cumplimiento quedan [NEEDS CLARIFICATION: definir].
-### User Story 1 - Piloto de pasarela de pago <<Future>> [UC093] (Priority: P3)
-Como cliente o prestador, quiero una capacidad futura e informativa de piloto de pasarela de pago [UC093], para evaluar si CONectaSM debería ofrecerla; activación, disponibilidad, proveedor, moneda, datos financieros, pago, conciliación y cumplimiento quedan [NEEDS CLARIFICATION: definir].
 
-**Why this priority**: UC093 es una capacidad <<Future>> para Cliente o Prestador; no implica habilitación, cobro, persistencia, transacción ni estado de pago.
+### User Story 1 - Piloto de pasarela de pago `<<Future>>` [UC093] (Priority: P4)
 
-**Independent Test**: Con una cuenta de cliente o prestador, verificar que UC093 no se presenta como disponible mientras no exista una decisión de activación; si se habilitara, confirmar proveedor, datos financieros, moneda, pago y cumplimiento documentados [NEEDS CLARIFICATION: definir].
+Como Cliente o Prestador, quiero evaluar un piloto de pago integrado para facilitar transacciones, únicamente si el modelo de monetización de la plataforma ha sido validado y aprobado explícitamente.
+
+**Why this priority**: Es la capacidad de mayor riesgo regulatorio y financiero de todo el proyecto; su prioridad más baja (P4) refleja que depende de una validación de negocio que todavía no existe, no solo de una decisión técnica.
+
+**Independent Test**: Únicamente en un entorno de piloto aprobado, iniciar una transacción de prueba y verificar que se asocia correctamente a un servicio elegible sin alterar el modelo de contratación si el piloto está deshabilitado.
 
 **Acceptance Scenarios**:
 
-1. **Scenario**: UC093 no habilitado
-   - **Given** la capacidad futura de piloto de pasarela de pago [UC093] no está habilitada
-   - **When** un cliente o prestador consulta las capacidades disponibles
-   - **Then** el sistema no la presenta como disponible ni simula pagos, cobros, registros o estados.
+1. **Scenario**: Piloto deshabilitado (comportamiento por defecto)
+    
+    - **Given** la capacidad Future no está habilitada
+    - **When** un Cliente o Prestador intenta iniciar un pago integrado
+    - **Then** el sistema no ofrece ni ejecuta el flujo de pago, y el modelo de contratación actual (sin pago integrado) sigue funcionando con normalidad
+2. **Scenario**: Piloto habilitado y transacción de prueba
+    
+    - **Given** el modelo de monetización fue validado y el piloto está explícitamente habilitado
+    - **When** un Cliente inicia el flujo de pago para un servicio elegible
+    - **Then** el sistema procesa la transacción mediante la pasarela configurada y registra el resultado autorizado
+3. **Scenario**: Confirmación tardía o reintento
+    
+    - **Given** la pasarela confirma un pago después de un timeout o reintento
+    - **When** el sistema recibe la confirmación duplicada
+    - **Then** el procesamiento es idempotente: el servicio queda con una única interpretación del estado de la transacción, sin duplicar cobros ni confirmaciones
 
-2. **Scenario**: UC093 habilitado sin reglas definidas
-   - **Given** una activación de UC093 requiere decidir proveedor, moneda, datos financieros, pago, conciliación y cumplimiento
-   - **When** se intenta habilitarlo
-   - **Then** el sistema exige documentar esas decisiones [NEEDS CLARIFICATION: definir] y no afirma que ejecute cobros, guarde datos financieros o muestre estados antes de ello.
 
 ---
 
 ### Edge Cases
 
-- Un intento de pago debe permanecer en modo informativo y no almacenar datos financieros reales hasta definir el alcance Future.
-- <<Future>> Esta capacidad no ejecuta cobros reales. El proveedor, moneda, conciliación y cumplimiento quedan [NEEDS CLARIFICATION: definir].
+- El piloto está deshabilitado: ninguna UI ni API del MVP debe asumir que existe pago integrado disponible.
+- Un intento de pago debe permanecer en modo informativo y no almacenar datos financieros reales hasta que el alcance Future esté formalmente aprobado.
+- Una transacción de prueba queda en un estado intermedio (ni confirmada ni rechazada) por una falla de red: el sistema debe poder reconciliarla sin intervención manual improvisada.
 
-## Requirements *(mandatory)*
+## Requirements _(mandatory)_
 
 ### Functional Requirements
 
-- **FR-093**: El sistema DEBE tratar «Piloto de pasarela de pago <<Future>>» [UC093] como capacidad futura e informativa para Cliente o Prestador; si no está habilitada, no debe presentarla como disponible ni ejecutar cobros. Activación, proveedor, moneda, datos financieros, pago, conciliación y cumplimiento quedan [NEEDS CLARIFICATION: definir].
-### Key Entities *(include if feature involves data)*
+- **FR-093**: El sistema DEBE mantener la funcionalidad de pasarela de pagos fuera del MVP inicial, y SOLO DEBE habilitar un piloto después de validar el modelo de monetización y registrar una aprobación explícita del producto. Si se habilita, DEBE procesar las confirmaciones de forma idempotente. [UC093]
 
-- **Registro específico de Pasarela de pagos futura**: entidad candidata asociada al CU (UC093); si se consulta, crea o actualiza información queda [NEEDS CLARIFICATION: definir].
-- **Actor asignado y autorización**: identidad del actor indicado en el diagrama y permiso requerido para cada operación.
-- **Estado y resultado de cada operación**: no definidos por el diagrama; cualquier transacción, pago, mensaje, evidencia, retención o formato queda [NEEDS CLARIFICATION: definir].
+### Key Entities _(include if feature involves data)_
 
-## Success Criteria *(mandatory)*
+- **Transacción de pago piloto**: servicio asociado, proveedor externo, estado (iniciada/confirmada/reconciliada), resultado.
+
+## Success Criteria _(mandatory)_
 
 ### Measurable Outcomes
 
-- **SC-001**: El 100% de las superficies de CONectaSM no presenta UC093 como disponible mientras no exista una decisión de activación documentada.
-- **SC-002**: Si se evalúa su habilitación, ningún cobro, pago, transacción, dato financiero o estado se ejecuta, guarda o muestra sin reglas documentadas [NEEDS CLARIFICATION: definir].
-- **SC-003**: Los estados, filtros, evidencias o políticas no definidos en los diagramas se presentan como [NEEDS CLARIFICATION: definir política antes de implementar].
+- **SC-001**: El piloto de pagos permanece inaccesible mientras la aprobación de producto no esté habilitada.
+- **SC-002**: Antes de habilitar pagos, el 100% de los escenarios de prueba de reintento/confirmación tardía preserva una única interpretación del estado de la transacción.
+- **SC-003**: La desactivación del piloto no impide completar ningún flujo comprometido en UC-01 a UC-06.
+

@@ -1,52 +1,57 @@
 # Feature Specification: SPEC-17 — Mapa visual de prestadores
 
-**Creado**: 2026-09-16
-**Casos de uso cubiertos**: UC087
+**Creado**: 2026-09-16 
+**Casos de uso cubiertos**: UC087 
 
-## User Scenarios & Testing *(mandatory)*
+## User Scenarios & Testing _(mandatory)_
 
-> Relaciones del diagrama: <<Could>> El mapa debe mostrar solo zonas aproximadas; la precisión y proveedor cartográfico quedan [NEEDS CLARIFICATION: definir].
-### User Story 1 - Mapa visual de prestadores <<Could>> [UC087] (Priority: P2)
-Como cliente, quiero una capacidad candidata de mapa visual de prestadores [UC087], para evaluar si CONectaSM debería ofrecerla; disponibilidad, elegibilidad, precisión, proveedor cartográfico y tratamiento de ubicación quedan [NEEDS CLARIFICATION: definir].
+### User Story 1 - Mapa visual de prestadores `<<Could>>` [UC087] (Priority: P3)
 
-**Why this priority**: UC087 es una capacidad informativa <<Could>> para Cliente; no implica habilitación, publicación de marcadores, persistencia ni estados.
+Como Cliente, quiero visualizar Prestadores en un mapa para explorar opciones geográficamente, en lugar de solo verlos en una lista.
 
-**Independent Test**: Con una cuenta de cliente, verificar que, si UC087 no está habilitado, no se presenta como disponible; si se habilitara, confirmar precisión, proveedor y reglas documentadas [NEEDS CLARIFICATION: definir].
+**Why this priority**: Es una mejora de descubrimiento (complementa `spec-02` de UC-02), pero la plataforma ya es funcional sin ella mediante la lista y filtros existentes.
+
+**Independent Test**: Con Prestadores de prueba en zonas conocidas, abrir el mapa y verificar que solo se muestra la zona aproximada de cada uno, nunca su dirección exacta.
 
 **Acceptance Scenarios**:
 
-1. **Scenario**: UC087 no habilitado
-   - **Given** la capacidad candidata de mapa visual de prestadores [UC087] no está habilitada
-   - **When** un cliente consulta las capacidades disponibles
-   - **Then** el sistema no la presenta como disponible ni simula marcadores, zonas o estados.
+1. **Scenario**: Capacidad deshabilitada (comportamiento por defecto)
+    
+    - **Given** el mapa visual no está habilitado
+    - **When** un Cliente busca esta opción
+    - **Then** el sistema no la presenta como disponible; el descubrimiento por lista/filtros (`spec-02`) sigue funcionando con normalidad
+2. **Scenario**: Mapa con precisión autorizada
+    
+    - **Given** el mapa está habilitado y existen Prestadores con zona aproximada configurada (`spec-02`, UC009)
+    - **When** un Cliente lo abre
+    - **Then** el sistema muestra únicamente marcadores a nivel de zona aproximada, nunca la dirección exacta de ningún Prestador
+3. **Scenario**: Prestador sin zona aproximada válida
+    
+    - **Given** un Prestador no tiene una zona aproximada configurada
+    - **When** se genera el mapa
+    - **Then** el sistema omite a ese Prestador del mapa, sin sustituir el marcador por una dirección exacta ni una ubicación inventada
 
-2. **Scenario**: UC087 habilitado sin reglas definidas
-   - **Given** una activación de UC087 requiere decidir disponibilidad, elegibilidad, precisión, proveedor cartográfico y datos de ubicación
-   - **When** se intenta habilitarlo
-   - **Then** el sistema exige documentar esas decisiones [NEEDS CLARIFICATION: definir] y no afirma que muestre o guarde ubicaciones antes de ello.
 
 ---
 
 ### Edge Cases
 
-- Un marcador sin zona aproximada válida debe omitirse, nunca sustituirse por una dirección exacta.
-- <<Could>> El mapa debe mostrar solo zonas aproximadas; la precisión y proveedor cartográfico quedan [NEEDS CLARIFICATION: definir].
+- Una zona con muy pocos Prestadores podría revelar indirectamente su ubicación aproximada por descarte: la agrupación visual debe evitar exponer una precisión mayor a la autorizada, incluso en zonas de baja densidad.
 
-## Requirements *(mandatory)*
+## Requirements _(mandatory)_
 
 ### Functional Requirements
 
-- **FR-087**: El sistema DEBE tratar «Mapa visual de prestadores <<Could>>» [UC087] como capacidad candidata e informativa para Cliente; si no está habilitada, no debe presentarla como disponible. Disponibilidad, elegibilidad, precisión, proveedor y tratamiento de ubicación quedan [NEEDS CLARIFICATION: definir].
-### Key Entities *(include if feature involves data)*
+- **FR-087**: El sistema PUEDE proporcionar un mapa visual de Prestadores, utilizando exclusivamente el nivel de precisión de ubicación autorizado por las reglas de privacidad de `spec-02` (UC013), y DEBE permanecer deshabilitado sin afectar el descubrimiento base (`spec-02`) mientras no exista aprobación explícita. [UC087]
 
-- **Registro específico de Mapa visual de prestadores**: entidad candidata asociada al CU (UC087); si se consulta, crea o actualiza información queda [NEEDS CLARIFICATION: definir].
-- **Actor asignado y autorización**: identidad del actor indicado en el diagrama y permiso requerido para cada operación.
-- **Estado y resultado de cada operación**: no definidos por el diagrama; cualquier zona, marcador, mensaje, evidencia, retención o formato queda [NEEDS CLARIFICATION: definir].
+### Key Entities _(include if feature involves data)_
 
-## Success Criteria *(mandatory)*
+- **Representación geográfica de Prestador**: derivada de la zona aproximada (`spec-02`), nunca de la dirección exacta.
+
+## Success Criteria _(mandatory)_
 
 ### Measurable Outcomes
 
-- **SC-001**: El 100% de las superficies de CONectaSM no presenta UC087 como disponible mientras no exista una decisión de habilitación documentada.
-- **SC-002**: Si se evalúa su habilitación, ninguna ubicación exacta, marcador o estado se muestra o guarda sin reglas documentadas [NEEDS CLARIFICATION: definir].
-- **SC-003**: Los estados, filtros, evidencias o políticas no definidos en los diagramas se presentan como [NEEDS CLARIFICATION: definir política antes de implementar].
+- **SC-001**: El 100% de las representaciones geográficas del mapa respeta la precisión de ubicación autorizada y no revela dirección exacta sin autorización, en el 100% de los casos de prueba.
+- **SC-002**: La desactivación del mapa no impide completar el descubrimiento de Prestadores por lista/filtros definido en `spec-02`.
+

@@ -1,212 +1,202 @@
 # Feature Specification: SPEC-12 — Administración, moderación y gestión de riesgos
 
 **Creado**: 2026-09-16
-**Casos de uso cubiertos**: UC068,UC069,UC070,UC071,UC072,UC073,UC074,UC075,UC076
+**Casos de uso cubiertos**: UC068, UC069, UC070, UC071, UC072, UC073, UC074, UC075, UC076 
 
-## User Scenarios & Testing *(mandatory)*
+## User Scenarios & Testing _(mandatory)_
 
-> Relaciones del diagrama: UC071 extiende la cola UC070 y UC072 extiende la revisión UC071.
+
 ### User Story 1 - Administrar categorías de servicios [UC068] (Priority: P1)
-Como administrador, quiero administrar categorías de servicios, para gestionar específicamente administrar categorías de servicios dentro de CONectaSM.
 
-**Why this priority**: UC068 permite a Administrador administrar categorías de servicios; el resultado se limita a la operación descrita en el diagrama.
+Como Administrador, quiero crear, editar y desactivar categorías de servicio, para mantener el catálogo de la plataforma organizado y vigente.
 
-**Independent Test**: Con una cuenta de administrador y un registro de prueba de «Administrar categorías de servicios», verificar que UC068 muestra o guarda el resultado indicado sin ejecutar otro CU.
+**Why this priority**: El catálogo de categorías es usado por Prestadores (perfil) y Clientes (solicitudes) desde el primer día; sin él no hay forma de clasificar servicios.
+
+**Independent Test**: Crear, editar y desactivar una categoría de prueba, y verificar que el catálogo refleja el cambio.
 
 **Acceptance Scenarios**:
 
-1. **Scenario**: Administrar categorías de servicios para UC068
-   - **Given** un administrador autorizado dispone de los datos de «Administrar categorías de servicios»
-   - **When** ejecuta la acción «Administrar categorías de servicios»
-   - **Then** el sistema guarda «Administrar categorías de servicios» en el registro seleccionado y muestra su nuevo estado.
+1. **Scenario**: Creación de categoría [UC068]
+    
+    - **Given** un Administrador autenticado define una nueva categoría con nombre único
+    - **When** la guarda
+    - **Then** el sistema la agrega al catálogo activo, disponible para Prestadores y Clientes
+2. **Scenario**: Desactivación de categoría con solicitudes en borrador
+    
+    - **Given** una categoría está siendo usada por un borrador de solicitud de un Cliente
+    - **When** el Administrador la desactiva
+    - **Then** el sistema aplica la desactivación al catálogo, pero el borrador existente puede publicarse solo si seleccionar otra categoría.
 
-2. **Scenario**: Datos insuficientes o actor no autorizado en UC068
-   - **Given** la solicitud de «Administrar categorías de servicios» no identifica un registro válido o el actor no tiene el rol Administrador
-   - **When** intenta confirmar la operación
-   - **Then** el sistema rechaza la operación, no modifica el registro y comunica la causa
+
+
+---
 
 ### User Story 2 - Administrar zonas [UC069] (Priority: P1)
-Como administrador, quiero administrar zonas, para gestionar específicamente administrar zonas dentro de CONectaSM.
 
-**Why this priority**: UC069 permite a Administrador administrar zonas; el resultado se limita a la operación descrita en el diagrama.
+Como Administrador, quiero crear, editar y desactivar zonas geográficas, para mantener actualizada la cobertura de la plataforma en la ciudad.
 
-**Independent Test**: Con una cuenta de administrador y un registro de prueba de «Administrar zonas», verificar que UC069 muestra o guarda el resultado indicado sin ejecutar otro CU.
+**Why this priority**: Las zonas son usadas para el matching entre Prestadores y Clientes, su correcta administración es tan crítica como la de categorías.
 
-**Acceptance Scenarios**:
-
-1. **Scenario**: Administrar zonas para UC069
-   - **Given** un administrador autorizado dispone de los datos de «Administrar zonas»
-   - **When** ejecuta la acción «Administrar zonas»
-   - **Then** el sistema guarda «Administrar zonas» en el registro seleccionado y muestra su nuevo estado.
-
-2. **Scenario**: Datos insuficientes o actor no autorizado en UC069
-   - **Given** la solicitud de «Administrar zonas» no identifica un registro válido o el actor no tiene el rol Administrador
-   - **When** intenta confirmar la operación
-   - **Then** el sistema rechaza la operación, no modifica el registro y comunica la causa
-
-### User Story 3 - Consultar cola de reportes [UC070] (Priority: P1)
-Como administrador, quiero consultar cola de reportes, para gestionar específicamente consultar cola de reportes dentro de CONectaSM.
-
-**Why this priority**: UC070 permite a Administrador consultar cola de reportes; el resultado se limita a la operación descrita en el diagrama.
-
-**Independent Test**: Con una cuenta de administrador y un registro de prueba de «Consultar cola de reportes», verificar que UC070 muestra o guarda el resultado indicado sin ejecutar otro CU.
+**Independent Test**: Crear, editar y desactivar una zona de prueba, y verificar que el catálogo de zonas refleja el cambio.
 
 **Acceptance Scenarios**:
 
-1. **Scenario**: Consultar cola de reportes para UC070
-   - **Given** un administrador autorizado dispone de los datos de «Consultar cola de reportes»
-   - **When** ejecuta la acción «Consultar cola de reportes»
-   - **Then** el sistema muestra la información específica de «Consultar cola de reportes».
+1. **Scenario**: Creación de zona [UC069]
+    
+    - **Given** un Administrador define una nueva zona con nombre único
+    - **When** la guarda
+    - **Then** el sistema la agrega al catálogo activo de zonas
+2. **Scenario**: Desactivación de zona en uso por un Prestador activo
+    
+    - **Given** un Prestador tiene configurada una zona como parte de su cobertura de atención
+    - **When** el Administrador desactiva esa zona
+    - **Then** el sistema aplica la desactivación al catálogo, pero el Prestador conserva temporalmente esa cobertura.
 
-2. **Scenario**: Datos insuficientes o actor no autorizado en UC070
-   - **Given** la solicitud de «Consultar cola de reportes» no identifica un registro válido o el actor no tiene el rol Administrador
-   - **When** intenta confirmar la operación
-   - **Then** el sistema rechaza la operación, no modifica el registro y comunica la causa
+**Checkpoint**: El catálogo de zonas puede mantenerse actualizado por el Administrador sin intervención técnica.
 
-### User Story 4 - Revisar detalle de reporte [UC071] (Priority: P1)
-Como administrador, quiero revisar detalle de reporte, para gestionar específicamente revisar detalle de reporte dentro de CONectaSM.
+---
 
-**Why this priority**: UC071 permite a Administrador revisar detalle de reporte; el resultado se limita a la operación descrita en el diagrama.
+### User Story 3 - Gestionar reportes: cola, revisión y resolución [UC070, UC071, UC072] (Priority: P1)
 
-**Independent Test**: Con una cuenta de administrador y un registro de prueba de «Revisar detalle de reporte», verificar que UC071 muestra o guarda el resultado indicado sin ejecutar otro CU.
+Como Administrador, quiero consultar la cola de reportes pendientes, revisar el detalle de cada uno y resolverlos, para mantener la confianza y seguridad de la plataforma.
 
-**Acceptance Scenarios**:
+**Why this priority**: Es el flujo central de moderación; sin él, los reportes generados en `SPEC-10` y `SPEC-11` (UC064, UC065, UC066) nunca llegan a una resolución.
 
-1. **Scenario**: Revisar detalle de reporte para UC071
-   - **Given** un administrador autorizado dispone de los datos de «Revisar detalle de reporte»
-   - **When** ejecuta la acción «Revisar detalle de reporte»
-   - **Then** el sistema guarda «Revisar detalle de reporte» en el registro seleccionado y muestra su nuevo estado.
-
-2. **Scenario**: Datos insuficientes o actor no autorizado en UC071
-   - **Given** la solicitud de «Revisar detalle de reporte» no identifica un registro válido o el actor no tiene el rol Administrador
-   - **When** intenta confirmar la operación
-   - **Then** el sistema rechaza la operación, no modifica el registro y comunica la causa
-
-### User Story 5 - Cambiar estado y resolver reporte [UC072] (Priority: P1)
-Como administrador, quiero cambiar estado y resolver reporte, para gestionar específicamente cambiar estado y resolver reporte dentro de CONectaSM.
-
-**Why this priority**: UC072 permite a Administrador cambiar estado y resolver reporte; el resultado se limita a la operación descrita en el diagrama.
-
-**Independent Test**: Con una cuenta de administrador y un registro de prueba de «Cambiar estado y resolver reporte», verificar que UC072 muestra o guarda el resultado indicado sin ejecutar otro CU.
+**Independent Test**: Con reportes de prueba en distintos estados, verificar que el Administrador puede listarlos, abrir el detalle de uno y cambiar su estado a resuelto.
 
 **Acceptance Scenarios**:
 
-1. **Scenario**: Cambiar estado y resolver reporte para UC072
-   - **Given** un administrador autorizado dispone de los datos de «Cambiar estado y resolver reporte»
-   - **When** ejecuta la acción «Cambiar estado y resolver reporte»
-   - **Then** el sistema guarda «Cambiar estado y resolver reporte» en el registro seleccionado y muestra su nuevo estado.
+1. **Scenario**: Consulta de la cola de reportes [UC070]
+    
+    - **Given** existen reportes pendientes de usuario, de servicio o de reseña (`spec-10`, `spec-11`)
+    - **When** un Administrador consulta la cola
+    - **Then** el sistema muestra todos los reportes pendientes, sin importar su tipo de origen
+2. **Scenario**: Revisión de detalle de un reporte [UC071]
+    
+    - **Given** un Administrador selecciona un reporte de la cola
+    - **When** abre su detalle
+    - **Then** el sistema muestra el motivo, el objetivo reportado y toda evidencia adjunta (`SPEC-11`, UC067)
+3. **Scenario**: Resolución de un reporte [UC072]
+    
+    - **Given** un Administrador está revisando el detalle de un reporte
+    - **When** cambia su estado a resuelto o descartado, con una justificación
+    - **Then** el sistema actualiza el estado del reporte y lo retira de la cola de pendientes
+4. **Scenario**: Intento de resolver un reporte sin haberlo revisado
+    
+    - **Given** un reporte está en la cola sin haber sido abierto en detalle
+    - **When** se intenta cambiar directamente su estado a resuelto
+    - **Then** el sistema exige que el reporte haya sido abierto en detalle antes de permitir su resolución
 
-2. **Scenario**: Datos insuficientes o actor no autorizado en UC072
-   - **Given** la solicitud de «Cambiar estado y resolver reporte» no identifica un registro válido o el actor no tiene el rol Administrador
-   - **When** intenta confirmar la operación
-   - **Then** el sistema rechaza la operación, no modifica el registro y comunica la causa
 
-### User Story 6 - Bloquear preventivamente una cuenta [UC073] (Priority: P1)
-Como administrador, quiero bloquear preventivamente una cuenta, para gestionar específicamente bloquear preventivamente una cuenta dentro de CONectaSM.
 
-**Why this priority**: UC073 permite a Administrador bloquear preventivamente una cuenta; el resultado se limita a la operación descrita en el diagrama.
+---
 
-**Independent Test**: Con una cuenta de administrador y un registro de prueba de «Bloquear preventivamente una cuenta», verificar que UC073 muestra o guarda el resultado indicado sin ejecutar otro CU.
+### User Story 4 - Bloquear preventivamente una cuenta [UC073] (Priority: P1)
 
-**Acceptance Scenarios**:
+Como Administrador, quiero bloquear preventivamente una cuenta bajo investigación, para prevenir daño mientras se resuelve un reporte grave.
 
-1. **Scenario**: Bloquear preventivamente una cuenta para UC073
-   - **Given** un administrador autorizado dispone de los datos de «Bloquear preventivamente una cuenta»
-   - **When** ejecuta la acción «Bloquear preventivamente una cuenta»
-   - **Then** el sistema guarda «Bloquear preventivamente una cuenta» en el registro seleccionado y muestra su nuevo estado.
+**Why this priority**: Es una medida de contención necesaria antes de que un reporte grave (UC072) esté completamente resuelto.
 
-2. **Scenario**: Datos insuficientes o actor no autorizado en UC073
-   - **Given** la solicitud de «Bloquear preventivamente una cuenta» no identifica un registro válido o el actor no tiene el rol Administrador
-   - **When** intenta confirmar la operación
-   - **Then** el sistema rechaza la operación, no modifica el registro y comunica la causa
-
-### User Story 7 - Moderar perfil o contenido [UC074] (Priority: P1)
-Como administrador, quiero moderar perfil o contenido, para gestionar específicamente moderar perfil o contenido dentro de CONectaSM.
-
-**Why this priority**: UC074 permite a Administrador moderar perfil o contenido; el resultado se limita a la operación descrita en el diagrama.
-
-**Independent Test**: Con una cuenta de administrador y un registro de prueba de «Moderar perfil o contenido», verificar que UC074 muestra o guarda el resultado indicado sin ejecutar otro CU.
+**Independent Test**: Bloquear una cuenta de prueba y verificar que pierde acceso a las capacidades de su rol mientras el bloqueo esté activo.
 
 **Acceptance Scenarios**:
 
-1. **Scenario**: Moderar perfil o contenido para UC074
-   - **Given** un administrador autorizado dispone de los datos de «Moderar perfil o contenido»
-   - **When** ejecuta la acción «Moderar perfil o contenido»
-   - **Then** el sistema guarda «Moderar perfil o contenido» en el registro seleccionado y muestra su nuevo estado.
+1. **Scenario**: Bloqueo preventivo aplicado [UC073]
+    - **Given** un Administrador está revisando un reporte grave sobre una cuenta
+    - **When** aplica un bloqueo preventivo
+    - **Then** el sistema restringe el acceso de esa cuenta a las capacidades de su rol, dejando trazabilidad del bloqueo (quién, cuándo, motivo)
 
-2. **Scenario**: Datos insuficientes o actor no autorizado en UC074
-   - **Given** la solicitud de «Moderar perfil o contenido» no identifica un registro válido o el actor no tiene el rol Administrador
-   - **When** intenta confirmar la operación
-   - **Then** el sistema rechaza la operación, no modifica el registro y comunica la causa
+---
 
-### User Story 8 - Buscar usuarios y perfiles [UC075] (Priority: P1)
-Como administrador, quiero buscar usuarios y perfiles, para gestionar específicamente buscar usuarios y perfiles dentro de CONectaSM.
+### User Story 5 - Moderar perfil o contenido [UC074] (Priority: P1)
 
-**Why this priority**: UC075 permite a Administrador buscar usuarios y perfiles; el resultado se limita a la operación descrita en el diagrama.
+Como Administrador, quiero ocultar o corregir contenido de un perfil que incumple las normas de la plataforma, sin necesidad de bloquear la cuenta completa.
 
-**Independent Test**: Con una cuenta de administrador y un registro de prueba de «Buscar usuarios y perfiles», verificar que UC075 muestra o guarda el resultado indicado sin ejecutar otro CU.
+**Why this priority**: Permite una intervención proporcional (corregir contenido puntual) frente al bloqueo total de una cuenta (UC073).
+
+**Independent Test**: Sobre un perfil de prueba con contenido inapropiado, moderarlo y verificar que el contenido deja de mostrarse públicamente mientras la cuenta permanece activa.
 
 **Acceptance Scenarios**:
 
-1. **Scenario**: Buscar usuarios y perfiles para UC075
-   - **Given** un administrador autorizado dispone de los datos de «Buscar usuarios y perfiles»
-   - **When** ejecuta la acción «Buscar usuarios y perfiles»
-   - **Then** el sistema muestra la información específica de «Buscar usuarios y perfiles».
+1. **Scenario**: Contenido moderado [UC074]
+    - **Given** un Administrador identifica contenido de un perfil que incumple las normas
+    - **When** lo modera (oculta o solicita corrección)
+    - **Then** el sistema deja de exponer ese contenido públicamente, sin afectar el resto del perfil ni el acceso de la cuenta
 
-2. **Scenario**: Datos insuficientes o actor no autorizado en UC075
-   - **Given** la solicitud de «Buscar usuarios y perfiles» no identifica un registro válido o el actor no tiene el rol Administrador
-   - **When** intenta confirmar la operación
-   - **Then** el sistema rechaza la operación, no modifica el registro y comunica la causa
+---
 
-### User Story 9 - Gestionar servicios de alto riesgo [UC076] (Priority: P1)
-Como administrador, quiero gestionar servicios de alto riesgo, para gestionar específicamente gestionar servicios de alto riesgo dentro de CONectaSM.
+### User Story 6 - Buscar usuarios y perfiles [UC075] (Priority: P2)
 
-**Why this priority**: UC076 permite a Administrador gestionar servicios de alto riesgo; el resultado se limita a la operación descrita en el diagrama.
+Como Administrador, quiero buscar cuentas o perfiles por nombre, correo o identificador, para ubicar rápidamente el objetivo de una investigación o soporte.
 
-**Independent Test**: Con una cuenta de administrador y un registro de prueba de «Gestionar servicios de alto riesgo», verificar que UC076 muestra o guarda el resultado indicado sin ejecutar otro CU.
+**Why this priority**: Es una herramienta de apoyo transversal a las demás historias de este SPEC, no un flujo de valor final por sí mismo.
+
+**Independent Test**: Buscar una cuenta de prueba por distintos criterios y verificar que aparece en los resultados.
 
 **Acceptance Scenarios**:
 
-1. **Scenario**: Gestionar servicios de alto riesgo para UC076
-   - **Given** un administrador autorizado dispone de los datos de «Gestionar servicios de alto riesgo»
-   - **When** ejecuta la acción «Gestionar servicios de alto riesgo»
-   - **Then** el sistema guarda «Gestionar servicios de alto riesgo» en el registro seleccionado y muestra su nuevo estado.
+1. **Scenario**: Búsqueda exitosa [UC075]
+    - **Given** existe una cuenta con datos conocidos
+    - **When** un Administrador busca usando alguno de esos datos
+    - **Then** el sistema muestra la cuenta correspondiente entre los resultados
 
-2. **Scenario**: Datos insuficientes o actor no autorizado en UC076
-   - **Given** la solicitud de «Gestionar servicios de alto riesgo» no identifica un registro válido o el actor no tiene el rol Administrador
-   - **When** intenta confirmar la operación
-   - **Then** el sistema rechaza la operación, no modifica el registro y comunica la causa
+
+---
+
+### User Story 7 - Gestionar servicios de alto riesgo [UC076] (Priority: P1)
+
+Como Administrador, quiero identificar y gestionar servicios clasificados como de alto riesgo, para aplicar controles adicionales antes o durante su ejecución.
+
+**Why this priority**: Ciertos oficios o situaciones (ej. trabajos eléctricos de alto voltaje, servicios en menores de edad presentes en el hogar) pueden requerir supervisión adicional del Administrador.
+
+**Independent Test**: Marcar un servicio de prueba como de alto riesgo y verificar que queda identificado y disponible para seguimiento administrativo.
+
+**Acceptance Scenarios**:
+
+1. **Scenario**: Servicio marcado como alto riesgo [UC076]
+    - **Given** un servicio cumple un criterio de alto riesgo definido por el producto
+    - **When** un Administrador lo marca como tal
+    - **Then** el sistema lo identifica para seguimiento diferenciado
+
+
 
 ---
 
 ### Edge Cases
 
-- Una cuenta bloqueada preventivamente debe conservar trazabilidad; duración, apelación y umbrales quedan [NEEDS CLARIFICATION: definir].
-- Solo el Administrador ejecuta estas capacidades; las políticas concretas de bloqueo, moderación y alto riesgo quedan [NEEDS CLARIFICATION: definir criterios, duración y autoridad].
+- Una categoría o zona se desactiva mientras está en uso por un borrador o por la cobertura activa de un Prestador: El sistema debe poder publicar el borrador solo si seleccionar otra categoría y zona.
+- Dos Administradores intentan resolver el mismo reporte al mismo tiempo: el sistema debe evitar resultados contradictorios (ej. uno resuelve, otro descarta, simultáneamente).
+- Una cuenta bloqueada preventivamente  es también objeto de una nueva búsqueda: debe seguir siendo localizable para que el Administrador revierta el bloqueo si corresponde.
 
-## Requirements *(mandatory)*
+
+## Requirements _(mandatory)_
 
 ### Functional Requirements
 
-- **FR-068**: El sistema DEBE permitir que un Administrador ejecute «Administrar categorías de servicios» y debe mostrar o guardar el resultado específico de esa operación, sin concederla a otros roles. [UC068]
-- **FR-069**: El sistema DEBE permitir que un Administrador ejecute «Administrar zonas» y debe mostrar o guardar el resultado específico de esa operación, sin concederla a otros roles. [UC069]
-- **FR-070**: El sistema DEBE permitir que un Administrador ejecute «Consultar cola de reportes» y debe mostrar o guardar el resultado específico de esa operación, sin concederla a otros roles. [UC070]
-- **FR-071**: El sistema DEBE permitir que un Administrador ejecute «Revisar detalle de reporte» y debe mostrar o guardar el resultado específico de esa operación, sin concederla a otros roles. [UC071]
-- **FR-072**: El sistema DEBE permitir que un Administrador ejecute «Cambiar estado y resolver reporte» y debe mostrar o guardar el resultado específico de esa operación, sin concederla a otros roles. [UC072]
-- **FR-073**: El sistema DEBE permitir que un Administrador ejecute «Bloquear preventivamente una cuenta» y debe mostrar o guardar el resultado específico de esa operación, sin concederla a otros roles. [UC073]
-- **FR-074**: El sistema DEBE permitir que un Administrador ejecute «Moderar perfil o contenido» y debe mostrar o guardar el resultado específico de esa operación, sin concederla a otros roles. [UC074]
-- **FR-075**: El sistema DEBE permitir que un Administrador ejecute «Buscar usuarios y perfiles» y debe mostrar o guardar el resultado específico de esa operación, sin concederla a otros roles. [UC075]
-- **FR-076**: El sistema DEBE permitir que un Administrador ejecute «Gestionar servicios de alto riesgo» y debe mostrar o guardar el resultado específico de esa operación, sin concederla a otros roles. [UC076]
-### Key Entities *(include if feature involves data)*
+- **FR-068**: El sistema DEBE permitir que un Administrador cree, edite y desactive categorías de servicio del catálogo. [UC068]
+- **FR-069**: El sistema DEBE permitir que un Administrador cree, edite y desactive zonas geográficas del catálogo. [UC069]
+- **FR-070**: El sistema DEBE permitir que un Administrador consulte la cola de reportes pendientes, sin importar su origen (usuario, servicio o reseña). [UC070]
+- **FR-071**: El sistema DEBE permitir que un Administrador revise el detalle completo de un reporte, incluyendo su evidencia asociada, antes de poder resolverlo. [UC071]
+- **FR-072**: El sistema DEBE permitir que un Administrador cambie el estado de un reporte a resuelto o descartado, con una justificación registrada, únicamente después de haberlo revisado en detalle. [UC072]
+- **FR-073**: El sistema DEBE permitir que un Administrador bloquee preventivamente una cuenta, dejando trazabilidad de quién lo hizo, cuándo y por qué. [UC073]
+- **FR-074**: El sistema DEBE permitir que un Administrador modere contenido puntual de un perfil sin bloquear la cuenta completa. [UC074]
+- **FR-075**: El sistema DEBE permitir que un Administrador busque cuentas o perfiles por distintos criterios (nombre, correo, identificador). [UC075]
+- **FR-076**: El sistema DEBE permitir que un Administrador marque un servicio como de alto riesgo según los criterios definidos por el producto. [UC076]
 
-- **Registro específico de Administración, moderación y gestión de riesgos**: información que los CUs (UC068,UC069,UC070,UC071,UC072,UC073,UC074,UC075,UC076) consultan, crean, actualizan o muestran.
-- **Actor asignado y autorización**: identidad del actor indicado en el diagrama y permiso requerido para cada operación.
-- **Estado y resultado de cada operación**: valor confirmado, mensaje mostrado y evidencia asociada; retención y formatos quedan [NEEDS CLARIFICATION: definir].
+### Key Entities _(include if feature involves data)_
 
-## Success Criteria *(mandatory)*
+- **Categoría de servicio**: nombre, estado (activa/inactiva).
+- **Zona**: nombre, cobertura geográfica, estado (activa/inactiva).
+- **Reporte**: tipo de origen, objetivo, estado (pendiente/en revisión/resuelto/descartado), justificación de resolución.
+- **Bloqueo preventivo**: cuenta afectada, administrador que lo aplicó, fecha, motivo.
+- **Acción de moderación**: contenido afectado, tipo de acción (ocultar/corregir), administrador responsable.
+- **Marca de alto riesgo**: servicio asociado, criterio aplicado, administrador que la asignó.
+
+## Success Criteria _(mandatory)_
 
 ### Measurable Outcomes
 
-- **SC-001**: El 100% de los CUs UC068,UC069,UC070,UC071,UC072,UC073,UC074,UC075,UC076 solo permite la acción al actor asignado en su diagrama y devuelve el resultado de su operación específica.
-- **SC-002**: Ante datos faltantes, registro inexistente o rol incorrecto, ninguna operación cambia datos y la interfaz informa la causa.
-- **SC-003**: Los estados, filtros, evidencias o políticas no definidos en los diagramas se presentan como [NEEDS CLARIFICATION: definir política antes de implementar].
+- **SC-001**: El 100% de los reportes creados en `SPEC-10` y `SPEC-11` es visible en la cola de este SPEC.
+- **SC-002**: Ningún reporte cambia de estado a resuelto/descartado sin haber pasado primero por su revisión de detalle.
+- **SC-003**: El 100% de los bloqueos preventivos queda con administrador, fecha y motivo registrados.
+- **SC-004**: Ninguna acción de moderación de contenido (UC074) provoca por sí sola un bloqueo de cuenta (UC073); son acciones independientes.
