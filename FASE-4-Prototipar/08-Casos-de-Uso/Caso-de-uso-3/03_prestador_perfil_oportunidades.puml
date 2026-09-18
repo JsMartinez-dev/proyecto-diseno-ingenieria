@@ -18,17 +18,16 @@ rectangle "CONectaSM" {
   usecase "Gestionar agenda \n[US-022]" as UC032
   usecase "Consultar vista previa\ndel perfil\n[US-023]" as UC033
 
-  usecase "Determinar compatibilidad\nde solicitudes\n[US-039]" as UC034
-  usecase "Ver tablero de\noportunidades\n[US-040]" as UC035
+  usecase "Ver oportunidades\ncompatibles\n[US-040]" as UC035
   usecase "Filtrar oportunidades\n[US-041]" as UC036
   usecase "Consultar detalle\nde oportunidad\n[US-042]" as UC037
-  usecase "Notificar nueva oportunidad\ncompatible\n[US-044]" as UC038
 }
 
 Prestador --> UC024
 Prestador --> UC028
 Prestador --> UC025
 Prestador --> UC026
+Prestador --> UC027
 Prestador --> UC029
 Prestador --> UC030
 Prestador --> UC031
@@ -42,8 +41,5 @@ UC024 .> UC027 : <<include>>
 UC024 .> UC026 : <<include>>
 
 
-UC035 .> UC034 : <<include>>
 UC036 .> UC035 : <<extend>>
-UC038 .> UC034 : <<extend>>
-UC028 .> UC024 : <<extend>>
 @enduml

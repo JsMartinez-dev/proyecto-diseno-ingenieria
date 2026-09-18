@@ -17,7 +17,6 @@ rectangle "CONectaSM" {
   usecase "Iniciar sesión\n[US-003]" as UC003
   usecase "Cerrar sesión\n[US-004]" as UC004
   usecase "Recuperar acceso\n[US-005]" as UC005
-  usecase "Acceder según rol\n[US-006]" as UC006
   usecase "Aceptar términos y\ntratamiento de datos\n[US-007]" as UC007
 
   usecase "Editar datos básicos\n[US-008]" as UC008
@@ -25,7 +24,6 @@ rectangle "CONectaSM" {
   usecase "Controlar visibilidad\nde datos personales\n[US-010]" as UC010
   usecase "Consultar datos almacenados\n[US-011]" as UC011
   usecase "Solicitar eliminación\nde cuenta\n[US-012]" as UC012
-  usecase "Separar ubicación aproximada\ny dirección exacta\n[US-013]" as UC013
 }
 
 Cliente --> UC001
@@ -42,8 +40,5 @@ Usuario --> UC012
 
 UC001 .> UC007 : <<include>>
 UC002 .> UC007 : <<include>>
-UC003 .> UC006 : <<include>>
-UC009 .> UC013 : <<include>>
-UC010 .> UC013 : <<include>>
 
 @enduml

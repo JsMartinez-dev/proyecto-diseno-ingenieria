@@ -10,10 +10,8 @@ rectangle "CONectaSM" {
   usecase "Buscar prestadores\npor categoría y zona\n[US-026]" as UC014
   usecase "Consultar perfil público\ndel prestador\n[US-024]" as UC015
 
-  usecase "Adjuntar fotos\n[US-032]" as UC016
-  usecase "Definir zona aproximada\ny urgencia\n[US-033]" as UC017
-  usecase "Publicar solicitud\n[US-034]" as UC018
-  usecase "Conservar borrador\n[US-030]" as UC019
+  usecase "Crear y publicar solicitud\n[US-034]" as UC018
+  usecase "Guardar solicitud\ncomo borrador\n[US-030]" as UC019
 
   usecase "Editar solicitud abierta\n[US-035]" as UC020
   usecase "Cancelar solicitud abierta\n[US-036]" as UC021
@@ -24,16 +22,10 @@ rectangle "CONectaSM" {
 Cliente --> UC014
 Cliente --> UC015
 Cliente --> UC018
+Cliente --> UC019
 Cliente --> UC020
 Cliente --> UC021
 Cliente --> UC022
 Cliente --> UC023
-
-UC015 .> UC014 : <<extend>>
-
-UC018 .> UC017 : <<include>>
-UC016 .> UC018 : <<extend>>
-UC019 .> UC018 : <<extend>>
-
 
 @enduml

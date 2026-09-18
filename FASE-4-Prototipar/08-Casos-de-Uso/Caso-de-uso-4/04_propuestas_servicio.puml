@@ -9,28 +9,18 @@ actor "Prestador" as Prestador
 
 rectangle "CONectaSM" {
   usecase "Crear propuesta\n[US-045]" as UC039
-  usecase "Indicar disponibilidad\n[US-047]" as UC040
-  usecase "Agregar mensaje\n[US-048]" as UC041
   usecase "Editar propuesta activa\n[US-049]" as UC042
   usecase "Retirar propuesta\n[US-050]" as UC043
-  usecase "Notificar propuesta recibida\n[US-051]" as UC044
 
   usecase "Consultar propuestas\nrecibidas\n[US-052]" as UC045
   usecase "Aceptar propuesta\n[US-054]" as UC046
-  usecase "Cerrar propuestas\nno seleccionadas\n[US-055]" as UC047
-
-  usecase "Registrar servicio\ncontratado\n[US-056]" as UC048
-  usecase "Habilitar datos de\ncomunicación\n[US-057]" as UC049
   usecase "Consultar detalle\ndel servicio\n[US-058]" as UC050
   usecase "Marcar servicio\nen ejecución\n[US-059]" as UC051
   usecase "Marcar servicio\ncomo terminado\n[US-060]" as UC052
   usecase "Confirmar finalización\n[US-061]" as UC053
   usecase "Cancelar servicio\ncontratado\n[US-062]" as UC054
   usecase "Consultar historial\nde estados del servicio\n[US-063]" as UC055
-  usecase "Usar canal de comunicación\nautorizado\n[US-064]" as UC056
-
-  usecase "Notificar aceptación\nde propuesta\n[US-089]" as UC057
-  usecase "Notificar cambios de estado\ndel servicio\n[US-090]" as UC058
+  usecase "Consultar datos de contacto\nautorizados\n[US-064]" as UC056
 }
 
 Prestador --> UC039
@@ -52,21 +42,5 @@ Cliente --> UC054
 Cliente --> UC055
 Cliente --> UC056
 
-
-UC039 .> UC040 : <<include>>
-UC041 .> UC039 : <<extend>>
-UC044 .> UC039 : <<extend>>
-
-UC046 .> UC047 : <<include>>
-UC046 .> UC048 : <<include>>
-UC046 .> UC049 : <<include>>
-UC057 .> UC046 : <<extend>>
-UC056 .> UC049 : <<extend>>
-
-
-UC058 .> UC051 : <<extend>>
-UC058 .> UC052 : <<extend>>
-UC058 .> UC053 : <<extend>>
-UC058 .> UC054 : <<extend>>
 
 @enduml

@@ -20,8 +20,9 @@ rectangle "CONectaSM - Evolución" {
   usecase "Programa de referidos\n[US-099] <<Could>>" as UC089
   usecase "Soporte por WhatsApp\n[US-100] <<Could>>" as UC090
   usecase "Onboarding asistido por\nWhatsApp o gestor\n[US-101] <<Could>>" as UC091
-  usecase "Idiomas adicionales\n[US-102] <<Could>>" as UC092
-  usecase "Piloto de pasarela de pago\n[US-103] <<Future>>" as UC093
+  usecase "Vincular ruta institucional\nfutura\n[US-088] <<Future>>" as UC080
+  usecase "Seleccionar idioma\n[US-102] <<Could>>" as UC092
+  usecase "Pagar servicio mediante\npasarela\n[US-103] <<Future>>" as UC093
 }
 
 Cliente --> UC086
@@ -32,6 +33,7 @@ Prestador --> UC088
 Usuario --> UC089
 Usuario --> UC090
 Prestador --> UC091
+Prestador --> UC080
 Usuario --> UC092
 Cliente --> UC093
 Prestador --> UC093

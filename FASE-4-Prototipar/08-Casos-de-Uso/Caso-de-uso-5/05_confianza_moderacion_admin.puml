@@ -17,8 +17,7 @@ rectangle "CONectaSM" {
 
   usecase "Calificar servicio finalizado\n[US-065]" as UC059
   usecase "Agregar reseña textual\n[US-067]" as UC060
-  usecase "Calcular reputación agregada\n[US-068]" as UC061
-  usecase "Mostrar nivel de verificación\n[US-069]" as UC062
+  usecase "Consultar nivel de verificación\n[US-069]" as UC062
   usecase "Solicitar verificación\ndocumental ampliada\n[US-070]" as UC063
   usecase "Reportar reseña\nproblemática\n[US-071]" as UC064
 
@@ -32,7 +31,7 @@ rectangle "CONectaSM" {
   usecase "Administrar zonas\n[US-029]" as UC069
   usecase "Consultar cola de reportes\n[US-075]" as UC070
   usecase "Revisar detalle de reporte\n[US-076]" as UC071
-  usecase "Cambiar estado y\nresolver reporte\n[US-077]" as UC072
+  usecase "Resolver reporte\n[US-077]" as UC072
   usecase "Bloquear preventivamente\nuna cuenta\n[US-078]" as UC073
   usecase "Moderar perfil o contenido\n[US-079]" as UC074
   usecase "Buscar usuarios y perfiles\n[US-080]" as UC075
@@ -61,13 +60,10 @@ Admin --> UC076
 
 
 UC060 .> UC059 : <<extend>>
-UC059 .> UC061 : <<include>>
 
 UC067 .> UC064 : <<extend>>
 UC067 .> UC065 : <<extend>>
 UC067 .> UC066 : <<extend>>
 
-UC071 .> UC070 : <<extend>>
-UC072 .> UC071 : <<extend>>
 
 @enduml

@@ -15,8 +15,7 @@ Usuario <|-- Prestador
 rectangle "CONectaSM" {
   usecase "Consultar ruta de\nformalización\n[US-083]" as UC077
   usecase "Abrir enlaces oficiales\nde formalización\n[US-086]" as UC078
-  usecase "Mostrar progreso sin declarar\nestatus legal\n[US-087]" as UC079
-  usecase "Vincular ruta institucional\nfutura\n[US-088]" as UC080
+  usecase "Consultar progreso de\nformalización\n[US-087]" as UC079
 
   usecase "Configurar preferencias\nde notificación\n[US-091]" as UC081
   usecase "Consultar historial\nde trabajos\n[US-092]" as UC082
@@ -28,7 +27,6 @@ rectangle "CONectaSM" {
 Prestador --> UC077
 Prestador --> UC078
 Prestador --> UC079
-Prestador --> UC080
 Prestador --> UC084
 
 Usuario --> UC081
