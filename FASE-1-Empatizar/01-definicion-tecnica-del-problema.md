@@ -69,21 +69,21 @@ Marta:
 
 - En 2024, el **90,5%** de los propietarios de micronegocios en Colombia eran trabajadores por cuenta propia [1], y el **82,3%** operaba con una sola persona (el propio propietario) [1]. Para 2025, a nivel de las 24 ciudades evaluadas, la proporción de trabajadores por cuenta propia alcanzó el **92,0%** [2] y los micronegocios unipersonales (rango de 1 persona) correspondieron al **85,7%** [2].
 
-![Trabajadores-informales](../assets/grafica_trabajadores_propios.png)
+![Trabajadores-informales](grafica_trabajadores_propios.png)
 
 
 - En términos de adopción digital, en 2024 el **89,1%** de los micronegocios del país no utilizaba ningún dispositivo electrónico, ya sea computador, tablet o portátil [1], aunque el **70,9%** sí usaba algún tipo de teléfono celular convencional o inteligente [1]. En 2025, el **82,6%** de los micronegocios urbanos seguía careciendo de dispositivos electrónicos para sus actividades [2], mientras que el **83,9%** utilizaba teléfonos celulares [2].
 
-![dispositivos-electronicos-uso](../assets/grafica_dispositivos_electronicos.png)
+![dispositivos-electronicos-uso](grafica_dispositivos_electronicos.png)
 
 - En cuanto al uso de internet, en 2024 el **50,4%** de los micronegocios no empleaba este servicio para su actividad [1], aunque los negocios conectados registraron un crecimiento del **14,7%** frente a 2023 [1]. En 2025, el uso de internet en los micronegocios de las 24 ciudades alcanzó el **75,8%** [2], reportando una variación positiva de **11,7%** frente al año anterior [2].
 
-![dispositivos-electronicos-uso](../assets/grafica_uso_servicio_internet.png)
+![dispositivos-electronicos-uso](grafica_uso_servicio_internet.png)
 
 - Respecto a la formalidad de entrada, en 2024 el **77,6%** de los micronegocios nacionales no contaba con Registro Único Tributario (RUT) [1] y el **89,5%** no estaba registrado ante alguna Cámara de Comercio [1]. En 2025, dentro de las 24 ciudades, el **68,4%** de los micronegocios continuaba operando sin RUT [2] y el **87,0%** carecía de matrícula mercantil registrada [2]. Adicionalmente, el **81,6%** de los propietarios no realizó aportes periódicos a salud y pensión en 2025 [2].
 
 
-![empresas-rut](../assets/grafica_rut_empresas.png)
+![empresas-rut](grafica_rut_empresas.png)
 
 
 > Estos datos nacionales y urbanos demuestran que, si bien el uso del teléfono celular y el acceso a internet han crecido en las cabeceras urbanas, una gran mayoría de los micronegocios de servicios son de carácter unipersonal, operan bajo la informalidad empresarial (sin registro mercantil ni tributario y sin cotizaciones de seguridad social) y dependen de herramientas manuales o informales para operar, careciendo de software de gestión especializada, lo cual apoya firmemente la necesidad y el planteamiento de la hipótesis del proyecto.

@@ -65,7 +65,7 @@ La necesidad de intervenir se sustenta en dos tipos de evidencia:
 
 2. **Evidencia directa (entrevistas):** las 6 entrevistas realizadas confirman de forma consistente los síntomas descritos en el planteamiento del problema: solicitudes sin responder, citas olvidadas, falta de registro, pérdida de oportunidades comerciales y desconfianza del cliente ante la informalidad del trabajador.
 
-Ver evidencia completa y gráficas en [01-definición técnica del problema](FASE-1-Empatizar/01-definicion-tecnica-del-problema.md)
+Ver evidencia completa y gráficas en [01-definición técnica del problema](01-definicion-tecnica-del-problema.md)
 	
 ### Usuarios o beneficiarios
 
