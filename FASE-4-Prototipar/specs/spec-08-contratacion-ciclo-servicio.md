@@ -1,11 +1,11 @@
 # Feature Specification: SPEC-08 — Contratación y ciclo de vida del servicio
 
 **Creado**: 2026-09-16
-**Casos de uso cubiertos**: UC045, UC046, UC047, UC048, UC049, UC050, UC051, UC052, UC053, UC054, UC055, UC056
+**Casos de uso cubiertos**: UC045, UC046, UC050, UC051, UC052, UC053, UC054, UC055, UC056
 
 ## User Scenarios & Testing _(mandatory)_
 
-### User Story 1 - Consultar y aceptar propuestas recibidas [UC045, UC046, UC047, UC048, UC049] (Priority: P1)
+### User Story 1 - Consultar y aceptar propuestas recibidas [UC045, UC046; postcondiciones UC047, UC048 y UC049] (Priority: P1)
 
 Como cliente, quiero consultar las propuestas que recibí para mi solicitud y aceptar la que prefiera, para que se registre el servicio contratado, se cierren automáticamente las demás propuestas y quede habilitada la comunicación con el prestador elegido.
 
@@ -25,7 +25,7 @@ Como cliente, quiero consultar las propuestas que recibí para mi solicitud y ac
     - **Given** un Cliente tiene varias propuestas activas para su solicitud
     - **When** acepta una de ellas
     - **Then** el sistema registra el servicio contratado con el Prestador seleccionado y habilita los datos de comunicación entre ambos, en una sola operación consistente
-3. **Scenario**: Cerrar automáticamente las propuestas no seleccionadas [UC047]
+3. **Scenario**: Cerrar automáticamente las propuestas no seleccionadas [Postcondición UC047]
     
     - **Given** un Cliente acepta una propuesta entre varias recibidas para la misma solicitud
     - **When** la aceptación se confirma
@@ -129,29 +129,29 @@ Como cliente o prestador, quiero consultar el historial completo de estados de m
     - **When** realiza la solicitud
     - **Then** el sistema deniega el acceso
 
-### User Story 5 - Usar el canal de comunicación autorizado [UC056] (Priority: P1)
+### User Story 5 - Consultar datos de contacto autorizados [UC056] (Priority: P1)
 
-Como cliente o prestador, quiero usar el canal de comunicación autorizado una vez contratado el servicio, para coordinar los detalles necesarios sin exponer mis datos de contacto personales.
+Como cliente o prestador, quiero consultar los datos de contacto autorizados una vez contratado el servicio, para coordinar los detalles necesarios con la contraparte.
 
-**Why this priority**: Permite coordinar el servicio sin depender de canales informales ni de revelar información de contacto directo entre las partes.
+**Why this priority**: Permite coordinar el servicio mediante la información autorizada, respetando el momento y el alcance en que puede revelarse.
 
-**Independent Test**: Con un servicio recién contratado (datos de comunicación habilitados por UC049), enviar un mensaje por el canal autorizado y verificar que llega a la otra parte; intentar usarlo antes de que la propuesta haya sido aceptada y verificar el rechazo.
+**Independent Test**: Con un servicio recién contratado, consultar los datos de contacto autorizados y verificar que solo las partes del servicio pueden verlos; intentar consultarlos antes de aceptar la propuesta y verificar el rechazo.
 
 **Acceptance Scenarios**:
 
-1. **Scenario**: Uso del canal tras la habilitación [UC056]
+1. **Scenario**: Consulta de datos autorizados tras la aceptación [UC056]
     
     - **Given** un servicio contratado ya tiene sus datos de comunicación habilitados
-    - **When** el Cliente o el Prestador envían un mensaje por el canal autorizado
-    - **Then** el sistema lo entrega a la otra parte sin exponer datos de contacto personales de ninguna de las dos
-2. **Scenario**: Intento de uso antes de la habilitación
+    - **When** el Cliente o el Prestador consulta los datos autorizados de la contraparte
+    - **Then** el sistema muestra únicamente la información de contacto aprobada para coordinar ese servicio
+2. **Scenario**: Intento de consulta antes de la habilitación
     
     - **Given** una propuesta aún no ha sido aceptada
-    - **When** el Cliente o el Prestador intentan usar el canal de comunicación autorizado
-    - **Then** el sistema bloquea el uso hasta que la aceptación de la propuesta habilite los datos de comunicación
+    - **When** el Cliente o el Prestador intentan consultar los datos de contacto
+    - **Then** el sistema bloquea la consulta hasta que la aceptación de la propuesta habilite esos datos
 3. **Scenario**: Actor ajeno al servicio
     
-    - **Given** un actor que no es parte de ese servicio contratado intenta usar su canal de comunicación
+    - **Given** un actor que no es parte de ese servicio contratado intenta consultar sus datos de contacto
     - **When** realiza la solicitud
     - **Then** el sistema deniega el acceso
 
@@ -161,7 +161,7 @@ Como cliente o prestador, quiero usar el canal de comunicación autorizado una v
 
 - Dos transiciones de estado del mismo servicio se intentan de forma simultánea: el sistema debe resolverlas conservando un único historial ordenado, sin aplicar ninguna transición no autorizada.
 - Un cliente o un prestador intenta cancelar un servicio que ya fue confirmado como finalizado: el sistema debe rechazar la cancelación y conservar el estado finalizado.
-- Se intenta usar el canal de comunicación autorizado antes de que la propuesta haya sido aceptada: el sistema debe bloquear su uso hasta que los datos de comunicación queden habilitados.
+- Se intenta consultar los datos de contacto autorizados antes de que la propuesta haya sido aceptada: el sistema debe bloquear la consulta hasta que esos datos queden habilitados.
 - Un prestador marca un servicio como terminado sin haberlo marcado antes en ejecución: El sistema exige pasar primero por "en ejecución" o permite marcarlo terminado directamente.
 
 ## Requirements _(mandatory)_
@@ -169,17 +169,17 @@ Como cliente o prestador, quiero usar el canal de comunicación autorizado una v
 ### Functional Requirements
 
 - **FR-045**: El sistema DEBE permitir que un Cliente consulte todas las propuestas activas recibidas para una solicitud propia. _(UC045)_
-- **FR-046**: El sistema DEBE permitir que un Cliente acepte una propuesta activa de su solicitud, y DEBE rechazar una segunda aceptación si la solicitud ya tiene un servicio contratado. _(UC046, incluye a UC047, UC048 y UC049)_
-- **FR-047**: El sistema DEBE cerrar automáticamente, como parte de la aceptación, todas las demás propuestas activas de la misma solicitud. _(UC047, incluido en UC046)_
-- **FR-048**: El sistema DEBE registrar, como parte de la aceptación, un servicio contratado vinculado a la solicitud, la propuesta aceptada, el Cliente y el Prestador. _(UC048, incluido en UC046)_
-- **FR-049**: El sistema DEBE habilitar, como parte de la aceptación, los datos de comunicación necesarios entre el Cliente y el Prestador de ese servicio. _(UC049, incluido en UC046)_
+- **FR-046**: El sistema DEBE permitir que un Cliente acepte una propuesta activa de su solicitud, y DEBE rechazar una segunda aceptación si la solicitud ya tiene un servicio contratado. _(UC046; genera las postcondiciones UC047, UC048 y UC049)_
+- **FR-047**: El sistema DEBE cerrar automáticamente, como parte de la aceptación, todas las demás propuestas activas de la misma solicitud. _(Postcondición de UC046)_
+- **FR-048**: El sistema DEBE registrar, como parte de la aceptación, un servicio contratado vinculado a la solicitud, la propuesta aceptada, el Cliente y el Prestador. _(Postcondición de UC046)_
+- **FR-049**: El sistema DEBE habilitar, como parte de la aceptación, los datos de comunicación necesarios entre el Cliente y el Prestador de ese servicio. _(Postcondición de UC046)_
 - **FR-050**: El sistema DEBE permitir que el Cliente o el Prestador de un servicio contratado consulten su detalle completo, y DEBE denegar el acceso a cualquier otro actor. _(UC050)_
 - **FR-051**: El sistema DEBE permitir que el Prestador de un servicio contratado lo marque como en ejecución. _(UC051)_
 - **FR-052**: El sistema DEBE permitir que el Prestador de un servicio en ejecución lo marque como terminado. _(UC052)_
 - **FR-053**: El sistema DEBE permitir que el Cliente de un servicio marcado como terminado confirme su finalización, cerrándolo de forma definitiva. _(UC053)_
 - **FR-054**: El sistema DEBE permitir que el Cliente o el Prestador de un servicio contratado lo cancelen mientras no haya sido confirmado como finalizado, y DEBE rechazar la cancelación si ya fue finalizado. _(UC054)_
 - **FR-055**: El sistema DEBE permitir que el Cliente o el Prestador de un servicio consulten su historial completo de transiciones de estado, en orden. _(UC055)_
-- **FR-056**: El sistema DEBE permitir el uso del canal de comunicación autorizado únicamente después de que los datos de comunicación del servicio hayan sido habilitados, sin exponer datos de contacto personales de ninguna de las partes. _(UC056, extiende a UC049)_
+- **FR-056**: El sistema DEBE permitir consultar los datos de contacto autorizados únicamente después de que la aceptación haya habilitado los datos del servicio, mostrando solo la información aprobada. _(UC056; usa los datos habilitados por la postcondición UC049)_
 
 ### Key Entities _(include if feature involves data)_
 
@@ -195,4 +195,4 @@ Como cliente o prestador, quiero usar el canal de comunicación autorizado una v
 - **SC-002**: El 100% de los intentos de aceptar una segunda propuesta para una solicitud ya contratada es rechazado.
 - **SC-003**: El 100% de las transiciones de estado del servicio queda registrada en un historial ordenado, incluso ante intentos simultáneos.
 - **SC-004**: El 100% de los intentos de cancelar un servicio ya finalizado es rechazado sin cambiar su estado.
-- **SC-005**: El 100% de los usos del canal de comunicación autorizado ocurre solo después de que los datos de comunicación fueron habilitados, y ninguno expone datos de contacto personales.
+- **SC-005**: El 100% de las consultas de datos de contacto autorizados ocurre solo después de que esos datos fueron habilitados y solo por las partes del servicio.

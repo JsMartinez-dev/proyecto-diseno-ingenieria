@@ -1,7 +1,7 @@
 # Feature Specification: SPEC-02 — Gestión de perfil y privacidad
 
 **Creado**: 2026-09-16
-**Casos de uso cubiertos**: UC008–UC013
+**Casos de uso cubiertos**: UC008–UC012
 	
 
 ## User Scenarios & Testing *(mandatory)*
@@ -34,7 +34,7 @@ Como usuario, quiero consultar y editar mis datos básicos para mantener mi info
 
 ---
 
-### User Story 2 - Privacidad y visibilidad de ubicación [UC009, UC010, UC013] (Priority: P1)
+### User Story 2 - Privacidad y visibilidad de ubicación [UC009, UC010; regla de privacidad UC013] (Priority: P1)
 
 Como usuario, quiero controlar la visibilidad de mis datos de ubicación y de mi perfil en general, para proteger mi información frente a terceros.
 
@@ -54,7 +54,7 @@ Como usuario, quiero controlar la visibilidad de mis datos de ubicación y de mi
    - **When** la modifica
    - **Then** el sistema aplica la nueva preferencia sin superar las reglas de privacidad base del producto
 
-1. **Scenario**: Separación entre zona aproximada y dirección exacta [UC013]
+1. **Scenario**: Separación entre zona aproximada y dirección exacta [Regla UC013]
    - **Given** un usuario tiene registrada tanto su zona aproximada como su dirección exacta
    - **When** un tercero sin autorización explícita consulta su perfil
    - **Then** el sistema expone únicamente la zona aproximada, nunca la dirección exacta
@@ -100,7 +100,7 @@ Como usuario, quiero solicitar la eliminación de mi cuenta para dejar de tener 
 - **FR-002**: El sistema DEBE validar y persistir los cambios en datos básicos editables, rechazando valores con formato inválido sin alterar el valor previo. *(UC008)*
 - **FR-003**: El sistema DEBE permitir configurar y actualizar la zona aproximada del usuario. *(UC009)*
 - **FR-004**: El sistema DEBE aplicar las preferencias de visibilidad configuradas por el usuario sin superar las reglas de privacidad base definidas por el producto. *(UC010)*
-- **FR-005**: El sistema DEBE separar de forma estricta la zona aproximada de la dirección exacta, exponiendo esta última únicamente cuando la regla de negocio correspondiente lo autorice explícitamente. *(UC013)*
+- **FR-005**: El sistema DEBE separar de forma estricta la zona aproximada de la dirección exacta, exponiendo esta última únicamente cuando la regla de negocio correspondiente lo autorice explícitamente. *(Regla de privacidad UC013 aplicada a UC009 y UC010)*
 - **FR-006**: El sistema DEBE registrar toda solicitud de eliminación de cuenta con usuario, fecha y estado. *(UC012)*
 - **FR-007**: El sistema NO DEBE ejecutar la eliminación de una cuenta sin la confirmación explícita requerida. *(UC012)*
 

@@ -1,11 +1,11 @@
 # Feature Specification: SPEC-07 — Creación y gestión de propuestas
 
 **Creado**: 2026-09-16
-**Casos de uso cubiertos**: UC039, UC040, UC041, UC042, UC043, UC044 
+**Casos de uso cubiertos**: UC039, UC042, UC043
 
 ## User Scenarios & Testing _(mandatory)_
 
-### User Story 1 - Crear una propuesta para una solicitud [UC039, UC040, UC041, UC044] (Priority: P1)
+### User Story 1 - Crear una propuesta para una solicitud [UC039; datos UC040 y UC041; evento UC044] (Priority: P1)
 
 Como prestador, quiero crear una propuesta para una solicitud publicada indicando obligatoriamente mi disponibilidad, y agregar un mensaje si lo considero útil, para que el cliente reciba una propuesta completa y sea notificado de inmediato.
 
@@ -15,7 +15,7 @@ Como prestador, quiero crear una propuesta para una solicitud publicada indicand
 
 **Acceptance Scenarios**:
 
-1. **Scenario**: Creación completa con disponibilidad obligatoria [UC040]
+1. **Scenario**: Creación completa con disponibilidad obligatoria [UC039; dato UC040]
     
     - **Given** un Prestador tiene una solicitud abierta y compatible con su perfil
     - **When** crea una propuesta indicando su disponibilidad para atenderla
@@ -25,12 +25,12 @@ Como prestador, quiero crear una propuesta para una solicitud publicada indicand
     - **Given** un Prestador intenta crear una propuesta sin indicar su disponibilidad
     - **When** confirma la operación
     - **Then** el sistema rechaza la creación y señala el dato obligatorio faltante
-3. **Scenario**: Agregar un mensaje de forma opcional [UC041]
+3. **Scenario**: Agregar un mensaje de forma opcional [Paso opcional UC041]
     
     - **Given** un Prestador está creando su propuesta
     - **When** agrega un mensaje adicional para el Cliente
     - **Then** el sistema lo asocia a la propuesta; si no agrega ningún mensaje, la propuesta se crea igualmente sin él
-4. **Scenario**: Notificar al cliente sobre la nueva propuesta [UC044 ]
+4. **Scenario**: Notificar al cliente sobre la nueva propuesta [Evento UC044]
     
     - **Given** un Prestador crea una propuesta para la solicitud de un Cliente
     - **When** la propuesta queda registrada
@@ -111,10 +111,10 @@ Como prestador, quiero retirar una propuesta que ya no puedo o no quiero cumplir
 
 ### Functional Requirements
 
-- **FR-039**: El sistema DEBE permitir que un Prestador cree una propuesta vinculada a una solicitud abierta y compatible con su perfil, únicamente si incluye su disponibilidad, y DEBE rechazar la creación si la solicitud ya no está abierta. _(UC039, incluye a UC040)_
-- **FR-040**: El sistema DEBE exigir la disponibilidad del Prestador como dato obligatorio de toda propuesta creada. _(UC040, incluido en UC039)_
-- **FR-041**: El sistema DEBE permitir, de forma opcional, agregar un mensaje a la propuesta al momento de crearla, sin que su ausencia impida crearla. _(UC041, extiende a UC039)_
-- **FR-044**: El sistema DEBE notificar automáticamente al Cliente propietario de la solicitud cuando se cree una nueva propuesta para ella, sin que ningún actor deba solicitar esa notificación por separado. _(UC044, extiende a UC039)_
+- **FR-039**: El sistema DEBE permitir que un Prestador cree una propuesta vinculada a una solicitud abierta y compatible con su perfil, únicamente si incluye su disponibilidad, y DEBE rechazar la creación si la solicitud ya no está abierta. _(UC039; disponibilidad como dato obligatorio UC040)_
+- **FR-040**: El sistema DEBE exigir la disponibilidad del Prestador como dato obligatorio de toda propuesta creada. _(Dato obligatorio de UC039)_
+- **FR-041**: El sistema DEBE permitir, de forma opcional, agregar un mensaje a la propuesta al momento de crearla, sin que su ausencia impida crearla. _(Paso opcional de UC039)_
+- **FR-044**: El sistema DEBE notificar automáticamente al Cliente propietario de la solicitud cuando se cree una nueva propuesta para ella, sin que ningún actor deba solicitar esa notificación por separado. _(Evento automático asociado a UC039)_
 - **FR-042**: El sistema DEBE permitir que un Prestador edite una propuesta propia mientras esté activa, y DEBE rechazar la edición si la propuesta ya no está activa o no le pertenece. _(UC042)_
 - **FR-043**: El sistema DEBE permitir que un Prestador retire una propuesta propia mientras esté activa, y DEBE rechazar el retiro si la propuesta ya no está activa o no le pertenece. _(UC043)_
 

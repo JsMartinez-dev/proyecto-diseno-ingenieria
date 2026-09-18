@@ -1,7 +1,7 @@
 # Feature Specification: SPEC-01 — Autenticación, registro y control de acceso
 
 **Creado**: 2026-09-16
-**Casos de uso cubiertos**: UC001–UC007
+**Casos de uso cubiertos**: UC001–UC005, UC007
 
 
 ## User Scenarios & Testing *(mandatory)*
@@ -40,7 +40,7 @@ Como persona nueva, quiero registrarme como Cliente o Prestador aceptando los t�
 
 ---
 
-### User Story 2 - Autenticación y acceso seguro [UC003, UC004, UC005, UC006] (Priority: P1)
+### User Story 2 - Autenticación y acceso seguro [UC003, UC004, UC005; regla de autorización UC006] (Priority: P1)
 
 Como usuario registrado, quiero iniciar, cerrar y recuperar mi sesión, y acceder únicamente a las capacidades autorizadas para mi rol.
 
@@ -70,7 +70,7 @@ Como usuario registrado, quiero iniciar, cerrar y recuperar mi sesión, y accede
    - **When** solicita recuperación indicando su correo
    - **Then** el sistema envía un mecanismo de verificación sin confirmar ni negar si el correo está registrado
 
-1. **Scenario**: Acceso restringido según rol [UC006]
+1. **Scenario**: Acceso restringido según rol [Regla UC006]
    - **Given** un Cliente autenticado intenta acceder a una capacidad exclusiva de Prestador (o viceversa)
    - **When** realiza la solicitud
    - **Then** el sistema deniega el acceso
@@ -94,7 +94,7 @@ Como usuario registrado, quiero iniciar, cerrar y recuperar mi sesión, y accede
 - **FR-004**: El sistema DEBE autenticar credenciales válidas y rechazar las inválidas sin revelar cuál de los dos datos (correo o contraseña) fue incorrecto. *(UC003)*
 - **FR-005**: El sistema DEBE permitir cerrar sesión de forma verificable. *(UC004)*
 - **FR-006**: El sistema DEBE permitir recuperar el acceso mediante un mecanismo que no confirme ni niegue la existencia de una cuenta asociada al correo indicado. *(UC005)*
-- **FR-007**: El sistema DEBE aplicar las capacidades permitidas exclusivamente según el rol autenticado, denegando cualquier acción fuera de ese alcance. *(UC006)*
+- **FR-007**: El sistema DEBE aplicar las capacidades permitidas exclusivamente según el rol autenticado, denegando cualquier acción fuera de ese alcance. *(Regla de autorización UC006 asociada a las operaciones protegidas)*
 
 ### Key Entities *(include if feature involves data)*
 

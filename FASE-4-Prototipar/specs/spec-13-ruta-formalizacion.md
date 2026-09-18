@@ -1,7 +1,7 @@
 # Feature Specification: SPEC-13 — Ruta de formalización
 
 **Creado**: 2026-09-16 
-**Casos de uso cubiertos**: UC077, UC078, UC079, UC080 
+**Casos de uso cubiertos**: UC077, UC078, UC079
 
 ## User Scenarios & Testing _(mandatory)_
 
@@ -47,7 +47,7 @@ Como Prestador, quiero abrir enlaces oficiales desde la ruta de formalización p
 
 ---
 
-### User Story 3 - Mostrar progreso sin declarar estatus legal [UC079] (Priority: P1)
+### User Story 3 - Consultar progreso de formalización [UC079] (Priority: P1)
 
 Como Prestador, quiero ver un progreso orientativo de mi ruta de formalización sin que la plataforma afirme o certifique automáticamente mi estatus legal.
 
@@ -71,11 +71,11 @@ Como Prestador, quiero ver un progreso orientativo de mi ruta de formalización 
 
 ---
 
-### User Story 4 - Vincular ruta institucional futura  [UC080] (Priority: P3)
+### User Story 4 - Vincular ruta institucional futura [Capacidad Future UC080] (Priority: P3)
 
 Como Prestador, quiero que en el futuro la ruta de formalización pueda vincularse con rutas institucionales oficiales, para ampliar el acompañamiento más allá de lo que ofrece la plataforma por sí sola.
 
-**Why this priority**: Está marcado explícitamente como `<<Future>>` en el diagrama; no es parte del alcance comprometido del MVP, igual que las capacidades descritas en `spec-07`.
+**Why this priority**: Está marcado explícitamente como `<<Future>>` en el diagrama UC-07; no es parte del alcance comprometido del MVP.
 
 **Independent Test**: Solo en un entorno de prueba con la capacidad habilitada, vincular una ruta institucional simulada y verificar que no altera el comportamiento cuando la capacidad está deshabilitada.
 
@@ -107,7 +107,7 @@ Como Prestador, quiero que en el futuro la ruta de formalización pueda vincular
 - **FR-077**: El sistema DEBE proporcionar a los Prestadores una ruta orientativa de formalización, identificada explícitamente como informativa. [UC077]
 - **FR-078**: El sistema DEBE permitir abrir enlaces oficiales de formalización configurados, identificándolos claramente como destinos externos. [UC078]
 - **FR-079**: El sistema DEBE presentar el progreso de formalización como orientativo y NO DEBE declarar, certificar ni inferir automáticamente un estatus legal a partir de dicho progreso, sin importar su nivel de avance. [UC079]
-- **FR-080**: El sistema PUEDE admitir en el futuro una vinculación con rutas institucionales externas, la cual DEBE permanecer deshabilitada sin afectar el funcionamiento de UC077–UC079 mientras no sea aprobada explícitamente. [UC080]
+- **FR-080**: El sistema PUEDE admitir en el futuro una vinculación con rutas institucionales externas, la cual DEBE permanecer deshabilitada sin afectar el funcionamiento de UC077–UC079 mientras no sea aprobada explícitamente. [Capacidad Future UC080 documentada en UC-07]
 
 ### Key Entities _(include if feature involves data)_
 

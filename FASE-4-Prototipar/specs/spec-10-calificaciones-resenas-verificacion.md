@@ -1,12 +1,12 @@
 # Feature Specification: SPEC-10 — Calificaciones, reseñas y verificación
 
 **Creado**: 2026-09-16 
-**Casos de uso cubiertos**: UC059, UC060, UC061, UC062, UC063, UC064 
+**Casos de uso cubiertos**: UC059, UC060, UC062, UC063, UC064
 
 ## User Scenarios & Testing _(mandatory)_
 
 
-### User Story 1 - Calificar servicio finalizado [UC059, UC061 ] (Priority: P1)
+### User Story 1 - Calificar servicio finalizado [UC059; regla UC061] (Priority: P1)
 
 Como Cliente, quiero calificar un servicio ya finalizado para dejar constancia de mi experiencia y que la reputación del Prestador se actualice.
 
@@ -21,7 +21,7 @@ Como Cliente, quiero calificar un servicio ya finalizado para dejar constancia d
     - **Given** un Cliente tiene un servicio propio en estado "finalizado" sin calificación previa
     - **When** asigna una calificación (ej. de 1 a 5)
     - **Then** el sistema registra la calificación asociada a ese servicio y al Prestador correspondiente
-2. **Scenario**: Recálculo automático de reputación agregada [UC061]
+2. **Scenario**: Recálculo automático de reputación agregada [Regla UC061]
     
     - **Given** se acaba de registrar una nueva calificación válida para un Prestador
     - **When** la calificación se confirma
@@ -66,7 +66,7 @@ Como Cliente, quiero agregar un comentario escrito a mi calificación para expli
 
 ---
 
-### User Story 3 - Mostrar nivel de verificación [UC062] (Priority: P1)
+### User Story 3 - Consultar nivel de verificación [UC062] (Priority: P1)
 
 Como Usuario (Cliente o Prestador), quiero ver el nivel de verificación de un Prestador para decidir con más confianza si contratarlo.
 
@@ -138,7 +138,7 @@ Como Usuario, quiero reportar una reseña que considero falsa, ofensiva o injust
 
 - **FR-059**: El sistema DEBE permitir que un Cliente califique un servicio propio únicamente cuando esté en estado "finalizado", y como máximo una vez por servicio. [UC059]
 - **FR-060**: El sistema DEBE permitir agregar una reseña textual únicamente sobre una calificación ya existente del mismo Cliente. [UC060]
-- **FR-061**: El sistema DEBE recalcular automáticamente la reputación agregada del Prestador cada vez que se registra una nueva calificación válida. [UC061]
+- **FR-061**: El sistema DEBE recalcular automáticamente la reputación agregada del Prestador cada vez que se registra una nueva calificación válida. [Regla interna UC061 asociada a UC059]
 - **FR-062**: El sistema DEBE mostrar el nivel de verificación vigente de un Prestador a cualquier Usuario que consulte su perfil. [UC062]
 - **FR-063**: El sistema DEBE permitir que un Prestador solicite verificación documental ampliada, sin admitir una segunda solicitud mientras haya una pendiente. [UC063]
 - **FR-064**: El sistema DEBE permitir que un Usuario reporte una reseña existente, registrando el reporte para su revisión posterior. [UC064]

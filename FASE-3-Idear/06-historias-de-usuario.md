@@ -604,7 +604,7 @@
 * Dado un evento administrativo que no deba exponerse íntegramente, cuando se presenta al usuario, entonces se muestra solo la información permitida.
 * Dado un servicio cancelado/finalizado, cuando se consulta, entonces el historial permanece disponible según política de retención.
 
-##### HU-SA21 — Usar canal de coordinación autorizado
+##### HU-SA21 — Consultar datos de contacto autorizados
 **Como** Cliente y prestador seleccionado, **quiero** comunicarse mediante el canal habilitado para el servicio, **para** coordinar horario y detalles sin exponer información antes de la aceptación.
 
 **Criterios de aceptación:**
@@ -728,7 +728,7 @@
 
 ---
 
-##### HU-SA36 — Mostrar progreso sin declarar estatus legal
+##### HU-SA36 — Consultar progreso de formalización
 **Como** Sistema, **quiero** diferenciar progreso, declaración y verificación, **para** evitar etiquetar erróneamente a una persona como formal o informal.
 
 **Criterios de aceptación:**
@@ -792,7 +792,7 @@
 * Dado que el canal es externo, cuando se abre, entonces se informa de forma adecuada el cambio de contexto si la política lo requiere.
 * Dado que se comparten datos con el canal externo, cuando se diseña la integración, entonces se minimiza la información transferida.
 
-##### HU-SA44 — Idiomas adicionales
+##### HU-SA44 — Seleccionar idioma
 **Como** Usuario, **quiero** cambiar el idioma de la interfaz, **para** usar la plataforma en un idioma adicional cuando la expansión lo requiera.
 
 **Criterios de aceptación:**
@@ -800,7 +800,7 @@
 * Dado contenido generado por usuarios, cuando cambia el idioma de interfaz, entonces no se traduce automáticamente salvo funcionalidad expresa.
 * Dada una traducción faltante, cuando se carga una pantalla, entonces se aplica la estrategia de fallback definida.
 
-##### HU-SA45 — Piloto de pasarela de pago
+##### HU-SA45 — Pagar servicio mediante pasarela
 **Como** Cliente y prestador, **quiero** probar un flujo de pago externo/integrado limitado, **para** validar viabilidad antes de incorporar pagos al producto central.
 
 **Criterios de aceptación:**

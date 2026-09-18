@@ -1,10 +1,10 @@
 # Feature Specification: SPEC-06 — Compatibilidad y oportunidades de servicio
 
 **Creado**: 2026-09-16
-**Casos de uso cubiertos**: UC034, UC035, UC036, UC037, UC038 
+**Casos de uso cubiertos**: UC035, UC036, UC037
 ## User Scenarios & Testing _(mandatory)_
 
-### User Story 1 - Ver y filtrar el tablero de oportunidades compatibles [UC034, UC035, UC036, UC038] (Priority: P1)
+### User Story 1 - Ver y filtrar oportunidades compatibles [UC035, UC036; regla UC034; evento UC038] (Priority: P1)
 
 Como prestador, quiero ver un tablero con las solicitudes de servicio compatibles con mi perfil, poder filtrarlas, y ser notificado cuando aparezca una nueva oportunidad compatible, para no tener que revisar manualmente cada solicitud publicada en la plataforma.
 
@@ -14,7 +14,7 @@ Como prestador, quiero ver un tablero con las solicitudes de servicio compatible
 
 **Acceptance Scenarios**:
 
-1. **Scenario**: Ver el tablero con oportunidades compatibles [UC034]
+1. **Scenario**: Ver oportunidades compatibles [UC035]
     
     - **Given** un Prestador tiene su perfil configurado con categorías, zonas de atención y disponibilidad
     - **When** consulta su tablero de oportunidades
@@ -34,7 +34,7 @@ Como prestador, quiero ver un tablero con las solicitudes de servicio compatible
     - **Given** un Prestador aplica un filtro que ninguna oportunidad de su tablero cumple
     - **When** confirma el filtro
     - **Then** el sistema muestra el resultado vacío, sin producir un error ni descartar el filtro aplicado
-5. **Scenario**: Notificar una nueva oportunidad compatible [UC038]
+5. **Scenario**: Notificar una nueva oportunidad compatible [Evento UC038]
     
     - **Given** un Cliente publica una nueva solicitud que resulta compatible con el perfil de un Prestador
     - **When** el sistema determina esa compatibilidad
@@ -88,11 +88,11 @@ Como prestador, quiero consultar el detalle completo de una oportunidad de mi ta
 
 ### Functional Requirements
 
-- **FR-035**: El sistema DEBE permitir que un Prestador consulte un tablero que muestre únicamente las solicitudes abiertas compatibles con su perfil (categoría, zona y disponibilidad), incluyendo el caso de tablero vacío. _(UC035, incluye a UC034)_
-- **FR-034**: El sistema DEBE calcular la compatibilidad de cada solicitud contra cada perfil usando categoría, zona y disponibilidad, y DEBE marcar como no evaluable toda solicitud que no tenga datos suficientes para ese cálculo. _(UC034, incluido en UC035)_
+- **FR-035**: El sistema DEBE permitir que un Prestador consulte oportunidades que muestren únicamente las solicitudes abiertas compatibles con su perfil (categoría, zona y disponibilidad), incluyendo el caso de lista vacía. _(UC035; usa la regla UC034)_
+- **FR-034**: El sistema DEBE calcular la compatibilidad de cada solicitud contra cada perfil usando categoría, zona y disponibilidad, y DEBE marcar como no evaluable toda solicitud que no tenga datos suficientes para ese cálculo. _(Regla interna de compatibilidad para UC035)_
 - **FR-036**: El sistema DEBE permitir que un Prestador filtre su tablero de oportunidades por criterios adicionales, sin alterar el cálculo de compatibilidad subyacente. _(UC036, extiende a UC035)_
 - **FR-037**: El sistema DEBE permitir que un Prestador consulte el detalle completo de una oportunidad compatible de su tablero, sin exponer datos privados del Cliente que la publicó, y DEBE rechazar la consulta si la oportunidad no es compatible con su perfil o no existe. _(UC037)_
-- **FR-038**: El sistema DEBE notificar a un Prestador cuando el cálculo de compatibilidad detecte una nueva oportunidad para su perfil, sin requerir que el Prestador esté consultando el tablero en ese momento. _(UC038, extiende a UC034)_
+- **FR-038**: El sistema DEBE notificar a un Prestador cuando el cálculo de compatibilidad detecte una nueva oportunidad para su perfil, sin requerir que el Prestador esté consultando las oportunidades en ese momento. _(Evento automático asociado a UC035)_
 
 ### Key Entities _(include if feature involves data)_
 

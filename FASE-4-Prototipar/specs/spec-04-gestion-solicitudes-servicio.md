@@ -1,11 +1,11 @@
 # Feature Specification: SPEC-04 — Gestión de solicitudes de servicio
 
 **Creado**: 2026-09-16
-**Casos de uso cubiertos**: UC016, UC017, UC018, UC019, UC020, UC021, UC022, UC023 
+**Casos de uso cubiertos**: UC018, UC019, UC020, UC021, UC022, UC023
 
 ## User Scenarios & Testing _(mandatory)_
 
-### User Story 1 - Publicar una solicitud de servicio [UC016, UC017, UC018, UC019] (Priority: P1)
+### User Story 1 - Crear y publicar una solicitud de servicio [UC018, UC019; pasos integrados UC016 y UC017] (Priority: P1)
 
 Como cliente, quiero crear una solicitud de servicio definiendo obligatoriamente su zona aproximada y su urgencia, pudiendo adjuntar fotos y decidiendo si la publico de inmediato o la conservo como borrador, para conseguir prestadores sin necesidad de revelar mi dirección exacta.
 
@@ -15,22 +15,22 @@ Como cliente, quiero crear una solicitud de servicio definiendo obligatoriamente
 
 **Acceptance Scenarios**:
 
-1. **Scenario**: Publicación completa con datos obligatorios [UC017]
+1. **Scenario**: Publicación completa con datos obligatorios [UC018; campos UC017]
     
     - **Given** un Cliente indica categoría, descripción, zona aproximada y nivel de urgencia de su solicitud
     - **When** confirma la publicación
     - **Then** el sistema crea la solicitud en estado «publicada», visible para prestadores de esa categoría y zona, mostrando la zona aproximada pero no la dirección exacta del Cliente
-2. **Scenario**: Intento de publicar sin zona o sin urgencia [UC017]
+2. **Scenario**: Intento de publicar sin zona o sin urgencia [Validación UC017]
     
     - **Given** un Cliente intenta publicar una solicitud sin haber definido la zona aproximada o el nivel de urgencia
     - **When** confirma la publicación
     - **Then** el sistema rechaza la operación, señala el campo faltante y no crea ningún registro
-3. **Scenario**: Adjuntar fotos de forma opcional [UC016]
+3. **Scenario**: Adjuntar fotos de forma opcional [Paso opcional UC016]
     
     - **Given** un Cliente está redactando su solicitud antes de confirmarla
     - **When** adjunta una o más fotos del problema o del lugar
     - **Then** el sistema las asocia a la solicitud y las incluye al publicarla; si el Cliente no adjunta ninguna foto, la publicación se completa igualmente sin ellas
-4. **Scenario**: Conservar como borrador en lugar de publicar [UC019]
+4. **Scenario**: Guardar solicitud como borrador [UC019]
     
     - **Given** un Cliente completó parcial o totalmente los datos de su solicitud
     - **When** elige conservar como borrador en lugar de confirmar la publicación
@@ -128,10 +128,10 @@ Como cliente, quiero ver la lista de mis solicitudes y el detalle y estado de ca
 
 ### Functional Requirements
 
-- **FR-017**: El sistema DEBE exigir zona aproximada y nivel de urgencia como datos obligatorios en toda publicación de solicitud, incluidos siempre dentro del flujo de publicación. _(UC017, incluido en UC018)_
+- **FR-017**: El sistema DEBE exigir zona aproximada y nivel de urgencia como datos obligatorios en toda publicación de solicitud, incluidos siempre dentro del flujo de publicación. _(Campos obligatorios de UC018)_
 - **FR-018**: El sistema DEBE permitir que un Cliente publique una solicitud completa (categoría, descripción, zona aproximada, urgencia y fotos opcionales), dejándola visible para prestadores de esa categoría y zona sin revelar la dirección exacta, y DEBE rechazar la publicación si falta algún dato obligatorio. _(UC018)_
-- **FR-016**: El sistema DEBE permitir, de forma opcional, adjuntar una o más fotos a la solicitud antes o durante su publicación, sin que su ausencia impida publicar. _(UC016, extiende a UC018)_
-- **FR-019**: El sistema DEBE permitir, como alternativa a publicar, conservar la solicitud como borrador no visible para prestadores, retomable posteriormente. _(UC019, extiende a UC018)_
+- **FR-016**: El sistema DEBE permitir, de forma opcional, adjuntar una o más fotos a la solicitud antes o durante su publicación, sin que su ausencia impida publicar. _(Paso opcional de UC018)_
+- **FR-019**: El sistema DEBE permitir guardar una solicitud como borrador no visible para prestadores y retomarla posteriormente, como alternativa autónoma a publicarla. _(UC019)_
 - **FR-020**: El sistema DEBE permitir que un Cliente edite los datos de una solicitud propia mientras esté en estado abierto (publicada o borrador), y DEBE rechazar la edición si la solicitud ya no admite cambios o no le pertenece. _(UC020)_
 - **FR-021**: El sistema DEBE permitir que un Cliente cancele una solicitud propia mientras esté abierta, dejándola fuera de la visibilidad de los prestadores, y DEBE rechazar la cancelación si la solicitud ya no está abierta o no le pertenece. _(UC021)_
 - **FR-022**: El sistema DEBE permitir que un Cliente consulte la lista completa de sus propias solicitudes, con su estado actual, sin mostrar solicitudes de otros clientes. _(UC022)_

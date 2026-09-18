@@ -36,7 +36,7 @@ Como Usuario, quiero referir a otras personas a CONectaSM para apoyar el crecimi
 
 ---
 
-### User Story 2 - Idiomas adicionales `<<Could>>` [UC092] (Priority: P3)
+### User Story 2 - Seleccionar idioma `<<Could>>` [UC092] (Priority: P3)
 
 Como Usuario, quiero usar la plataforma en un idioma adicional al español, para mejorar mi accesibilidad lingüística.
 
@@ -75,7 +75,7 @@ Como Usuario, quiero usar la plataforma en un idioma adicional al español, para
 ### Functional Requirements
 
 - **FR-089**: El sistema PUEDE implementar un programa de referidos, sujeto a reglas explícitas de elegibilidad, atribución y prevención de auto-referido/duplicados, y DEBE permanecer deshabilitado sin afectar el MVP mientras no exista aprobación explícita. [UC089]
-- **FR-092**: El sistema PUEDE admitir idiomas adicionales, con un comportamiento de respaldo en español para cualquier texto sin traducción disponible, y DEBE permanecer deshabilitado (operando solo en español) sin afectar el MVP mientras no exista aprobación explícita. [UC092]
+- **FR-092**: El sistema PUEDE permitir seleccionar un idioma adicional, con un comportamiento de respaldo en español para cualquier texto sin traducción disponible, y DEBE mantener la selección deshabilitada (operando solo en español) sin afectar el MVP mientras no exista aprobación explícita. [UC092]
 
 ### Key Entities _(include if feature involves data)_
 

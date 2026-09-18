@@ -9,7 +9,7 @@
 
 Como Cliente, quiero visualizar Prestadores en un mapa para explorar opciones geográficamente, en lugar de solo verlos en una lista.
 
-**Why this priority**: Es una mejora de descubrimiento (complementa `spec-02` de UC-02), pero la plataforma ya es funcional sin ella mediante la lista y filtros existentes.
+**Why this priority**: Es una mejora de descubrimiento (complementa `spec-03` de UC-02), pero la plataforma ya es funcional sin ella mediante la lista y filtros existentes.
 
 **Independent Test**: Con Prestadores de prueba en zonas conocidas, abrir el mapa y verificar que solo se muestra la zona aproximada de cada uno, nunca su dirección exacta.
 
@@ -19,7 +19,7 @@ Como Cliente, quiero visualizar Prestadores en un mapa para explorar opciones ge
     
     - **Given** el mapa visual no está habilitado
     - **When** un Cliente busca esta opción
-    - **Then** el sistema no la presenta como disponible; el descubrimiento por lista/filtros (`spec-02`) sigue funcionando con normalidad
+    - **Then** el sistema no la presenta como disponible; el descubrimiento por lista/filtros (`spec-03`) sigue funcionando con normalidad
 2. **Scenario**: Mapa con precisión autorizada
     
     - **Given** el mapa está habilitado y existen Prestadores con zona aproximada configurada (`spec-02`, UC009)
@@ -42,7 +42,7 @@ Como Cliente, quiero visualizar Prestadores en un mapa para explorar opciones ge
 
 ### Functional Requirements
 
-- **FR-087**: El sistema PUEDE proporcionar un mapa visual de Prestadores, utilizando exclusivamente el nivel de precisión de ubicación autorizado por las reglas de privacidad de `spec-02` (UC013), y DEBE permanecer deshabilitado sin afectar el descubrimiento base (`spec-02`) mientras no exista aprobación explícita. [UC087]
+- **FR-087**: El sistema PUEDE proporcionar un mapa visual de Prestadores, utilizando exclusivamente el nivel de precisión de ubicación autorizado por las reglas de privacidad de `spec-02` (UC013), y DEBE permanecer deshabilitado sin afectar el descubrimiento base (`spec-03`) mientras no exista aprobación explícita. [UC087]
 
 ### Key Entities _(include if feature involves data)_
 
@@ -53,5 +53,5 @@ Como Cliente, quiero visualizar Prestadores en un mapa para explorar opciones ge
 ### Measurable Outcomes
 
 - **SC-001**: El 100% de las representaciones geográficas del mapa respeta la precisión de ubicación autorizada y no revela dirección exacta sin autorización, en el 100% de los casos de prueba.
-- **SC-002**: La desactivación del mapa no impide completar el descubrimiento de Prestadores por lista/filtros definido en `spec-02`.
+- **SC-002**: La desactivación del mapa no impide completar el descubrimiento de Prestadores por lista/filtros definido en `spec-03`.
 

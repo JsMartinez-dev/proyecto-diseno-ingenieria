@@ -1,11 +1,11 @@
 # Feature Specification: SPEC-09 — Notificaciones de propuestas y servicios
 
 **Creado**: 2026-09-16
-**Casos de uso cubiertos**: UC057, UC058
+**Casos de uso cubiertos**: Ninguno; UC057 y UC058 son eventos automáticos asociados a otros casos de uso
 
 ## User Scenarios & Testing _(mandatory)_
 
-### User Story 1 - Notificar la aceptación de una propuesta [UC057] (Priority: P1)
+### User Story 1 - Notificar la aceptación de una propuesta [Evento UC057] (Priority: P1)
 
 Como prestador, quiero ser notificado automáticamente cuando un cliente acepta mi propuesta, para saber sin demora que debo iniciar el servicio contratado.
 
@@ -15,7 +15,7 @@ Como prestador, quiero ser notificado automáticamente cuando un cliente acepta 
 
 **Acceptance Scenarios**:
 
-1. **Scenario**: Notificación disparada por la aceptación [UC057]
+1. **Scenario**: Notificación disparada por la aceptación [Evento UC057]
     
     - **Given** un Cliente acepta la propuesta de un Prestador
     - **When** la aceptación se confirma
@@ -31,7 +31,7 @@ Como prestador, quiero ser notificado automáticamente cuando un cliente acepta 
     - **When** se intenta generar o forzar una notificación de aceptación
     - **Then** el sistema no permite crear una notificación de aceptación sin una aceptación real asociada
 
-### User Story 2 - Notificar cambios de estado del servicio [UC058] (Priority: P1)
+### User Story 2 - Notificar cambios de estado del servicio [Evento UC058] (Priority: P1)
 
 Como cliente o prestador, quiero ser notificado automáticamente cuando la otra parte cambie el estado del servicio contratado, para conocer su avance sin tener que consultarlo manualmente cada vez.
 
@@ -41,17 +41,17 @@ Como cliente o prestador, quiero ser notificado automáticamente cuando la otra 
 
 **Acceptance Scenarios**:
 
-1. **Scenario**: Notificación por una transición ejecutada por el Prestador [UC058]
+1. **Scenario**: Notificación por una transición ejecutada por el Prestador [Evento UC058]
     
     - **Given** un Prestador marca su servicio contratado como en ejecución o como terminado
     - **When** la transición se confirma
     - **Then** el sistema notifica automáticamente al Cliente de ese servicio sobre el nuevo estado
-2. **Scenario**: Notificación por una transición ejecutada por el Cliente [UC058]
+2. **Scenario**: Notificación por una transición ejecutada por el Cliente [Evento UC058]
     
     - **Given** un Cliente confirma la finalización de su servicio
     - **When** la confirmación se registra
     - **Then** el sistema notifica automáticamente al Prestador sobre el cierre del servicio
-3. **Scenario**: Notificación por cancelación [UC058 ]
+3. **Scenario**: Notificación por cancelación [Evento UC058]
     
     - **Given** un Cliente o un Prestador cancela un servicio contratado
     - **When** la cancelación se confirma
@@ -73,8 +73,8 @@ Como cliente o prestador, quiero ser notificado automáticamente cuando la otra 
 
 ### Functional Requirements
 
-- **FR-057**: El sistema DEBE notificar automáticamente al Prestador cuya propuesta fue aceptada, disparado exclusivamente por la aceptación de esa propuesta, sin que ningún actor lo ejecute como acción independiente. _(UC057, extiende a UC046)_
-- **FR-058**: El sistema DEBE notificar automáticamente a la contraparte del servicio (Cliente o Prestador) cuando este cambie de estado por marcar en ejecución, marcar como terminado, confirmar finalización o cancelar, disparado exclusivamente por esas transiciones. _(UC058, extiende a UC051, UC052, UC053 y UC054)_
+- **FR-057**: El sistema DEBE notificar automáticamente al Prestador cuya propuesta fue aceptada, disparado exclusivamente por la aceptación de esa propuesta, sin que ningún actor lo ejecute como acción independiente. _(Evento automático de UC046)_
+- **FR-058**: El sistema DEBE notificar automáticamente a la contraparte del servicio (Cliente o Prestador) cuando este cambie de estado por marcar en ejecución, marcar como terminado, confirmar finalización o cancelar, disparado exclusivamente por esas transiciones. _(Evento automático de UC051, UC052, UC053 y UC054)_
 
 ### Key Entities _(include if feature involves data)_
 

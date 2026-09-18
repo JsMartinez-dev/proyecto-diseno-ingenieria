@@ -121,7 +121,7 @@
 | **Must** | US-061 | Confirmar finalización del servicio | Necesaria para el flujo principal o para una condición mínima de seguridad, privacidad u operación. |
 | **Must** | US-062 | Cancelar servicio contratado | Necesaria para el flujo principal o para una condición mínima de seguridad, privacidad u operación. |
 | **Must** | US-063 | Consultar historial de estados del servicio | Necesaria para el flujo principal o para una condición mínima de seguridad, privacidad u operación. |
-| **Must** | US-064 | Usar canal de coordinación autorizado | Must condicionado: la coordinación posterior a la aceptación es indispensable, aunque el canal concreto depende de la decisión PD-05. |
+| **Must** | US-064 | Consultar datos de contacto autorizados | Must condicionado: la coordinación posterior a la aceptación es indispensable y solo se revelan los datos aprobados. |
 
 ### EP-09 — Reputación, verificación y confianza
 
@@ -131,7 +131,7 @@
 | **Must** | US-066 | Impedir calificación duplicada | Necesaria para el flujo principal o para una condición mínima de seguridad, privacidad u operación. |
 | **Must** | US-067 | Agregar reseña textual | Necesaria para el flujo principal o para una condición mínima de seguridad, privacidad u operación. |
 | **Must** | US-068 | Calcular reputación agregada | Necesaria para el flujo principal o para una condición mínima de seguridad, privacidad u operación. |
-| **Must** | US-069 | Mostrar nivel de verificación con significado explícito | Necesaria para el flujo principal o para una condición mínima de seguridad, privacidad u operación. |
+| **Must** | US-069 | Consultar nivel de verificación con significado explícito | Necesaria para el flujo principal o para una condición mínima de seguridad, privacidad u operación. |
 | **Must** | US-071 | Reportar reseña o reputación problemática | Necesaria para el flujo principal o para una condición mínima de seguridad, privacidad u operación. |
 | **Should** | US-070 | Solicitar verificación documental ampliada | Valor alto, pero el MVP puede operar temporalmente sin esta capacidad. |
 
@@ -159,7 +159,7 @@
 | **Should** | US-084 | Consultar checklist por cuatro dimensiones | Valor alto, pero el MVP puede operar temporalmente sin esta capacidad. |
 | **Should** | US-085 | Registrar avance declarado en checklist | Valor alto, pero el MVP puede operar temporalmente sin esta capacidad. |
 | **Should** | US-086 | Abrir enlaces oficiales de formalización | Valor alto, pero el MVP puede operar temporalmente sin esta capacidad. |
-| **Should** | US-087 | Mostrar progreso sin declarar estatus legal | Valor alto, pero el MVP puede operar temporalmente sin esta capacidad. |
+| **Should** | US-087 | Consultar progreso de formalización | Valor alto, pero el MVP puede operar temporalmente sin esta capacidad; nunca declara estatus legal. |
 | **Could** | US-088 | Vincular ruta institucional futura | Mejora evolutiva; no bloquea la hipótesis central ni el ciclo principal. |
 
 ### EP-12 — Notificaciones, historial y analítica básica
@@ -184,5 +184,5 @@
 | **Could** | US-099 | Programa de referidos                                 | Mejora evolutiva; no bloquea la hipótesis central ni el ciclo principal.                                                           |
 | **Could** | US-100 | Soporte por WhatsApp                                  | Mejora evolutiva; no bloquea la hipótesis central ni el ciclo principal.                                                           |
 | **Could** | US-101 | Onboarding asistido por WhatsApp o gestor comunitario | Mejora evolutiva; no bloquea la hipótesis central ni el ciclo principal.                                                           |
-| **Could** | US-102 | Idiomas adicionales                                   | Mejora evolutiva; no bloquea la hipótesis central ni el ciclo principal.                                                           |
-| **Won't** | US-103 | Piloto de pasarela de pago                            | Won’t Have del MVP: el backlog la ubica como piloto posterior y el alcance excluye pagos integrados/billetera del release inicial. |
+| **Could** | US-102 | Seleccionar idioma                                    | Mejora evolutiva; no bloquea la hipótesis central ni el ciclo principal.                                                           |
+| **Won't** | US-103 | Pagar servicio mediante pasarela                      | Won’t Have del MVP: el backlog la ubica como piloto posterior y el alcance excluye pagos integrados/billetera del release inicial. |

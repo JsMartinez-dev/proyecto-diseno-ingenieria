@@ -6,9 +6,9 @@
 ## User Scenarios & Testing _(mandatory)_
 
 
-### User Story 1 - Piloto de pasarela de pago `<<Future>>` [UC093] (Priority: P4)
+### User Story 1 - Pagar servicio mediante pasarela `<<Future>>` [UC093] (Priority: P4)
 
-Como Cliente o Prestador, quiero evaluar un piloto de pago integrado para facilitar transacciones, únicamente si el modelo de monetización de la plataforma ha sido validado y aprobado explícitamente.
+Como Cliente, quiero pagar un servicio mediante una pasarela integrada, únicamente cuando el modelo de monetización de la plataforma haya sido validado y aprobado explícitamente.
 
 **Why this priority**: Es la capacidad de mayor riesgo regulatorio y financiero de todo el proyecto; su prioridad más baja (P4) refleja que depende de una validación de negocio que todavía no existe, no solo de una decisión técnica.
 
