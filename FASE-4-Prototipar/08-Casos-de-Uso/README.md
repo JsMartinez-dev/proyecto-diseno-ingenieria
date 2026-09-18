@@ -24,4 +24,4 @@
 | UC-06    | Formalización, notificaciones e historial |
 | UC-07    | Capacidades Could/Future                  |
 
-
+[Ver diagrama en Miro](https://miro.com/app/live-embed/uXjVHlVh5HE=/?embedMode=view_only_without_ui...)
