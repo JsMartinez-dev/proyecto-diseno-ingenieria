@@ -44,9 +44,6 @@ oportunidades comerciales y de los servicios que reciben estos trabajadores**.
 Esto podría ocasionar una pérdida de productividad y de ingresos, especialmente cuando 
 aumenta el número de clientes y solicitudes.
 
-> Todo lo anterior es una **hipótesis inicial**. Ninguna fuente consultada hasta 
-> ahora mide directamente la fragmentación en la gestión de clientes. esto debe 
-> confirmarse mediante entrevistas con trabajadores reales del sector.
 
 ## 3. Evidencia de contexto (DANE — EMICRON 2024)
 

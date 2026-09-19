@@ -3,6 +3,7 @@
 **Date**: [DATE] 
 **Spec**: [link]
 
+Plantear de manera técnica el proyecto, la arquitectura a realizar con respecto al scope del proyecto
 ## Summary
 
 [Extract from feature spec: primary requirement + technical approach from research]

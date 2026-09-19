@@ -1,4 +1,4 @@
-# PLANTILLA DE PROYECTO: CONectaSM
+# PLANTILLA DE PROYECTO: ALIADO
 
 ---
 
@@ -15,7 +15,7 @@
 
 ## 1. IDENTIFICACIÓN DEL PROYECTO
 
-* **Título del proyecto:** CONectaSM - Plataforma para la gestión y contratación confiable de servicios técnicos a domicilio en Santa Marta.
+* **Título del proyecto:** ALIADO - Plataforma para la gestión y contratación confiable de servicios técnicos a domicilio en Santa Marta.
 
 
 * **Tipo de proyecto:**
@@ -74,13 +74,13 @@ Ver evidencia completa y gráficas en [01-definición técnica del problema](01-
 - **Prestador (trabajador independiente):** persona que ofrece servicios técnicos a domicilio de forma independiente y que actualmente gestiona sus solicitudes, agenda y desplazamientos de forma manual y fragmentada.
 ### Justificación técnica y social del proyecto
 
-* **Justificación social:** el problema afecta directamente los ingresos y la productividad de un grupo poblacional numeroso y mayoritariamente informal (según EMICRON, Santa Marta concentra la mayor proporción de trabajadores por cuenta propia del país). Mejorar la gestión de oportunidades comerciales de este grupo tiene un impacto potencial en su estabilidad de ingresos. Del lado del cliente, resolver el problema también responde a una necesidad de confianza y transparencia.
+* **Justificación social:** ==el problema afecta directamente los ingresos y la productividad de un grupo poblacional numeroso y mayoritariamente informal (según EMICRON, Santa Marta concentra la mayor proporción de trabajadores por cuenta propia del país). Mejorar la gestión de oportunidades comerciales de este grupo tiene un impacto potencial en su estabilidad de ingresos. Del lado del cliente, resolver el problema también responde a una necesidad de confianza y transparencia.==
 
-* **Justificación técnica**: Los archivos [spec-01](FASE-4-Prototipar/08-Casos-de-Uso/Caso-de-uso-1/spec-01-acceso-identidad-cuenta-privacidad.md) a [spec-07](FASE-4-Prototipar/08-Casos-de-Uso/Caso-de-uso-7/spec-07-capacidades-could-future.md) ya documentan un análisis técnico avanzado, que evidencia viabilidad técnica del enfoque de plataforma digital.
+* **Justificación técnica**: Los archivos [spec-01](FASE-4-Prototipar/08-Casos-de-Uso/Caso-de-uso-1/spec-01-acceso-identidad-cuenta-privacidad.md) a [spec-20](FASE-4-Prototipar/08-Casos-de-Uso/Caso-de-uso-7/spec-07-capacidades-could-future.md) ya documentan un análisis técnico avanzado, que evidencia viabilidad técnica del enfoque de plataforma digital.
 
 ---
 
-## 3. RESTRICCIONES Y CONDICIONANTES DEL DISEÑO
+## 3. ==RESTRICCIONES== Y CONDICIONANTES DEL DISEÑO
 
 Seleccionen cuáles de las siguientes restricciones aplican e indican cómo se incorporan en el diseño de su solución:
 *   [x] **Técnicas** (Limitaciones de tecnología disponible, velocidad, arquitectura, infraestructura, etc.)
@@ -100,15 +100,15 @@ Seleccionen cuáles de las siguientes restricciones aplican e indican cómo se i
 	
 **Requerimientos funcionales (RF):** documentados en el repositorio, organizados por caso de uso.
 
-| Caso de uso | Archivo                                                                                                                                                             | Alcance                                                   | N.º de RF |
-| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------- | --------- |
-| UC-01       | [spec-01-acceso-identidad-cuenta-privacidad](FASE-4-Prototipar/08-Casos-de-Uso/Caso-de-uso-1/spec-01-acceso-identidad-cuenta-privacidad.md)                         | Registro, autenticación, roles, privacidad de ubicación   | 15        |
-| UC-02       | [spec-02-cliente-descubrimiento-solicitudes](FASE-4-Prototipar/08-Casos-de-Uso/Caso-de-uso-2/spec-02-cliente-descubrimiento-solicitudes.md)                         | Publicación de solicitudes, descubrimiento de prestadores | 15        |
-| UC-03       | [spec-03-prestador-perfil-oportunidades](FASE-4-Prototipar/08-Casos-de-Uso/Caso-de-uso-3/spec-03-prestador-perfil-oportunidades.md)                                 | Perfil profesional, tablero de oportunidades              | 16        |
-| UC-04       | [spec-04-propuestas-contratacion-ciclo-servicio](FASE-4-Prototipar/08-Casos-de-Uso/Caso-de-uso-4/spec-04-propuestas-contratacion-ciclo-servicio.md)                 | Propuestas, contratación, ciclo de vida del servicio      | 20        |
-| UC-05       | [spec-05-confianza-verificacion-reportes-administracion](FASE-4-Prototipar/08-Casos-de-Uso/Caso-de-uso-5/spec-05-confianza-verificacion-reportes-administracion.md) | Calificaciones, reportes, moderación, administración      | 19        |
-| UC-06       | [spec-06-formalizacion-notificaciones-historial](FASE-4-Prototipar/08-Casos-de-Uso/Caso-de-uso-6/spec-06-formalizacion-notificaciones-historial.md)                 | Formalización progresiva, notificaciones, historial       | 12        |
-| UC-07       | [spec-07-capacidades-could-future](FASE-4-Prototipar/08-Casos-de-Uso/Caso-de-uso-7/spec-07-capacidades-could-future.md)                                             | Capacidades Could/Future (fuera del MVP)                  | 10        |
+| Caso de uso | Alcance                                                   | N.º de RF |
+| ----------- | --------------------------------------------------------- | --------- |
+| UC-01       | Registro, autenticación, roles, privacidad de ubicación   | 15        |
+| UC-02       | Publicación de solicitudes, descubrimiento de prestadores | 15        |
+| UC-03       | Perfil profesional, tablero de oportunidades              | 16        |
+| UC-04       | Propuestas, contratación, ciclo de vida del servicio      | 20        |
+| UC-05       | Calificaciones, reportes, moderación, administración      | 19        |
+| UC-06       | Formalización progresiva, notificaciones, historial       | 12        |
+| UC-07       | Capacidades Could/Future (fuera del MVP)                  | 10        |
 
 **Total: 107 requerimientos funcionales**, cada uno con Historia de Usuario, Escenarios de Aceptación, Casos Límite y Criterios de Éxito medibles.
 
