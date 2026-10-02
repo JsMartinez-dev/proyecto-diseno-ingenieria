@@ -41,12 +41,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Corte-2/planes/plan-spec-02-perfil.md",
+                "file": "Corte-2/planes/plan-spec-03-descubrimiento.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "plan-spec-02-perfil"
+              "title": "plan-spec-03-descubrimiento"
             }
           },
           {
@@ -161,7 +161,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Corte-2/planes/plan-spec-02-perfil.md",
+                "file": "Corte-2/planes/plan-spec-03-descubrimiento.md",
                 "linksCollapsed": true,
                 "unlinkedCollapsed": true
               },
@@ -234,8 +234,10 @@
   },
   "active": "2f22c2662e2220b7",
   "lastOpenFiles": [
-    "Corte-2/planes/plan-spec-01-autenticacion.md",
     "Corte-2/planes/plan-spec-02-perfil.md",
+    "Corte-2/planes/plan-spec-03-descubrimiento.md",
+    "Corte-2/planes/Sin confirmar 361412.crdownload",
+    "Corte-2/planes/plan-spec-01-autenticacion.md",
     "FASE-4-Prototipar/specs/spec-02-gestion-perfil-privacidad.md",
     "FASE-4-Prototipar/specs/spec-01-autenticacion-registro-control-acceso.md",
     "Corte-2/planes/plan-template.md",
@@ -260,7 +262,6 @@
     "FASE-1-Empatizar/01-definicion-tecnica-del-problema.md",
     "FASE-4-Prototipar/08-Casos-de-Uso/Caso-de-uso-1/spec-01-acceso-identidad-cuenta-privacidad.md",
     "Corte-2/planes",
-    "Sin título.md",
     "Sin título.canvas",
     "Corte-2",
     "templates/log.txt",
@@ -276,7 +277,6 @@
     "FASE-4-Prototipar/08-Casos-de-Uso/Caso-de-uso-2/Caso-de-uso-2.drawio.png",
     "bd",
     "FASE-4-Prototipar/specs/Sin confirmar 883328.crdownload",
-    "FASE-4-Prototipar/specs/Sin confirmar 932120.crdownload",
     "Pasted image 20260903191325.png",
     "assets/grafica_dispositivos_electronicos.png",
     "assets/grafica_trabajadores_propios.png",
