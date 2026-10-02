@@ -1,0 +1,40 @@
+CheckInstanceExists: Created new mutex, we are the only instance
+UpdateHostsFile: Checking hosts file...
+UpdateHostsFile: Hosts file path: C:\WINDOWS\system32\drivers\etc\hosts
+UpdateHostsFile: Adding IPv4 entry
+UpdateHostsFile: Adding IPv6 entry
+UpdateHostsFile: Successfully updated hosts file
+UpdateHostsFile: Flushing DNS cache...
+UpdateHostsFile: DNS cache flushed successfully
+Creating IPv4 WebSocket Server on port 32658
+Creating IPv4 WSS Server on port 32660
+IP Address to listen on is 127.0.0.1
+Initialize SSL
+IPv4 WebServer active on 127.0.0.1:32658
+IPv4 HTTP server running OK
+SSL Success
+Creating IPv6 WebSocket Server on port 32658
+Creating IPv6 WSS Server on port 32660
+IP Address to listen on is ::1
+Initialize SSL
+IPv4 WebServer active on 127.0.0.1:32660
+IPv6 WebServer active on ::1:32658
+SSL Success
+IPv6 HTTP server running OK
+StartSoftwareAgent
+IPv6 WebServer active on ::1:32660
+BCS Version 5.69
+IPv6 HTTP server running OK
+New connection on socket 1012
+Starting secure HTTP session thread for socket 1012
+New connection on socket 1032
+Starting secure HTTP session thread for socket 1032
+Upgrade to websocket
+R 1
+ HTTP/1.1 101 Switching Protocols
+Upgrade: websocket
+Connection: Upgrade
+Sec-WebSocket-Accept: +JAtu5uTBUNXj0vaBFXXnFf0GvM=
+
+
+ HttpServerSession end thread
