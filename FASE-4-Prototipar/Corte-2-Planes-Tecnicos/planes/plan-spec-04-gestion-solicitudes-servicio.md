@@ -36,13 +36,13 @@ Relaciones: `Usuario` 1—N `Solicitud`, `Solicitud` 1—N `FotoSolicitud`, `Sol
 
 ## API Contracts
 
-| Método | Endpoint | Request body | Respuesta éxito | Errores |
-|---|---|---|---|---|
-| POST | `/api/v1/solicitudes` | `{ categoriaId, descripcion, zonaId, urgencia, fotos[], estadoDeseado }` | `201 { id, estado }` | `400` falta zona/urgencia/categoría |
-| PUT | `/api/v1/solicitudes/{id}` | campos editables de la solicitud | `200 { id, estado }` | `400` datos inválidos; `403/404` no pertenece o no existe; `409` ya no admite cambios |
-| POST | `/api/v1/solicitudes/{id}/cancelar` | *(sin body)* | `200 { estado: "CANCELADA" }` | `403/404` no pertenece o no existe; `409` ya no estaba abierta |
-| GET | `/api/v1/solicitudes/mias` | — | `200 [ { id, estado, ... } ]` *(puede ser vacío)* | `401` sin rol Cliente |
-| GET | `/api/v1/solicitudes/mias/{id}` | — | `200 { ...detalle }` | `404` inexistente o ajena (sin distinguir causa) |
+| Método | Endpoint                            | Request body                                                             | Respuesta éxito                                   | Errores                                                                               |
+| ------ | ----------------------------------- | ------------------------------------------------------------------------ | ------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| POST   | `/api/v1/solicitudes`               | `{ categoriaId, descripcion, zonaId, urgencia, fotos[], estadoDeseado }` | `201 { id, estado }`                              | `400` falta zona/urgencia/categoría                                                   |
+| PUT    | `/api/v1/solicitudes/{id}`          | campos editables de la solicitud                                         | `200 { id, estado }`                              | `400` datos inválidos; `403/404` no pertenece o no existe; `409` ya no admite cambios |
+| POST   | `/api/v1/solicitudes/{id}/cancelar` | *(sin body)*                                                             | `200 { estado: "CANCELADA" }`                     | `403/404` no pertenece o no existe; `409` ya no estaba abierta                        |
+| GET    | `/api/v1/solicitudes/mias`          | —                                                                        | `200 [ { id, estado, ... } ]` *(puede ser vacío)* | `401` sin rol Cliente                                                                 |
+| GET    | `/api/v1/solicitudes/mias/{id}`     | —                                                                        | `200 { ...detalle }`                              | `404` inexistente o ajena (sin distinguir causa)                                      |
 
 Todos los endpoints restringidos a rol CLIENTE mediante el filtro de autorización por rol de SPEC-01 (T018).
 
