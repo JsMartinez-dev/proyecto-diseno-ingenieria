@@ -4,7 +4,7 @@
     "type": "split",
     "children": [
       {
-        "id": "b1eb1ad9c0d5aa45",
+        "id": "aee83dda72e5c897",
         "type": "tabs",
         "children": [
           {
@@ -13,58 +13,15 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "FASE-4-Prototipar/Corte-2-Planes-Tecnicos/planes/plan-general-ALIADO.md",
+                "file": "Planes-y-plantilla-del-proyecto/planes/plan-spec-13-ruta-formalizacion.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "plan-general-ALIADO"
-            }
-          },
-          {
-            "id": "6d46d6b7afa28c62",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "FASE-4-Prototipar/Corte-2-Planes-Tecnicos/planes/plan-spec-04-gestion-solicitudes-servicio.md",
-                "mode": "source",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "plan-spec-04-gestion-solicitudes-servicio"
-            }
-          },
-          {
-            "id": "5b27ae14bf19bc14",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "FASE-4-Prototipar/specs/spec-04-gestion-solicitudes-servicio.md",
-                "mode": "source",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "spec-04-gestion-solicitudes-servicio"
-            }
-          },
-          {
-            "id": "0085068e284e7d44",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "FASE-4-Prototipar/specs/spec-01-autenticacion-registro-control-acceso.md",
-                "mode": "source",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "spec-01-autenticacion-registro-control-acceso"
+              "title": "plan-spec-13-ruta-formalizacion"
             }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "vertical"
@@ -126,7 +83,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 310.16668701171875
+    "width": 200
   },
   "right": {
     "id": "56d61a7d3e5eca91",
@@ -232,54 +189,54 @@
       "bases:Crear nueva base": false
     }
   },
-  "active": "4fe7ee3994669842",
+  "active": "0b320436009abb74",
   "lastOpenFiles": [
-    "FASE-4-Prototipar/specs/spec-04-gestion-solicitudes-servicio.md",
-    "FASE-4-Prototipar/Corte-2-Planes-Tecnicos/planes/plan-spec-04-gestion-solicitudes-servicio.md",
-    "FASE-4-Prototipar/Corte-2-Planes-Tecnicos/planes/plan-spec-01-autenticacion.md",
-    "FASE-4-Prototipar/specs/spec-01-autenticacion-registro-control-acceso.md",
-    "FASE-4-Prototipar/Corte-2-Planes-Tecnicos/planes/plan-general-ALIADO.md",
-    "FASE-4-Prototipar/Corte-2-Planes-Tecnicos/planes/plan-spec-02-perfil.md",
-    "FASE-4-Prototipar/Corte-2-Planes-Tecnicos/planes/plan-spec-10-calificaciones-resenas-verificacion.md",
-    "FASE-4-Prototipar/Corte-2-Planes-Tecnicos/planes/plan-template.md",
-    "Corte-2/planes/Sin confirmar 535176.crdownload",
-    "FASE-4-Prototipar/Corte-2-Planes-Tecnicos/planes/plan-spec-20-pasarela-pagos-futura.md",
-    "FASE-4-Prototipar/Corte-2-Planes-Tecnicos/planes/plan-spec-19-referidos-e-idiomas.md",
-    "Corte-2/planes/Sin confirmar 418533.crdownload",
-    "FASE-4-Prototipar/Corte-2-Planes-Tecnicos/planes/plan-spec-18-insignia-progreso-formalizacion.md",
-    "Corte-2/planes/Sin confirmar 267057.crdownload",
-    "FASE-4-Prototipar/Corte-2-Planes-Tecnicos/planes/plan-spec-17-mapa-visual-prestadores.md",
-    "Corte-2/planes/Sin confirmar 791315.crdownload",
-    "FASE-4-Prototipar/Corte-2-Planes-Tecnicos/planes/plan-spec-16-onboarding-asistido.md",
-    "Corte-2/planes/Sin confirmar 340533.crdownload",
-    "FASE-4-Prototipar/Corte-2-Planes-Tecnicos/planes/plan-spec-15-chat-soporte-whatsapp.md",
-    "Corte-2/planes/Sin confirmar 804436.crdownload",
-    "FASE-4-Prototipar/Corte-2-Planes-Tecnicos/planes/plan-spec-14-preferencias-historial-indicadores.md",
-    "Corte-2/planes/Sin confirmar 249517.crdownload",
-    "FASE-4-Prototipar/Corte-2-Planes-Tecnicos/planes/plan-spec-13-ruta-formalizacion.md",
-    "Corte-2/planes/Sin confirmar 344180.crdownload",
-    "FASE-4-Prototipar/Corte-2-Planes-Tecnicos/planes/plan-spec-12-administracion-moderacion-riesgos.md",
-    "Corte-2/planes/Sin confirmar 102211.crdownload",
-    "FASE-4-Prototipar/Corte-2-Planes-Tecnicos/planes/plan-spec-11-reportes-evidencias.md",
-    "Corte-2/planes/Sin confirmar 601960.crdownload",
-    "Pasted image 20261002184931.png",
-    "FASE-4-Prototipar/Corte-2-Planes-Tecnicos/Plantilla-Proyecto-ALIADO.md",
-    "FASE-4-Prototipar/Corte-2-Planes-Tecnicos/planes/plan-spec-03-descubrimiento.md",
-    "FASE-4-Prototipar/Corte-2-Planes-Tecnicos/planes/plan-spec-07-creacion-gestion-propuestas.md",
-    "FASE-4-Prototipar/Corte-2-Planes-Tecnicos/planes/plan-spec-09-notificaciones-propuestas-servicios.md",
-    "FASE-4-Prototipar/Corte-2-Planes-Tecnicos/planes/plan-spec-08-contratacion-ciclo-servicio.md",
-    "FASE-4-Prototipar/Corte-2-Planes-Tecnicos/planes/plan-spec-06-compatibilidad-oportunidades.md",
-    "FASE-4-Prototipar/Corte-2-Planes-Tecnicos/planes/plan-spec-05-perfil-profesional.md",
-    "FASE-4-Prototipar/specs/spec-06-compatibilidad-oportunidades.md",
-    "Sin título.canvas",
-    "FASE-4-Prototipar/08-Casos-de-Uso/Caso-de-uso-1/Caso-de-uso-1.drawio.png",
-    "FASE-4-Prototipar/08-Casos-de-Uso/Caso-de-uso-6/Caso-de-uso-6.drawio.png",
-    "FASE-4-Prototipar/08-Casos-de-Uso/Caso-de-uso-5/Caso-de-uso-5.drawio.png",
-    "FASE-4-Prototipar/08-Casos-de-Uso/Caso-de-uso-4/Caso-de-uso-4.drawio.png",
-    "FASE-4-Prototipar/08-Casos-de-Uso/Caso-de-uso-3/Caso-de-uso-3.drawio.png",
-    "FASE-4-Prototipar/08-Casos-de-Uso/Caso-de-uso-2/Caso-de-uso-2.drawio.png",
-    "Pasted image 20260903191325.png",
+    "FASE-4-Prototipar/specs/spec-13-ruta-formalizacion.md",
+    "Planes-y-plantilla-del-proyecto/planes/plan-spec-13-ruta-formalizacion.md",
+    "Planes-y-plantilla-del-proyecto/planes/plan-spec-04-gestion-solicitudes-servicio.md",
+    "Planes-y-plantilla-del-proyecto/planes/plan-spec-02-perfil.md",
+    "Planes-y-plantilla-del-proyecto/planes/plan-general-ALIADO.md",
+    "Planes-y-plantilla-del-proyecto/planes/plan-spec-01-autenticacion.md",
+    "Planes-y-plantilla-del-proyecto/Plantilla-Proyecto-ALIADO.md",
+    "templates/spec-template.md",
+    "entrevistas-realizadas.md",
+    "README.md",
+    "S.md",
+    "P.md",
+    "P 1.md",
+    "FASE-1-Empatizar/01-definicion-tecnica-del-problema.md",
+    "FASE-1-Empatizar/03-Entrevistas/entrevistas-realizadas/Entrevista-01-Cliente.md",
+    "FASE-1-Empatizar/04-mapa-de-empatia.md",
+    "FASE-1-Empatizar/02-usuarios-principales.md",
+    "FASE-1-Empatizar/03-Entrevistas.md",
+    "assets/grafica_dispositivos_uso_celular.jpg",
+    "assets/grafica_dispositivos_electronicos_2025.png.jpg",
     "assets/grafica_dispositivos_electronicos.png",
-    "assets/grafica_trabajadores_propios.png"
+    "assets/grafica_trabajadores_propios_2025.jpg",
+    "assets/grafica_trabajadores_propios.png",
+    "assets/grafica_distribucion_micronegocios.jpg",
+    "assets/grafica_rut_empresas.png",
+    "assets/grafica_uso_servicio_internet.png",
+    "Sin confirmar 239366.crdownload",
+    "FASE-1-Empatizar/03-Entrevistas/entrevista-semiestructurada.md",
+    "FASE-4-Prototipar/specs/spec-05-perfil-profesional.md",
+    "FASE-4-Prototipar/specs/spec-01-autenticacion-registro-control-acceso.md",
+    "Sin confirmar 478344.crdownload",
+    "templates/plan-template 1.md",
+    "templates/plantilla-estudiante-capstone.md",
+    "FASE-4-Prototipar/specs/spec-04-gestion-solicitudes-servicio.md",
+    "Planes-y-plantilla-del-proyecto/planes/plan-spec-10-calificaciones-resenas-verificacion.md",
+    "Planes-y-plantilla-del-proyecto/planes/plan-template.md",
+    "Corte-2/planes/Sin confirmar 535176.crdownload",
+    "Corte-2/planes/Sin confirmar 418533.crdownload",
+    "Corte-2/planes/Sin confirmar 267057.crdownload",
+    "Corte-2/planes/Sin confirmar 791315.crdownload",
+    "Corte-2/planes/Sin confirmar 340533.crdownload",
+    "Corte-2/planes/Sin confirmar 804436.crdownload",
+    "Corte-2/planes/Sin confirmar 249517.crdownload",
+    "Corte-2/planes/Sin confirmar 344180.crdownload",
+    "Pasted image 20261002184931.png",
+    "Sin título.canvas",
+    "FASE-4-Prototipar/08-Casos-de-Uso/Caso-de-uso-1/Caso-de-uso-1.drawio.png"
   ]
 }
