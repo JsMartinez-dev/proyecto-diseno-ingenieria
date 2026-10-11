@@ -144,11 +144,11 @@ flowchart TD
 
 ## Equipo
 
-- Juan Sebastian Martinez Uribe — 2022214031
-- Abraham Ceballos Rodriguez — 2022214004
-- Daniel de Jesús Florez Martinez — 2022214050
-- Seuma Numtshen Rayo Sauna — 2022214033
-- Jenifer Tatiana Roa Correa — 2022214006
+- Juan Sebastian Martinez Uribe 
+- Abraham Ceballos Rodriguez 
+- Daniel de Jesús Florez Martinez 
+- Seuma Numtshen Rayo Sauna
+- Jenifer Tatiana Roa Correa 
 
 ## Estado actual
 
