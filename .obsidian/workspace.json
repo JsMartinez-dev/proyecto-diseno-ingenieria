@@ -13,12 +13,26 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Planes-y-plantilla-del-proyecto/planes/plan-spec-13-ruta-formalizacion.md",
+                "file": "Planes-y-plantilla-del-proyecto/planes/plan-general-ALIADO.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "plan-spec-13-ruta-formalizacion"
+              "title": "plan-general-ALIADO"
+            }
+          },
+          {
+            "id": "12066f2bf3f09e77",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Planes-y-plantilla-del-proyecto/Plantilla-Proyecto-ALIADO.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "Plantilla-Proyecto-ALIADO"
             }
           }
         ]
@@ -189,26 +203,34 @@
       "bases:Crear nueva base": false
     }
   },
-  "active": "0b320436009abb74",
+  "active": "4fe7ee3994669842",
   "lastOpenFiles": [
-    "FASE-4-Prototipar/specs/spec-13-ruta-formalizacion.md",
+    "P.md",
+    "Planes-y-plantilla-del-proyecto/planes/plan-general-ALIADO.md",
+    "Planes-y-plantilla-del-proyecto/Plantilla-Proyecto-ALIADO.md",
+    "Sin confirmar 650596.crdownload",
+    "Planes-y-plantilla-del-proyecto/planes/plan-spec-19-referidos-e-idiomas.md",
+    "Planes-y-plantilla-del-proyecto/planes/plan-spec-18-insignia-progreso-formalizacion.md",
+    "Planes-y-plantilla-del-proyecto/planes/plan-spec-12-administracion-moderacion-riesgos.md",
+    "Planes-y-plantilla-del-proyecto/planes/plan-spec-10-calificaciones-resenas-verificacion.md",
+    "Planes-y-plantilla-del-proyecto/planes/plan-spec-07-creacion-gestion-propuestas.md",
+    "Planes-y-plantilla-del-proyecto/planes/plan-spec-01-autenticacion.md",
+    "FASE-4-Prototipar/13-prototipo-alta-fidelidad.md",
+    "FASE-4-Prototipar/12-prototipo-baja-fidelidad.md",
+    "FASE-4-Prototipar/11-modelo-ficha-especificacion-mvp.md",
+    "FASE-4-Prototipar/09-requisitos-funcionales.md",
     "Planes-y-plantilla-del-proyecto/planes/plan-spec-13-ruta-formalizacion.md",
+    "FASE-4-Prototipar/specs/spec-13-ruta-formalizacion.md",
     "Planes-y-plantilla-del-proyecto/planes/plan-spec-04-gestion-solicitudes-servicio.md",
     "Planes-y-plantilla-del-proyecto/planes/plan-spec-02-perfil.md",
-    "Planes-y-plantilla-del-proyecto/planes/plan-general-ALIADO.md",
-    "Planes-y-plantilla-del-proyecto/planes/plan-spec-01-autenticacion.md",
-    "Planes-y-plantilla-del-proyecto/Plantilla-Proyecto-ALIADO.md",
     "templates/spec-template.md",
     "entrevistas-realizadas.md",
     "README.md",
     "S.md",
-    "P.md",
     "P 1.md",
     "FASE-1-Empatizar/01-definicion-tecnica-del-problema.md",
     "FASE-1-Empatizar/03-Entrevistas/entrevistas-realizadas/Entrevista-01-Cliente.md",
     "FASE-1-Empatizar/04-mapa-de-empatia.md",
-    "FASE-1-Empatizar/02-usuarios-principales.md",
-    "FASE-1-Empatizar/03-Entrevistas.md",
     "assets/grafica_dispositivos_uso_celular.jpg",
     "assets/grafica_dispositivos_electronicos_2025.png.jpg",
     "assets/grafica_dispositivos_electronicos.png",
@@ -218,15 +240,7 @@
     "assets/grafica_rut_empresas.png",
     "assets/grafica_uso_servicio_internet.png",
     "Sin confirmar 239366.crdownload",
-    "FASE-1-Empatizar/03-Entrevistas/entrevista-semiestructurada.md",
-    "FASE-4-Prototipar/specs/spec-05-perfil-profesional.md",
-    "FASE-4-Prototipar/specs/spec-01-autenticacion-registro-control-acceso.md",
     "Sin confirmar 478344.crdownload",
-    "templates/plan-template 1.md",
-    "templates/plantilla-estudiante-capstone.md",
-    "FASE-4-Prototipar/specs/spec-04-gestion-solicitudes-servicio.md",
-    "Planes-y-plantilla-del-proyecto/planes/plan-spec-10-calificaciones-resenas-verificacion.md",
-    "Planes-y-plantilla-del-proyecto/planes/plan-template.md",
     "Corte-2/planes/Sin confirmar 535176.crdownload",
     "Corte-2/planes/Sin confirmar 418533.crdownload",
     "Corte-2/planes/Sin confirmar 267057.crdownload",
@@ -234,7 +248,6 @@
     "Corte-2/planes/Sin confirmar 340533.crdownload",
     "Corte-2/planes/Sin confirmar 804436.crdownload",
     "Corte-2/planes/Sin confirmar 249517.crdownload",
-    "Corte-2/planes/Sin confirmar 344180.crdownload",
     "Pasted image 20261002184931.png",
     "Sin título.canvas",
     "FASE-4-Prototipar/08-Casos-de-Uso/Caso-de-uso-1/Caso-de-uso-1.drawio.png"

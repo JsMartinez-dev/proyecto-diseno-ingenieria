@@ -1,4 +1,4 @@
-# PLAN GENERAL DE IMPLEMENTACIÓN E INFRAESTRUCTURA — ALIADO
+# PLAN GENERAL DE IMPLEMENTACIÓN E INFRAESTRUCTURA - ALIADO
 
 **Proyecto:** ALIADO - Plataforma para la gestión y contratación confiable de servicios técnicos a domicilio en Santa Marta  
 **Programa:** Ingeniería de Sistemas - Universidad del Magdalena  
@@ -12,7 +12,7 @@
 
 Este documento consolida en un único plan técnico la arquitectura, infraestructura, módulos, dependencias, datos, seguridad, despliegue, pruebas y orden de implementación de ALIADO para el alcance completo actualmente especificado en los SPEC-01 a SPEC-20.
 
-El objetivo no es reemplazar los planes individuales de cada SPEC. Los planes individuales siguen siendo la fuente de detalle para sus historias, endpoints y tareas; este documento define la **visión integral del sistema** y las decisiones transversales necesarias para que todas las piezas evolucionen de forma coherente.
+El objetivo no es reemplazar los planes individuales de cada SPEC. Los planes individuales siguen siendo la fuente de detalle para sus historias, endpoints y tareas, este documento define la **visión integral del sistema** y las decisiones transversales necesarias para que todas las piezas evolucionen de forma coherente.
 
 La solución se organiza como un **monolito modular**, con un backend único consumido por una aplicación móvil React Native para Cliente/Prestador y un panel web React para Administración. La persistencia principal es PostgreSQL y el despliegue inicial se realiza mediante contenedores Docker sobre VPS.
 
@@ -110,8 +110,8 @@ Las capacidades Could/Future deben cumplir simultáneamente:
 6. **Idempotencia en operaciones sensibles.**  
    Reintentos causados por conectividad débil no deben duplicar solicitudes, propuestas, servicios ni notificaciones.
 
-7. **Infraestructura sustituible mediante interfaces.**  
-   Archivos, notificaciones y otros proveedores externos se abstraen detrás de contratos internos.
+7. **Inversión de dependencias y adaptadores sustituibles.**  
+   El dominio y los casos de uso dependen de abstracciones propias, no de Spring Data JPA, PostgreSQL ni proveedores externos. La infraestructura implementa los puertos requeridos mediante adaptadores, archivos, notificaciones y otros proveedores se conectan de esta manera.
 
 8. **Observabilidad desde el inicio.**  
    Logs estructurados, métricas, health checks y trazabilidad de errores forman parte de la infraestructura base.
@@ -268,568 +268,195 @@ Para una evolución futura, este mecanismo puede formalizarse como **Transaction
 
 ## 7. Estructura lógica del repositorio
 
-ALIADO se implementará como un **monolito modular**, donde cada dominio funcional constituye un módulo independiente dentro del backend y, a su vez, cada módulo mantiene separación interna por capas.
+ALIADO se implementará como un **monolito modular**: cada dominio funcional constituye un módulo independiente dentro de un único backend desplegable. Dentro de cada módulo se aplicarán los principios de **Arquitectura Limpia (Clean Architecture)**, separando dominio, aplicación, infraestructura y presentación.
 
-La organización general sigue el principio:
+La estructura se organiza primero por **módulo funcional** y, dentro de este, por **responsabilidad arquitectónica**. No se crearán carpetas vacías ni se exigirán todas las capas cuando un módulo no las necesite.
 
+### 7.1 Estructura interna objetivo de un módulo
+
+La estructura de referencia es:
+
+```text
+modulo/
+├── domain/
+│   ├── model/                 # Modelos y reglas esenciales del dominio
+│   ├── repository/            # Puertos de persistencia requeridos
+│   └── exception/             # Excepciones del dominio, cuando aplique
+│
+├── application/
+│   ├── service/               # Servicios de aplicación/casos de uso
+│   ├── usecase/               # Casos de uso explícitos, si mejora la claridad
+│   ├── dto/                   # Consultas o resultados de aplicación
+│   └── port/                  # Otros puertos de entrada/salida, cuando aplique
+│
+├── infrastructure/
+│   ├── persistence/
+│   │   ├── entity/             # Entidades JPA (@Entity, @Table)
+│   │   ├── mapper/             # Conversión dominio <-> persistencia
+│   │   ├── jpa/                # Interfaces Spring Data JPA
+│   │   └── adapter/            # Implementaciones de puertos de persistencia
+│   ├── adapter/                # Adaptadores de servicios externos, si aplica
+│   └── config/                 # Configuración técnica del módulo
+│
+└── presentation/
+    ├── controller/             # Controladores HTTP/API REST
+    ├── dto/                    # Contratos HTTP de entrada y salida
+    ├── mapper/                 # Conversión DTO <-> modelos de aplicación
+    └── exception/              # Traducción de errores a respuestas HTTP
 ```
-módulo/
-├── controller/     # Entrada HTTP / API REST
-├── service/        # Casos de uso y lógica de aplicación
-├── repository/     # Acceso a persistencia
-├── model/          # Entidades y objetos de dominio
-├── dto/            # Contratos de entrada/salida
-├── mapper/         # Conversión Entity ↔ DTO, cuando sea necesaria
-└── exception/      # Excepciones propias del módulo, cuando aplique
+
+Los nombres `service/` y `usecase/` no tienen que coexistir si el módulo puede expresar claramente sus casos de uso con una sola organización. Del mismo modo, `application/port/`, `exception/`, `mapper/` y las carpetas de persistencia solo se crean cuando exista una necesidad real.
+
+Los nombres de carpeta no determinan por sí solos la arquitectura, lo determinante son las dependencias entre clases. El dominio no debe importar Spring, JPA, controladores ni DTO HTTP. La aplicación debe depender de contratos, no de implementaciones técnicas.
+
+### 7.2 Ejemplo de referencia: módulo `auth`
+
+El módulo `auth` servirá como ejemplo para los demás módulos cuando necesiten persistencia:
+
+```text
+com/aliado/auth/
+├── domain/
+│   ├── model/
+│   │   ├── Usuario.java
+│   │   ├── Consentimiento.java
+│   │   ├── Sesion.java
+│   │   ├── TokenRecuperacion.java
+│   │   └── RolUsuario.java
+│   └── repository/
+│       ├── UsuarioRepository.java
+│       ├── ConsentimientoRepository.java
+│       ├── SesionRepository.java
+│       └── TokenRecuperacionRepository.java
+│
+├── application/
+│   └── service/
+│       ├── AuthService.java
+│       ├── RegistroService.java
+│       ├── SesionService.java
+│       └── RecuperacionAccesoService.java
+│
+├── infrastructure/
+│   └── persistence/
+│       ├── entity/
+│       ├── mapper/
+│       ├── jpa/
+│       └── adapter/
+│
+└── presentation/
+    ├── controller/
+    │   └── AuthController.java
+    └── dto/
+        ├── RegistroRequest.java
+        ├── LoginRequest.java
+        ├── LoginResponse.java
+        └── RecuperacionRequest.java
 ```
 
-No todos los módulos están obligados a poseer todas las carpetas. Solo deben crearse cuando exista una responsabilidad real asociada.
+El árbol anterior representa la **separación objetivo**, no afirma que las entidades JPA, sus mappers, los repositorios Spring Data o sus adaptadores ya estén implementados. Esas clases concretas se añadirán cuando se implemente la persistencia del módulo. 
 
+### 7.3 Responsabilidad de cada capa
+
+| Capa              | Responsabilidad                                           | Puede depender de                                       | No debe depender de                                 |
+| ----------------- | --------------------------------------------------------- | ------------------------------------------------------- | --------------------------------------------------- |
+| `domain/`         | Modelos, invariantes y contratos esenciales del dominio   | Java y abstracciones propias                            | Spring, JPA, HTTP, infraestructura concreta         |
+| `application/`    | Casos de uso, coordinación y transacciones de aplicación  | `domain/` y puertos necesarios                          | Adaptadores concretos, controladores, entidades JPA |
+| `infrastructure/` | Persistencia, proveedores externos, configuración técnica | Contratos de dominio/aplicación y tecnologías concretas | -                                                   |
+| `presentation/`   | Endpoints, validación del request y respuestas HTTP       | Casos de uso/servicios públicos de aplicación           | Repositorios JPA o acceso directo a tablas          |
+
+La dirección de dependencias del código apunta hacia el interior: infraestructura y presentación pueden invocar abstracciones de aplicación/dominio, pero el dominio no conoce esas capas externas. La inyección de dependencias de Spring conecta las implementaciones concretas en tiempo de ejecución.
+
+### 7.4 Separación entre puerto de persistencia y Spring Data JPA
+
+Los repositorios se dividirán en tres responsabilidades cuando un módulo utilice persistencia:
+
+1. `domain/repository/`: interfaz propia del módulo, con las operaciones que el dominio o la aplicación necesitan. No extiende `JpaRepository` ni importa Spring Data.
+2. `infrastructure/persistence/jpa/`: interfaz específica de Spring Data, por ejemplo `UsuarioJpaRepository extends JpaRepository<UsuarioEntity, Long>`.
+3. `infrastructure/persistence/adapter/`: implementación del puerto de dominio, por ejemplo `UsuarioPersistenceAdapter implements UsuarioRepository`, utiliza el repositorio JPA y los mappers para traducir entre modelos.
+
+### 7.5 Criterio de organización modular
+
+La unidad principal de organización continúa siendo el **dominio funcional**, no una capa global. Por ejemplo:
+
+```text
+com/aliado/
+├── auth/
+│   ├── domain/
+│   ├── application/
+│   ├── infrastructure/
+│   └── presentation/
+├── solicitudes/
+│   ├── domain/
+│   ├── application/
+│   ├── infrastructure/
+│   └── presentation/
+├── propuestas/
+│   ├── domain/
+│   ├── application/
+│   ├── infrastructure/
+│   └── presentation/
+└── servicios/
+    ├── domain/
+    ├── application/
+    ├── infrastructure/
+    └── presentation/
 ```
+
+Se evita agrupar todos los controladores del sistema en un `controller/` global, todos los casos de uso en un `service/` global o todos los repositorios en un `repository/` global. Cada módulo conserva la propiedad de sus reglas, contratos y persistencia.
+
+El repositorio completo mantendrá esta organización dentro de `backend/src/main/java/com/aliado/`. La estructura exterior del repositorio será:
+
+```text
 aliado/
-│
 ├── backend/
-│   │
 │   ├── pom.xml
-│   │
 │   ├── Dockerfile
-│   │
 │   ├── .dockerignore
-│   │
-│   │
 │   ├── src/
-│   │   │
-│   │   ├── main/
-│   │   │   │
-│   │   │   ├── java/
-│   │   │   │   └── com/
-│   │   │   │       └── aliado/
-│   │   │   │
-│   │   │   │           ├── AliadoApplication.java
-│   │   │   │           │
-│   │   │   │           ├── auth/
-│   │   │   │           │   ├── controller/
-│   │   │   │           │   │   └── AuthController.java
-│   │   │   │           │   ├── service/
-│   │   │   │           │   │   ├── AuthService.java
-│   │   │   │           │   │   ├── RegistroService.java
-│   │   │   │           │   │   ├── SesionService.java
-│   │   │   │           │   │   └── RecuperacionAccesoService.java
-│   │   │   │           │   ├── repository/
-│   │   │   │           │   │   ├── UsuarioRepository.java
-│   │   │   │           │   │   ├── ConsentimientoRepository.java
-│   │   │   │           │   │   ├── SesionRepository.java
-│   │   │   │           │   │   └── TokenRecuperacionRepository.java
-│   │   │   │           │   ├── model/
-│   │   │   │           │   │   ├── Usuario.java
-│   │   │   │           │   │   ├── Consentimiento.java
-│   │   │   │           │   │   ├── Sesion.java
-│   │   │   │           │   │   ├── TokenRecuperacion.java
-│   │   │   │           │   │   └── RolUsuario.java
-│   │   │   │           │   ├── dto/
-│   │   │   │           │   │   ├── RegistroRequest.java
-│   │   │   │           │   │   ├── LoginRequest.java
-│   │   │   │           │   │   ├── LoginResponse.java
-│   │   │   │           │   │   └── RecuperacionRequest.java
-│   │   │   │           │   └── mapper/
-│   │   │   │           │
-│   │   │   │           ├── perfil/
-│   │   │   │           │   ├── controller/
-│   │   │   │           │   ├── service/
-│   │   │   │           │   │   ├── PerfilUsuarioService.java
-│   │   │   │           │   │   ├── UbicacionService.java
-│   │   │   │           │   │   └── EliminacionCuentaService.java
-│   │   │   │           │   ├── repository/
-│   │   │   │           │   ├── model/
-│   │   │   │           │   │   ├── PerfilUsuario.java
-│   │   │   │           │   │   ├── Ubicacion.java
-│   │   │   │           │   │   └── SolicitudEliminacion.java
-│   │   │   │           │   ├── dto/
-│   │   │   │           │   └── mapper/
-│   │   │   │           │
-│   │   │   │           ├── catalogo/
-│   │   │   │           │   ├── controller/
-│   │   │   │           │   │   └── CatalogoController.java
-│   │   │   │           │   ├── service/
-│   │   │   │           │   │   └── CatalogoService.java
-│   │   │   │           │   ├── repository/
-│   │   │   │           │   │   ├── CategoriaServicioRepository.java
-│   │   │   │           │   │   └── ZonaRepository.java
-│   │   │   │           │   ├── model/
-│   │   │   │           │   │   ├── CategoriaServicio.java
-│   │   │   │           │   │   └── Zona.java
-│   │   │   │           │   ├── dto/
-│   │   │   │           │   └── mapper/
-│   │   │   │           │
-│   │   │   │           ├── solicitudes/
-│   │   │   │           │   ├── controller/
-│   │   │   │           │   │   └── SolicitudController.java
-│   │   │   │           │   ├── service/
-│   │   │   │           │   │   ├── SolicitudService.java
-│   │   │   │           │   │   └── FotoSolicitudService.java
-│   │   │   │           │   ├── repository/
-│   │   │   │           │   │   ├── SolicitudRepository.java
-│   │   │   │           │   │   ├── FotoSolicitudRepository.java
-│   │   │   │           │   │   └── HistorialEstadoSolicitudRepository.java
-│   │   │   │           │   ├── model/
-│   │   │   │           │   │   ├── Solicitud.java
-│   │   │   │           │   │   ├── FotoSolicitud.java
-│   │   │   │           │   │   ├── HistorialEstadoSolicitud.java
-│   │   │   │           │   │   ├── EstadoSolicitud.java
-│   │   │   │           │   │   └── UrgenciaSolicitud.java
-│   │   │   │           │   ├── dto/
-│   │   │   │           │   └── mapper/
-│   │   │   │           │
-│   │   │   │           ├── perfiles/
-│   │   │   │           │   ├── controller/
-│   │   │   │           │   │   └── PerfilProfesionalController.java
-│   │   │   │           │   ├── service/
-│   │   │   │           │   │   ├── PerfilProfesionalService.java
-│   │   │   │           │   │   ├── ExperienciaProfesionalService.java
-│   │   │   │           │   │   ├── PortafolioService.java
-│   │   │   │           │   │   ├── DisponibilidadService.java
-│   │   │   │           │   │   └── AgendaService.java
-│   │   │   │           │   ├── repository/
-│   │   │   │           │   ├── model/
-│   │   │   │           │   │   ├── PerfilProfesional.java
-│   │   │   │           │   │   ├── PerfilCategoria.java
-│   │   │   │           │   │   ├── PerfilZonaAtencion.java
-│   │   │   │           │   │   ├── ExperienciaProfesional.java
-│   │   │   │           │   │   ├── ServicioPortafolio.java
-│   │   │   │           │   │   ├── Disponibilidad.java
-│   │   │   │           │   │   └── CompromisoAgenda.java
-│   │   │   │           │   ├── dto/
-│   │   │   │           │   │   ├── PerfilProfesionalRequest.java
-│   │   │   │           │   │   ├── PerfilProfesionalResponse.java
-│   │   │   │           │   │   └── PerfilPublicoResponse.java
-│   │   │   │           │   └── mapper/
-│   │   │   │           │
-│   │   │   │           ├── descubrimiento/
-│   │   │   │           │   ├── controller/
-│   │   │   │           │   ├── service/
-│   │   │   │           │   │   └── DescubrimientoService.java
-│   │   │   │           │   ├── dto/
-│   │   │   │           │   ├── mapper/
-│   │   │   │           │   └── mapa/                  # SPEC-17 Could
-│   │   │   │           │       ├── controller/
-│   │   │   │           │       ├── service/
-│   │   │   │           │       └── dto/
-│   │   │   │           │
-│   │   │   │           ├── oportunidades/
-│   │   │   │           │   ├── controller/
-│   │   │   │           │   ├── service/
-│   │   │   │           │   │   └── CompatibilidadService.java
-│   │   │   │           │   ├── dto/
-│   │   │   │           │   │   ├── OportunidadResponse.java
-│   │   │   │           │   │   └── FiltroOportunidadesRequest.java
-│   │   │   │           │   └── mapper/
-│   │   │   │           │
-│   │   │   │           ├── propuestas/
-│   │   │   │           │   ├── controller/
-│   │   │   │           │   ├── service/
-│   │   │   │           │   │   └── PropuestaService.java
-│   │   │   │           │   ├── repository/
-│   │   │   │           │   │   └── PropuestaRepository.java
-│   │   │   │           │   ├── model/
-│   │   │   │           │   │   ├── Propuesta.java
-│   │   │   │           │   │   └── EstadoPropuesta.java
-│   │   │   │           │   ├── dto/
-│   │   │   │           │   └── mapper/
-│   │   │   │           │
-│   │   │   │           ├── servicios/
-│   │   │   │           │   ├── controller/
-│   │   │   │           │   │   └── ServicioController.java
-│   │   │   │           │   ├── service/
-│   │   │   │           │   │   ├── ServicioService.java
-│   │   │   │           │   │   ├── EstadoServicioService.java
-│   │   │   │           │   │   └── ComunicacionServicioService.java
-│   │   │   │           │   ├── repository/
-│   │   │   │           │   │   ├── ServicioContratadoRepository.java
-│   │   │   │           │   │   ├── HistorialEstadoServicioRepository.java
-│   │   │   │           │   │   └── MensajeServicioRepository.java
-│   │   │   │           │   ├── model/
-│   │   │   │           │   │   ├── ServicioContratado.java
-│   │   │   │           │   │   ├── HistorialEstadoServicio.java
-│   │   │   │           │   │   ├── MensajeServicio.java
-│   │   │   │           │   │   └── EstadoServicio.java
-│   │   │   │           │   ├── dto/
-│   │   │   │           │   └── mapper/
-│   │   │   │           │
-│   │   │   │           ├── notificaciones/
-│   │   │   │           │   ├── controller/
-│   │   │   │           │   ├── service/
-│   │   │   │           │   │   ├── NotificacionService.java
-│   │   │   │           │   │   ├── EntregaNotificacionService.java
-│   │   │   │           │   │   └── ReintentoNotificacionService.java
-│   │   │   │           │   ├── repository/
-│   │   │   │           │   │   └── NotificacionRepository.java
-│   │   │   │           │   ├── model/
-│   │   │   │           │   │   ├── Notificacion.java
-│   │   │   │           │   │   ├── TipoNotificacion.java
-│   │   │   │           │   │   └── EstadoEntrega.java
-│   │   │   │           │   ├── gateway/
-│   │   │   │           │   │   ├── CanalEntregaNotificacion.java
-│   │   │   │           │   │   ├── PushNotificationGateway.java
-│   │   │   │           │   │   └── EmailNotificationGateway.java
-│   │   │   │           │   └── dto/
-│   │   │   │           │
-│   │   │   │           ├── confianza/
-│   │   │   │           │   ├── controller/
-│   │   │   │           │   │   ├── CalificacionController.java
-│   │   │   │           │   │   ├── ConfianzaController.java
-│   │   │   │           │   │   └── VerificacionController.java
-│   │   │   │           │   ├── service/
-│   │   │   │           │   │   ├── CalificacionService.java
-│   │   │   │           │   │   ├── ReputacionService.java
-│   │   │   │           │   │   └── VerificacionService.java
-│   │   │   │           │   ├── repository/
-│   │   │   │           │   ├── model/
-│   │   │   │           │   │   ├── Calificacion.java
-│   │   │   │           │   │   ├── Resena.java
-│   │   │   │           │   │   ├── ReputacionPrestador.java
-│   │   │   │           │   │   ├── SolicitudVerificacion.java
-│   │   │   │           │   │   └── DocumentoVerificacion.java
-│   │   │   │           │   ├── dto/
-│   │   │   │           │   └── mapper/
-│   │   │   │           │
-│   │   │   │           ├── reportes/
-│   │   │   │           │   ├── controller/
-│   │   │   │           │   ├── service/
-│   │   │   │           │   │   ├── ReporteService.java
-│   │   │   │           │   │   └── EvidenciaReporteService.java
-│   │   │   │           │   ├── repository/
-│   │   │   │           │   │   ├── ReporteRepository.java
-│   │   │   │           │   │   └── EvidenciaReporteRepository.java
-│   │   │   │           │   ├── model/
-│   │   │   │           │   │   ├── Reporte.java
-│   │   │   │           │   │   ├── EvidenciaReporte.java
-│   │   │   │           │   │   ├── TipoReporte.java
-│   │   │   │           │   │   └── EstadoReporte.java
-│   │   │   │           │   ├── dto/
-│   │   │   │           │   └── mapper/
-│   │   │   │           │
-│   │   │   │           ├── administracion/
-│   │   │   │           │   ├── controller/
-│   │   │   │           │   │   ├── CatalogoAdminController.java
-│   │   │   │           │   │   ├── ReporteAdminController.java
-│   │   │   │           │   │   ├── CuentaAdminController.java
-│   │   │   │           │   │   ├── ModeracionController.java
-│   │   │   │           │   │   └── RiesgoController.java
-│   │   │   │           │   ├── service/
-│   │   │   │           │   │   ├── AdministracionCatalogoService.java
-│   │   │   │           │   │   ├── ModeracionService.java
-│   │   │   │           │   │   ├── BloqueoService.java
-│   │   │   │           │   │   ├── RiesgoService.java
-│   │   │   │           │   │   └── BusquedaAdminService.java
-│   │   │   │           │   ├── repository/
-│   │   │   │           │   ├── model/
-│   │   │   │           │   │   ├── BloqueoPreventivo.java
-│   │   │   │           │   │   ├── AccionModeracion.java
-│   │   │   │           │   │   └── MarcaAltoRiesgo.java
-│   │   │   │           │   ├── dto/
-│   │   │   │           │   └── mapper/
-│   │   │   │           │
-│   │   │   │           ├── auditoria/
-│   │   │   │           │   ├── controller/
-│   │   │   │           │   │   └── AuditoriaController.java
-│   │   │   │           │   ├── service/
-│   │   │   │           │   │   └── AuditoriaService.java
-│   │   │   │           │   ├── repository/
-│   │   │   │           │   ├── model/
-│   │   │   │           │   │   └── AuditoriaAdministrativa.java
-│   │   │   │           │   └── dto/
-│   │   │   │           │
-│   │   │   │           ├── formalizacion/
-│   │   │   │           │   ├── controller/
-│   │   │   │           │   ├── service/
-│   │   │   │           │   │   ├── RutaFormalizacionService.java
-│   │   │   │           │   │   ├── ProgresoFormalizacionService.java
-│   │   │   │           │   │   └── VinculacionInstitucionalService.java
-│   │   │   │           │   ├── repository/
-│   │   │   │           │   ├── model/
-│   │   │   │           │   │   ├── RutaFormalizacion.java
-│   │   │   │           │   │   ├── PasoFormalizacion.java
-│   │   │   │           │   │   ├── EnlaceInstitucional.java
-│   │   │   │           │   │   └── ProgresoFormalizacion.java
-│   │   │   │           │   ├── dto/
-│   │   │   │           │   ├── mapper/
-│   │   │   │           │   └── insignia/             # SPEC-18 Could
-│   │   │   │           │       ├── service/
-│   │   │   │           │       └── dto/
-│   │   │   │           │
-│   │   │   │           ├── preferencias/
-│   │   │   │           │   ├── controller/
-│   │   │   │           │   ├── service/
-│   │   │   │           │   ├── repository/
-│   │   │   │           │   ├── model/
-│   │   │   │           │   │   └── PreferenciaNotificacion.java
-│   │   │   │           │   └── dto/
-│   │   │   │           │
-│   │   │   │           ├── historial/
-│   │   │   │           │   ├── controller/
-│   │   │   │           │   ├── service/
-│   │   │   │           │   │   ├── HistorialService.java
-│   │   │   │           │   │   └── ExportacionHistorialService.java
-│   │   │   │           │   ├── model/
-│   │   │   │           │   │   └── DescargaHistorial.java
-│   │   │   │           │   └── dto/
-│   │   │   │           │
-│   │   │   │           ├── indicadores/
-│   │   │   │           │   ├── controller/
-│   │   │   │           │   ├── service/
-│   │   │   │           │   │   └── IndicadorService.java
-│   │   │   │           │   └── dto/
-│   │   │   │           │       └── IndicadorBasicoResponse.java
-│   │   │   │           │
-│   │   │   │           ├── actividad/
-│   │   │   │           │   ├── controller/
-│   │   │   │           │   ├── service/
-│   │   │   │           │   │   └── ActividadRecienteService.java
-│   │   │   │           │   └── dto/
-│   │   │   │           │
-│   │   │   │           ├── comunicacion/             # Could — SPEC-15
-│   │   │   │           │   └── realtime/
-│   │   │   │           │       ├── config/
-│   │   │   │           │       ├── gateway/
-│   │   │   │           │       └── service/
-│   │   │   │           │
-│   │   │   │           ├── soporte/                  # Could — SPEC-15
-│   │   │   │           │   ├── controller/
-│   │   │   │           │   ├── service/
-│   │   │   │           │   ├── repository/
-│   │   │   │           │   └── model/
-│   │   │   │           │
-│   │   │   │           ├── onboarding/               # Could — SPEC-16
-│   │   │   │           │   ├── controller/
-│   │   │   │           │   ├── service/
-│   │   │   │           │   ├── repository/
-│   │   │   │           │   ├── model/
-│   │   │   │           │   └── dto/
-│   │   │   │           │
-│   │   │   │           ├── referidos/                # Could — SPEC-19
-│   │   │   │           │   ├── controller/
-│   │   │   │           │   ├── service/
-│   │   │   │           │   ├── repository/
-│   │   │   │           │   ├── model/
-│   │   │   │           │   └── dto/
-│   │   │   │           │
-│   │   │   │           ├── internacionalizacion/     # Could — SPEC-19
-│   │   │   │           │   ├── controller/
-│   │   │   │           │   ├── service/
-│   │   │   │           │   ├── repository/
-│   │   │   │           │   ├── model/
-│   │   │   │           │   └── dto/
-│   │   │   │           │
-│   │   │   │           ├── pagos/                    # Future — SPEC-20
-│   │   │   │           │   ├── controller/
-│   │   │   │           │   │   ├── PagoPilotoController.java
-│   │   │   │           │   │   └── PagoWebhookController.java
-│   │   │   │           │   ├── service/
-│   │   │   │           │   │   ├── PagoPilotoService.java
-│   │   │   │           │   │   └── ReconciliacionPagoService.java
-│   │   │   │           │   ├── gateway/
-│   │   │   │           │   │   └── PasarelaPago.java
-│   │   │   │           │   ├── repository/
-│   │   │   │           │   ├── model/
-│   │   │   │           │   └── dto/
-│   │   │   │           │
-│   │   │   │           └── common/
-│   │   │   │               ├── config/
-│   │   │   │               │   ├── JacksonConfig.java
-│   │   │   │               │   └── ApplicationConfig.java
-│   │   │   │               ├── security/
-│   │   │   │               │   ├── SecurityConfig.java
-│   │   │   │               │   ├── AuthenticationFilter.java
-│   │   │   │               │   ├── AuthorizationService.java
-│   │   │   │               │   └── CurrentUser.java
-│   │   │   │               ├── exception/
-│   │   │   │               │   ├── GlobalExceptionHandler.java
-│   │   │   │               │   ├── BusinessException.java
-│   │   │   │               │   └── ApiError.java
-│   │   │   │               ├── storage/
-│   │   │   │               │   ├── ArchivoStorageService.java
-│   │   │   │               │   ├── S3ArchivoStorageAdapter.java
-│   │   │   │               │   └── StorageProperties.java
-│   │   │   │               ├── featureflags/
-│   │   │   │               │   ├── FeatureFlagService.java
-│   │   │   │               │   └── FeatureFlagsProperties.java
-│   │   │   │               ├── idempotency/
-│   │   │   │               │   ├── IdempotencyService.java
-│   │   │   │               │   └── IdempotencyFilter.java
-│   │   │   │               ├── observability/
-│   │   │   │               │   ├── TraceIdFilter.java
-│   │   │   │               │   └── MetricsConfig.java
-│   │   │   │               ├── pagination/
-│   │   │   │               │   └── PageResponse.java
-│   │   │   │               └── validation/
-│   │   │   │                   └── ValidationUtils.java
-│   │   │   │
-│   │   │   └── resources/
-│   │   │       ├── application.yml
-│   │   │       ├── application-dev.yml
-│   │   │       ├── application-test.yml
-│   │   │       ├── application-prod.yml
-│   │   │       │
-│   │   │       └── db/
-│   │   │           └── migration/
-│   │   │               ├── V001__auth.sql
-│   │   │               ├── V002__perfil_privacidad.sql
-│   │   │               ├── V003__catalogo.sql
-│   │   │               ├── V004__solicitudes.sql
-│   │   │               ├── V005__perfil_profesional.sql
-│   │   │               ├── V006__propuestas.sql
-│   │   │               ├── V007__servicios.sql
-│   │   │               ├── V008__notificaciones.sql
-│   │   │               ├── V009__confianza.sql
-│   │   │               ├── V010__reportes.sql
-│   │   │               ├── V011__administracion.sql
-│   │   │               ├── V012__formalizacion.sql
-│   │   │               └── V013__preferencias_historial.sql
-│   │   │
-│   │   └── test/
-│   │       └── java/
-│   │           └── com/
-│   │               └── aliado/
-│   │                   ├── contract/
-│   │                   │   ├── auth/
-│   │                   │   ├── perfil/
-│   │                   │   ├── solicitudes/
-│   │                   │   ├── perfiles/
-│   │                   │   ├── descubrimiento/
-│   │                   │   ├── oportunidades/
-│   │                   │   ├── propuestas/
-│   │                   │   ├── servicios/
-│   │                   │   ├── notificaciones/
-│   │                   │   ├── confianza/
-│   │                   │   ├── reportes/
-│   │                   │   └── administracion/
-│   │                   │
-│   │                   ├── integration/
-│   │                   │   ├── auth/
-│   │                   │   ├── solicitudes/
-│   │                   │   ├── perfiles/
-│   │                   │   ├── propuestas/
-│   │                   │   ├── servicios/
-│   │                   │   ├── confianza/
-│   │                   │   ├── reportes/
-│   │                   │   ├── administracion/
-│   │                   │   └── formalizacion/
-│   │                   │
-│   │                   ├── unit/
-│   │                   │   ├── auth/
-│   │                   │   ├── solicitudes/
-│   │                   │   ├── oportunidades/
-│   │                   │   ├── propuestas/
-│   │                   │   ├── servicios/
-│   │                   │   ├── confianza/
-│   │                   │   ├── reportes/
-│   │                   │   ├── indicadores/
-│   │                   │   └── common/
-│   │                   │
-│   │                   └── support/
-│   │                       ├── TestDataFactory.java
-│   │                       ├── PostgreSQLContainerConfig.java
-│   │                       └── SecurityTestUtils.java
-│   │
-│   └── README.md
-│
-├── app-movil/
-│   ├── package.json
-│   ├── app.json
-│   ├── src/
-│   │   ├── modules/
+│   │   ├── main/java/com/aliado/
+│   │   │   ├── AliadoApplication.java
 │   │   │   ├── auth/
 │   │   │   ├── perfil/
+│   │   │   ├── catalogo/
 │   │   │   ├── solicitudes/
+│   │   │   ├── perfiles/
 │   │   │   ├── descubrimiento/
 │   │   │   ├── oportunidades/
 │   │   │   ├── propuestas/
 │   │   │   ├── servicios/
+│   │   │   ├── notificaciones/
 │   │   │   ├── confianza/
 │   │   │   ├── reportes/
+│   │   │   ├── administracion/
+│   │   │   ├── auditoria/
 │   │   │   ├── formalizacion/
+│   │   │   ├── preferencias/
 │   │   │   ├── historial/
-│   │   │   └── preferencias/
-│   │   ├── navigation/
-│   │   ├── components/
-│   │   ├── services/
-│   │   │   ├── api/
-│   │   │   ├── storage/
-│   │   │   └── notifications/
-│   │   ├── hooks/
-│   │   ├── store/
-│   │   ├── theme/
-│   │   └── utils/
-│   └── tests/
-│
-├── panel-admin/
-│   ├── package.json
-│   ├── src/
-│   │   ├── modules/
-│   │   │   ├── auth/
-│   │   │   ├── dashboard/
-│   │   │   ├── categorias/
-│   │   │   ├── zonas/
-│   │   │   ├── reportes/
-│   │   │   ├── usuarios/
-│   │   │   ├── moderacion/
-│   │   │   ├── riesgos/
-│   │   │   ├── verificaciones/
-│   │   │   └── auditoria/
-│   │   ├── components/
-│   │   ├── services/
-│   │   ├── hooks/
-│   │   ├── routes/
-│   │   ├── store/
-│   │   └── utils/
-│   └── tests/
-│
-├── infra/
-│   ├── docker/
-│   │   ├── backend/
-│   │   ├── postgres/
-│   │   └── storage/
-│   ├── reverse-proxy/
-│   │   ├── Caddyfile
-│   │   └── nginx.conf
-│   ├── monitoring/
-│   │   ├── prometheus/
-│   │   └── grafana/
-│   ├── backup/
-│   │   ├── backup-postgres.sh
-│   │   ├── restore-postgres.sh
-│   │   └── backup-storage.sh
-│   └── scripts/
-│       ├── deploy.sh
-│       ├── rollback.sh
-│       └── smoke-test.sh
-│
-├── docs/
-│   ├── architecture/
-│   │   ├── diagrams/
-│   │   ├── decisions/
-│   │   │   ├── ADR-001-monolito-modular.md
-│   │   │   ├── ADR-002-sesiones-opacas.md
-│   │   │   ├── ADR-003-storage-s3.md
-│   │   │   ├── ADR-004-notificaciones.md
-│   │   │   └── ADR-005-feature-flags.md
-│   │   └── data-model/
-│   ├── api/
-│   │   └── openapi/
-│   ├── security/
-│   ├── operations/
-│   │   ├── deployment.md
-│   │   ├── backup-restore.md
-│   │   └── incident-response.md
-│   └── testing/
-│
-├── .github/
-│   └── workflows/
-│       ├── backend-ci.yml
-│       ├── mobile-ci.yml
-│       ├── admin-ci.yml
-│       └── deploy.yml
-│
+│   │   │   ├── indicadores/
+│   │   │   ├── actividad/
+│   │   │   ├── comunicacion/          # Could
+│   │   │   ├── soporte/               # Could
+│   │   │   ├── onboarding/            # Could
+│   │   │   ├── referidos/             # Could
+│   │   │   ├── internacionalizacion/  # Could
+│   │   │   ├── pagos/                 # Future
+│   │   │   └── common/
+│   │   ├── main/resources/
+│   │   │   ├── application.yml
+│   │   │   ├── application-dev.yml
+│   │   │   ├── application-test.yml
+│   │   │   ├── application-prod.yml
+│   │   │   └── db/migration/
+│   │   └── test/java/com/aliado/
+│   │       ├── contract/
+│   │       ├── integration/
+│   │       ├── unit/
+│   │       └── support/
+│   └── README.md
+├── app-movil/                         # React Native
+├── panel-admin/                       # React
+├── infra/                             # Docker, proxy, monitoring, backups
+├── docs/                              # ADR, arquitectura, API y operaciones
+├── .github/workflows/
 ├── .env.example
 ├── .gitignore
 ├── docker-compose.yml
@@ -837,229 +464,81 @@ aliado/
 └── README.md
 ```
 
-### 7.1 Criterio de organización modular
+El árbol anterior es una vista lógica de los límites del repositorio. Los módulos `descubrimiento.mapa` y `formalizacion.insignia` se mantienen como submódulos internos de sus respectivos dominios, tal como establece el mapa de SPEC.
 
-La unidad principal de organización del backend es el **dominio funcional**, no la capa global.
+### 7.6 Regla para comunicación entre módulos
 
-Por tanto, se utiliza:
-
-```
-auth/
-├── controller/
-├── service/
-├── repository/
-├── model/
-└── dto/
-
-solicitudes/
-├── controller/
-├── service/
-├── repository/
-├── model/
-└── dto/
-```
-
-y se evita una estructura global de este tipo:
-
-```
-controller/
-├── AuthController
-├── SolicitudController
-├── PropuestaController
-└── ...
-
-service/
-├── AuthService
-├── SolicitudService
-└── ...
-```
-
-La organización por módulo mantiene juntas las clases que cambian por la misma razón y reduce el acoplamiento entre funcionalidades.
-
-### 7.2 Responsabilidad de las capas
-
-|Capa|Responsabilidad|
-|---|---|
-|`controller/`|API REST, validación superficial del request, códigos HTTP|
-|`service/`|casos de uso, reglas de negocio, transacciones y coordinación entre módulos|
-|`repository/`|persistencia y consultas|
-|`model/`|entidades JPA, enums y objetos propios del dominio|
-|`dto/`|contratos públicos de entrada y salida|
-|`mapper/`|transformación entre modelo y DTO cuando aporte claridad|
-|`gateway/`|contrato con proveedores o infraestructura externa|
-|`exception/`|errores específicos del dominio cuando no pertenecen a `common`|
-
-### 7.3 Regla para comunicación entre módulos
-
-Un módulo no debe acceder directamente a los repositorios internos de otro módulo.
+Un módulo no debe acceder directamente a los repositorios, entidades JPA ni tablas internas de otro módulo. Debe consumir un **contrato público de aplicación**, por ejemplo, una interfaz de consulta o un caso de uso expuesto explícitamente.
 
 Incorrecto:
 
-```
-PropuestaService
-    ↓
-SolicitudRepository
+```text
+Propuestas → SolicitudJpaRepository
 ```
 
 Preferido:
 
-```
-PropuestaService
-    ↓
-SolicitudService / SolicitudQueryService
-    ↓
-SolicitudRepository
-```
-
-De esta forma:
-
-```
-propuestas
-    │
-    └── depende del contrato de solicitudes
-
-solicitudes
-    │
-    └── conserva el control de su persistencia
+```text
+propuestas/application/
+    → contrato público de consulta de solicitudes
+        → solicitudes/application/
+            → solicitudes/domain/repository/
+                → adaptador de persistencia de solicitudes
 ```
 
-Esto permite mantener el monolito modular preparado para una eventual extracción futura sin diseñar prematuramente microservicios.
+El contrato público puede estar definido como interfaz en `solicitudes/application/port/` y tener una implementación en la capa de aplicación. La forma exacta dependerá de la operación, pero no se deben exponer repositorios internos como API entre módulos.
 
-### 7.4 `common` no es un dominio
+### 7.7 `common/` no es un dominio
 
-`common/` debe contener exclusivamente infraestructura realmente transversal:
+`common/` debe contener exclusivamente capacidades transversales que no pertenecen a un dominio de negocio: configuración global, seguridad técnica, observabilidad, idempotencia, feature flags, paginación y utilidades de validación reutilizables.
 
-```
-security
-storage
-idempotency
-observability
-featureflags
-exception
-pagination
-validation
-config
-```
+La estructura de `common/` también debe respetar la separación entre contratos e implementaciones cuando aplique. El manejador global de errores HTTP pertenece a presentación/configuración web, mientras que las excepciones de negocio permanecen en su módulo responsable.
 
-No deben moverse hacia `common/` servicios o modelos simplemente porque sean utilizados por dos módulos.
+No deben trasladarse modelos de dominio a `common/` únicamente porque sean utilizados por más de un módulo. Por ejemplo, `CategoriaServicio` conserva su propiedad en `catalogo`, los otros módulos acceden a través del contrato público definido para ello.
 
-Por ejemplo:
+### 7.8 Módulos sin persistencia propia y modelos de lectura
 
-```
-CategoriaServicio
-```
+No todos los módulos requieren `domain/repository/` ni `infrastructure/persistence/`. Algunos, como `descubrimiento`, `oportunidades`, `indicadores` y `actividad`, pueden ser principalmente servicios de consulta, cálculo o proyección.
 
-permanece en:
+Un modelo como `Oportunidad` puede ser una proyección calculada de solicitudes, perfiles profesionales, categorías, zonas y disponibilidad, sin convertirse automáticamente en una entidad persistente. Cuando necesite información de otro módulo, debe consumir una API de consulta/contrato público de ese módulo, no leer directamente sus entidades JPA ni sus tablas.
 
-```
-catalogo/model/
-```
-
-aunque sea utilizada por Solicitudes, Perfiles, Descubrimiento y Administración.
-
-### 7.5 Módulos sin persistencia propia
-
-No todos los módulos requieren `repository/` o `model/`.
-
-Ejemplos:
-
-```
-descubrimiento/
-oportunidades/
-indicadores/
-actividad/
-```
-
-son principalmente **read models o servicios de cálculo**, por lo que pueden depender de entidades de otros módulos sin crear tablas redundantes.
-
-Particularmente:
-
-```
-Oportunidad != entidad persistente
-```
-
-sino una proyección calculada de:
-
-```
-Solicitud
-+
-PerfilProfesional
-+
-Categoria
-+
-Zona
-+
-Disponibilidad
-```
-
-Igualmente:
-
-```
-HistorialTrabajo
-IndicadorBasico
-ActividadReciente
-MapaPrestador
-InsigniaFormalizacion
-```
-
-pueden implementarse como modelos derivados sin convertirse automáticamente en nuevas entidades persistentes.
-
-### 7.6 Capacidades Could y Future
+### 7.9 Capacidades Could y Future
 
 Los módulos correspondientes a SPEC-15–SPEC-20 deben permanecer desacoplados del núcleo:
 
-```
-comunicacion/
-soporte/
-onboarding/
-descubrimiento/mapa/
-formalizacion/insignia/
-referidos/
-internacionalizacion/
-pagos/
+```text
+comunicacion/realtime
+soporte
+onboarding
+descubrimiento/mapa
+formalizacion/insignia
+referidos
+internacionalizacion
+pagos
 ```
 
-Su regla de dependencia es:
+Regla de dependencia:
 
-```
-Could/Future → puede depender del MVP
-
+```text
+Could/Future → puede consumir contratos públicos del MVP
 MVP → NO puede depender obligatoriamente de Could/Future
+```
+
+### 7.10 Organización de pruebas
+
+Las pruebas se separan primero por tipo y luego por módulo:
+
+```text
+src/test/java/com/aliado/
+├── contract/
+├── integration/
+├── unit/
+└── support/
 ```
 
 Ejemplo:
 
-```
-pagos
-   ↓
-servicios
-```
-
-es válido.
-
-Pero:
-
-```
-servicios
-   ↓
-pagos
-```
-
-como dependencia obligatoria no lo es, porque el flujo de contratación debe funcionar aunque SPEC-20 permanezca deshabilitado.
-
-### 7.7 Organización de pruebas
-
-Las pruebas se separan primero por tipo:
-
-```
-contract/
-integration/
-unit/
-```
-
-y dentro de cada grupo se conserva la organización por módulo:
-
-```
+```text
 integration/
 ├── auth/
 ├── solicitudes/
@@ -1068,22 +547,9 @@ integration/
 └── reportes/
 ```
 
-Esto facilita identificar tanto:
+Los tests cross-módulo pueden ubicarse en `integration/journeys/` para flujos como:
 
-- qué tipo de prueba falló;
-    
-- qué dominio fue afectado.
-    
-
-Los tests cross-módulo pueden ubicarse en:
-
-```
-integration/journeys/
-```
-
-para flujos como:
-
-```
+```text
 Cliente publica solicitud
 → Prestador recibe oportunidad
 → crea propuesta
@@ -1092,23 +558,13 @@ Cliente publica solicitud
 → Cliente califica
 ```
 
-### 7.8 Regla de crecimiento de la estructura
+### 7.11 Regla de crecimiento de la estructura
 
-No se deben crear todas las carpetas o clases anticipadamente.
+La estructura descrita representa la **arquitectura objetivo**, no una obligación de crear todas las carpetas o clases desde el inicio. Cada directorio se crea cuando el SPEC correspondiente comienza a implementarse y existe una responsabilidad real.
 
-La estructura anterior representa la **arquitectura objetivo**. Cada directorio se crea cuando el SPEC correspondiente comienza a implementarse.
+Esto evita carpetas vacías, clases abstractas sin uso, interfaces especulativas y repositorios sin entidad o necesidad de consulta. Las implementaciones concretas de persistencia (entidades JPA, interfaces Spring Data, mappers y adaptadores) se añaden junto con el caso de uso que las requiera.
 
-Esto evita:
-
-```
-carpetas vacías
-clases abstractas sin uso
-interfaces especulativas
-repositorios sin entidad
-```
-
-y mantiene la estructura alineada con la evolución real del sistema.
-
+---
 ## 8. Mapa de módulos del backend
 
 ### 8.1–8.9 Núcleo transaccional
@@ -2191,7 +1647,7 @@ Proveedor, moneda, comisiones, reembolsos, cumplimiento y monetización antes de
 | Confirmación de pago duplicada | Crítico | idempotency key + reconciliación |
 | Crecimiento prematuro de infraestructura | Medio | monolito modular; escalar por métricas |
 
-## 34. Definición de listo — infraestructura
+## 34. Definición de listo - infraestructura
 
 La infraestructura del MVP se considera lista cuando:
 
@@ -2212,7 +1668,7 @@ La infraestructura del MVP se considera lista cuando:
 
 ---
 
-## 35. Definición de listo — MVP funcional
+## 35. Definición de listo - MVP funcional
 
 El MVP extendido SPEC-01–14 está listo cuando los siguientes flujos son verificables.
 
