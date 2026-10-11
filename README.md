@@ -3,7 +3,9 @@
 > **Plataforma para la gestión y contratación confiable de servicios técnicos a domicilio en Santa Marta, Colombia.**
 
 [![Estado](https://img.shields.io/badge/estado-en%20dise%C3%B1o%20y%20prototipado-orange)](https://github.com/JsMartinez-dev/proyecto-diseno-ingenieria)
+
 [![Metodolog%C3%ADa](https://img.shields.io/badge/metodolog%C3%ADa-Design%20Thinking-blue)](https://github.com/JsMartinez-dev/proyecto-diseno-ingenieria)
+
 [![Periodo](https://img.shields.io/badge/periodo-2026--2-lightgrey)](https://github.com/JsMartinez-dev/proyecto-diseno-ingenieria)
 
 ## Sobre el proyecto
