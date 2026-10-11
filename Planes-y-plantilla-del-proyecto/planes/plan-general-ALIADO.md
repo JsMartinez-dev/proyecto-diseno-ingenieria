@@ -276,7 +276,7 @@ La estructura se organiza primero por **módulo funcional** y, dentro de este, p
 
 La estructura de referencia es:
 
-```text
+```json
 modulo/
 ├── domain/
 │   ├── model/                 # Modelos y reglas esenciales del dominio
@@ -313,7 +313,7 @@ Los nombres de carpeta no determinan por sí solos la arquitectura, lo determina
 
 El módulo `auth` servirá como ejemplo para los demás módulos cuando necesiten persistencia:
 
-```text
+```json
 com/aliado/auth/
 ├── domain/
 │   ├── model/
@@ -377,7 +377,7 @@ Los repositorios se dividirán en tres responsabilidades cuando un módulo utili
 
 La unidad principal de organización continúa siendo el **dominio funcional**, no una capa global. Por ejemplo:
 
-```text
+```json
 com/aliado/
 ├── auth/
 │   ├── domain/
@@ -403,43 +403,496 @@ com/aliado/
 
 Se evita agrupar todos los controladores del sistema en un `controller/` global, todos los casos de uso en un `service/` global o todos los repositorios en un `repository/` global. Cada módulo conserva la propiedad de sus reglas, contratos y persistencia.
 
-El repositorio completo mantendrá esta organización dentro de `backend/src/main/java/com/aliado/`. La estructura exterior del repositorio será:
+El repositorio completo mantendrá esta organización dentro de `backend/src/main/java/com/aliado/`. La estructura del arbol es una vista lógica de los límites del repositorio, y  será:
 
-```text
+```json
 aliado/
 ├── backend/
 │   ├── pom.xml
 │   ├── Dockerfile
 │   ├── .dockerignore
 │   ├── src/
-│   │   ├── main/java/com/aliado/
-│   │   │   ├── AliadoApplication.java
-│   │   │   ├── auth/
-│   │   │   ├── perfil/
-│   │   │   ├── catalogo/
-│   │   │   ├── solicitudes/
-│   │   │   ├── perfiles/
-│   │   │   ├── descubrimiento/
-│   │   │   ├── oportunidades/
-│   │   │   ├── propuestas/
-│   │   │   ├── servicios/
-│   │   │   ├── notificaciones/
-│   │   │   ├── confianza/
-│   │   │   ├── reportes/
-│   │   │   ├── administracion/
-│   │   │   ├── auditoria/
-│   │   │   ├── formalizacion/
-│   │   │   ├── preferencias/
-│   │   │   ├── historial/
-│   │   │   ├── indicadores/
-│   │   │   ├── actividad/
-│   │   │   ├── comunicacion/          # Could
-│   │   │   ├── soporte/               # Could
-│   │   │   ├── onboarding/            # Could
-│   │   │   ├── referidos/             # Could
-│   │   │   ├── internacionalizacion/  # Could
-│   │   │   ├── pagos/                 # Future
-│   │   │   └── common/
+│   │   ├── main/
+│   │   │   ├── java/com/aliado/
+│   │   │   │   ├── AliadoApplication.java
+│   │   │   │   │
+│   │   │   │   ├── auth/
+│   │   │   │   │   ├── domain/
+│   │   │   │   │   │   ├── model/
+│   │   │   │   │   │   │   ├── Usuario.java
+│   │   │   │   │   │   │   ├── Consentimiento.java
+│   │   │   │   │   │   │   ├── Sesion.java
+│   │   │   │   │   │   │   ├── TokenRecuperacion.java
+│   │   │   │   │   │   │   └── RolUsuario.java
+│   │   │   │   │   │   └── repository/
+│   │   │   │   │   │       ├── UsuarioRepository.java
+│   │   │   │   │   │       ├── ConsentimientoRepository.java
+│   │   │   │   │   │       ├── SesionRepository.java
+│   │   │   │   │   │       └── TokenRecuperacionRepository.java
+│   │   │   │   │   ├── application/
+│   │   │   │   │   │   └── service/
+│   │   │   │   │   │       ├── AuthService.java
+│   │   │   │   │   │       ├── RegistroService.java
+│   │   │   │   │   │       ├── SesionService.java
+│   │   │   │   │   │       └── RecuperacionAccesoService.java
+│   │   │   │   │   ├── infrastructure/
+│   │   │   │   │   │   └── persistence/
+│   │   │   │   │   │       ├── entity/
+│   │   │   │   │   │       ├── mapper/
+│   │   │   │   │   │       ├── jpa/
+│   │   │   │   │   │       └── adapter/
+│   │   │   │   │   └── presentation/
+│   │   │   │   │       ├── controller/
+│   │   │   │   │       │   └── AuthController.java
+│   │   │   │   │       └── dto/
+│   │   │   │   │           ├── RegistroRequest.java
+│   │   │   │   │           ├── LoginRequest.java
+│   │   │   │   │           ├── LoginResponse.java
+│   │   │   │   │           └── RecuperacionRequest.java
+│   │   │   │   │
+│   │   │   │   ├── perfil/
+│   │   │   │   │   ├── domain/
+│   │   │   │   │   │   ├── model/
+│   │   │   │   │   │   │   ├── PerfilUsuario.java
+│   │   │   │   │   │   │   ├── Ubicacion.java
+│   │   │   │   │   │   │   └── SolicitudEliminacion.java
+│   │   │   │   │   │   └── repository/
+│   │   │   │   │   ├── application/
+│   │   │   │   │   │   └── service/
+│   │   │   │   │   │       ├── PerfilUsuarioService.java
+│   │   │   │   │   │       ├── UbicacionService.java
+│   │   │   │   │   │       └── EliminacionCuentaService.java
+│   │   │   │   │   ├── infrastructure/
+│   │   │   │   │   │   └── persistence/
+│   │   │   │   │   │       ├── entity/
+│   │   │   │   │   │       ├── mapper/
+│   │   │   │   │   │       ├── jpa/
+│   │   │   │   │   │       └── adapter/
+│   │   │   │   │   └── presentation/
+│   │   │   │   │       ├── controller/
+│   │   │   │   │       └── dto/
+│   │   │   │   │
+│   │   │   │   ├── catalogo/
+│   │   │   │   │   ├── domain/
+│   │   │   │   │   │   ├── model/
+│   │   │   │   │   │   │   ├── CategoriaServicio.java
+│   │   │   │   │   │   │   └── Zona.java
+│   │   │   │   │   │   └── repository/
+│   │   │   │   │   │       ├── CategoriaServicioRepository.java
+│   │   │   │   │   │       └── ZonaRepository.java
+│   │   │   │   │   ├── application/
+│   │   │   │   │   │   └── service/
+│   │   │   │   │   │       └── CatalogoService.java
+│   │   │   │   │   ├── infrastructure/
+│   │   │   │   │   │   └── persistence/
+│   │   │   │   │   │       ├── entity/
+│   │   │   │   │   │       ├── mapper/
+│   │   │   │   │   │       ├── jpa/
+│   │   │   │   │   │       └── adapter/
+│   │   │   │   │   └── presentation/
+│   │   │   │   │       ├── controller/
+│   │   │   │   │       │   └── CatalogoController.java
+│   │   │   │   │       └── dto/
+│   │   │   │   │
+│   │   │   │   ├── solicitudes/
+│   │   │   │   │   ├── domain/
+│   │   │   │   │   │   ├── model/
+│   │   │   │   │   │   │   ├── Solicitud.java
+│   │   │   │   │   │   │   ├── FotoSolicitud.java
+│   │   │   │   │   │   │   ├── HistorialEstadoSolicitud.java
+│   │   │   │   │   │   │   ├── EstadoSolicitud.java
+│   │   │   │   │   │   │   └── UrgenciaSolicitud.java
+│   │   │   │   │   │   └── repository/
+│   │   │   │   │   │       ├── SolicitudRepository.java
+│   │   │   │   │   │       ├── FotoSolicitudRepository.java
+│   │   │   │   │   │       └── HistorialEstadoSolicitudRepository.java
+│   │   │   │   │   ├── application/
+│   │   │   │   │   │   └── service/
+│   │   │   │   │   │       ├── SolicitudService.java
+│   │   │   │   │   │       └── FotoSolicitudService.java
+│   │   │   │   │   ├── infrastructure/
+│   │   │   │   │   │   └── persistence/
+│   │   │   │   │   │       ├── entity/
+│   │   │   │   │   │       ├── mapper/
+│   │   │   │   │   │       ├── jpa/
+│   │   │   │   │   │       └── adapter/
+│   │   │   │   │   └── presentation/
+│   │   │   │   │       ├── controller/
+│   │   │   │   │       │   └── SolicitudController.java
+│   │   │   │   │       └── dto/
+│   │   │   │   │
+│   │   │   │   ├── perfiles/
+│   │   │   │   │   ├── domain/
+│   │   │   │   │   │   ├── model/
+│   │   │   │   │   │   │   ├── PerfilProfesional.java
+│   │   │   │   │   │   │   ├── PerfilCategoria.java
+│   │   │   │   │   │   │   ├── PerfilZonaAtencion.java
+│   │   │   │   │   │   │   ├── ExperienciaProfesional.java
+│   │   │   │   │   │   │   ├── ServicioPortafolio.java
+│   │   │   │   │   │   │   ├── Disponibilidad.java
+│   │   │   │   │   │   │   └── CompromisoAgenda.java
+│   │   │   │   │   │   └── repository/
+│   │   │   │   │   ├── application/
+│   │   │   │   │   │   └── service/
+│   │   │   │   │   │       ├── PerfilProfesionalService.java
+│   │   │   │   │   │       ├── ExperienciaProfesionalService.java
+│   │   │   │   │   │       ├── PortafolioService.java
+│   │   │   │   │   │       ├── DisponibilidadService.java
+│   │   │   │   │   │       └── AgendaService.java
+│   │   │   │   │   ├── infrastructure/
+│   │   │   │   │   │   └── persistence/
+│   │   │   │   │   │       ├── entity/
+│   │   │   │   │   │       ├── mapper/
+│   │   │   │   │   │       ├── jpa/
+│   │   │   │   │   │       └── adapter/
+│   │   │   │   │   └── presentation/
+│   │   │   │   │       ├── controller/
+│   │   │   │   │       │   └── PerfilProfesionalController.java
+│   │   │   │   │       └── dto/
+│   │   │   │   │           ├── PerfilProfesionalRequest.java
+│   │   │   │   │           ├── PerfilProfesionalResponse.java
+│   │   │   │   │           └── PerfilPublicoResponse.java
+│   │   │   │   │
+│   │   │   │   ├── descubrimiento/
+│   │   │   │   │   ├── application/
+│   │   │   │   │   │   └── service/
+│   │   │   │   │   │       └── DescubrimientoService.java
+│   │   │   │   │   ├── infrastructure/
+│   │   │   │   │   │   └── adapter/
+│   │   │   │   │   ├── presentation/
+│   │   │   │   │   │   ├── controller/
+│   │   │   │   │   │   └── dto/
+│   │   │   │   │   └── mapa/                              # SPEC-17 Could
+│   │   │   │   │       ├── application/
+│   │   │   │   │       │   └── service/
+│   │   │   │   │       └── presentation/
+│   │   │   │   │           ├── controller/
+│   │   │   │   │           └── dto/
+│   │   │   │   │
+│   │   │   │   ├── oportunidades/
+│   │   │   │   │   ├── application/
+│   │   │   │   │   │   └── service/
+│   │   │   │   │   │       └── CompatibilidadService.java
+│   │   │   │   │   ├── infrastructure/
+│   │   │   │   │   │   └── adapter/
+│   │   │   │   │   └── presentation/
+│   │   │   │   │       ├── controller/
+│   │   │   │   │       └── dto/
+│   │   │   │   │           ├── OportunidadResponse.java
+│   │   │   │   │           └── FiltroOportunidadesRequest.java
+│   │   │   │   │
+│   │   │   │   ├── propuestas/
+│   │   │   │   │   ├── domain/
+│   │   │   │   │   │   ├── model/
+│   │   │   │   │   │   │   ├── Propuesta.java
+│   │   │   │   │   │   │   └── EstadoPropuesta.java
+│   │   │   │   │   │   └── repository/
+│   │   │   │   │   │       └── PropuestaRepository.java
+│   │   │   │   │   ├── application/
+│   │   │   │   │   │   └── service/
+│   │   │   │   │   │       └── PropuestaService.java
+│   │   │   │   │   ├── infrastructure/
+│   │   │   │   │   │   └── persistence/
+│   │   │   │   │   │       ├── entity/
+│   │   │   │   │   │       ├── mapper/
+│   │   │   │   │   │       ├── jpa/
+│   │   │   │   │   │       └── adapter/
+│   │   │   │   │   └── presentation/
+│   │   │   │   │       ├── controller/
+│   │   │   │   │       └── dto/
+│   │   │   │   │
+│   │   │   │   ├── servicios/
+│   │   │   │   │   ├── domain/
+│   │   │   │   │   │   ├── model/
+│   │   │   │   │   │   │   ├── ServicioContratado.java
+│   │   │   │   │   │   │   ├── HistorialEstadoServicio.java
+│   │   │   │   │   │   │   ├── MensajeServicio.java
+│   │   │   │   │   │   │   └── EstadoServicio.java
+│   │   │   │   │   │   └── repository/
+│   │   │   │   │   │       ├── ServicioContratadoRepository.java
+│   │   │   │   │   │       ├── HistorialEstadoServicioRepository.java
+│   │   │   │   │   │       └── MensajeServicioRepository.java
+│   │   │   │   │   ├── application/
+│   │   │   │   │   │   └── service/
+│   │   │   │   │   │       ├── ServicioService.java
+│   │   │   │   │   │       ├── EstadoServicioService.java
+│   │   │   │   │   │       └── ComunicacionServicioService.java
+│   │   │   │   │   ├── infrastructure/
+│   │   │   │   │   │   └── persistence/
+│   │   │   │   │   │       ├── entity/
+│   │   │   │   │   │       ├── mapper/
+│   │   │   │   │   │       ├── jpa/
+│   │   │   │   │   │       └── adapter/
+│   │   │   │   │   └── presentation/
+│   │   │   │   │       ├── controller/
+│   │   │   │   │       │   └── ServicioController.java
+│   │   │   │   │       └── dto/
+│   │   │   │   │
+│   │   │   │   ├── notificaciones/
+│   │   │   │   │   ├── domain/
+│   │   │   │   │   │   ├── model/
+│   │   │   │   │   │   │   ├── Notificacion.java
+│   │   │   │   │   │   │   ├── TipoNotificacion.java
+│   │   │   │   │   │   │   └── EstadoEntrega.java
+│   │   │   │   │   │   └── repository/
+│   │   │   │   │   │       └── NotificacionRepository.java
+│   │   │   │   │   ├── application/
+│   │   │   │   │   │   └── service/
+│   │   │   │   │   │       ├── NotificacionService.java
+│   │   │   │   │   │       ├── EntregaNotificacionService.java
+│   │   │   │   │   │       └── ReintentoNotificacionService.java
+│   │   │   │   │   ├── infrastructure/
+│   │   │   │   │   │   ├── persistence/
+│   │   │   │   │   │   │   ├── entity/
+│   │   │   │   │   │   │   ├── mapper/
+│   │   │   │   │   │   │   ├── jpa/
+│   │   │   │   │   │   │   └── adapter/
+│   │   │   │   │   │   └── gateway/
+│   │   │   │   │   │       ├── CanalEntregaNotificacion.java
+│   │   │   │   │   │       ├── PushNotificationGateway.java
+│   │   │   │   │   │       └── EmailNotificationGateway.java
+│   │   │   │   │   └── presentation/
+│   │   │   │   │       ├── controller/
+│   │   │   │   │       └── dto/
+│   │   │   │   │
+│   │   │   │   ├── confianza/
+│   │   │   │   │   ├── domain/
+│   │   │   │   │   │   ├── model/
+│   │   │   │   │   │   │   ├── Calificacion.java
+│   │   │   │   │   │   │   ├── Resena.java
+│   │   │   │   │   │   │   ├── ReputacionPrestador.java
+│   │   │   │   │   │   │   ├── SolicitudVerificacion.java
+│   │   │   │   │   │   │   └── DocumentoVerificacion.java
+│   │   │   │   │   │   └── repository/
+│   │   │   │   │   ├── application/
+│   │   │   │   │   │   └── service/
+│   │   │   │   │   │       ├── CalificacionService.java
+│   │   │   │   │   │       ├── ReputacionService.java
+│   │   │   │   │   │       └── VerificacionService.java
+│   │   │   │   │   ├── infrastructure/
+│   │   │   │   │   │   └── persistence/
+│   │   │   │   │   │       ├── entity/
+│   │   │   │   │   │       ├── mapper/
+│   │   │   │   │   │       ├── jpa/
+│   │   │   │   │   │       └── adapter/
+│   │   │   │   │   └── presentation/
+│   │   │   │   │       ├── controller/
+│   │   │   │   │       │   ├── CalificacionController.java
+│   │   │   │   │       │   ├── ConfianzaController.java
+│   │   │   │   │       │   └── VerificacionController.java
+│   │   │   │   │       └── dto/
+│   │   │   │   │
+│   │   │   │   ├── reportes/
+│   │   │   │   │   ├── domain/
+│   │   │   │   │   │   ├── model/
+│   │   │   │   │   │   │   ├── Reporte.java
+│   │   │   │   │   │   │   ├── EvidenciaReporte.java
+│   │   │   │   │   │   │   ├── TipoReporte.java
+│   │   │   │   │   │   │   └── EstadoReporte.java
+│   │   │   │   │   │   └── repository/
+│   │   │   │   │   │       ├── ReporteRepository.java
+│   │   │   │   │   │       └── EvidenciaReporteRepository.java
+│   │   │   │   │   ├── application/
+│   │   │   │   │   │   └── service/
+│   │   │   │   │   │       ├── ReporteService.java
+│   │   │   │   │   │       └── EvidenciaReporteService.java
+│   │   │   │   │   ├── infrastructure/
+│   │   │   │   │   │   └── persistence/
+│   │   │   │   │   │       ├── entity/
+│   │   │   │   │   │       ├── mapper/
+│   │   │   │   │   │       ├── jpa/
+│   │   │   │   │   │       └── adapter/
+│   │   │   │   │   └── presentation/
+│   │   │   │   │       ├── controller/
+│   │   │   │   │       └── dto/
+│   │   │   │   │
+│   │   │   │   ├── administracion/
+│   │   │   │   │   ├── domain/
+│   │   │   │   │   │   ├── model/
+│   │   │   │   │   │   │   ├── BloqueoPreventivo.java
+│   │   │   │   │   │   │   ├── AccionModeracion.java
+│   │   │   │   │   │   │   └── MarcaAltoRiesgo.java
+│   │   │   │   │   │   └── repository/
+│   │   │   │   │   ├── application/
+│   │   │   │   │   │   └── service/
+│   │   │   │   │   │       ├── AdministracionCatalogoService.java
+│   │   │   │   │   │       ├── ModeracionService.java
+│   │   │   │   │   │       ├── BloqueoService.java
+│   │   │   │   │   │       ├── RiesgoService.java
+│   │   │   │   │   │       └── BusquedaAdminService.java
+│   │   │   │   │   ├── infrastructure/
+│   │   │   │   │   │   └── persistence/
+│   │   │   │   │   │       ├── entity/
+│   │   │   │   │   │       ├── mapper/
+│   │   │   │   │   │       ├── jpa/
+│   │   │   │   │   │       └── adapter/
+│   │   │   │   │   └── presentation/
+│   │   │   │   │       ├── controller/
+│   │   │   │   │       │   ├── CatalogoAdminController.java
+│   │   │   │   │       │   ├── ReporteAdminController.java
+│   │   │   │   │       │   ├── CuentaAdminController.java
+│   │   │   │   │       │   ├── ModeracionController.java
+│   │   │   │   │       │   └── RiesgoController.java
+│   │   │   │   │       └── dto/
+│   │   │   │   │
+│   │   │   │   ├── auditoria/
+│   │   │   │   │   ├── domain/
+│   │   │   │   │   │   ├── model/
+│   │   │   │   │   │   │   └── AuditoriaAdministrativa.java
+│   │   │   │   │   │   └── repository/
+│   │   │   │   │   ├── application/
+│   │   │   │   │   │   └── service/
+│   │   │   │   │   │       └── AuditoriaService.java
+│   │   │   │   │   ├── infrastructure/
+│   │   │   │   │   │   └── persistence/
+│   │   │   │   │   │       ├── entity/
+│   │   │   │   │   │       ├── mapper/
+│   │   │   │   │   │       ├── jpa/
+│   │   │   │   │   │       └── adapter/
+│   │   │   │   │   └── presentation/
+│   │   │   │   │       ├── controller/
+│   │   │   │   │       │   └── AuditoriaController.java
+│   │   │   │   │       └── dto/
+│   │   │   │   │
+│   │   │   │   ├── formalizacion/
+│   │   │   │   │   ├── domain/
+│   │   │   │   │   │   ├── model/
+│   │   │   │   │   │   │   ├── RutaFormalizacion.java
+│   │   │   │   │   │   │   ├── PasoFormalizacion.java
+│   │   │   │   │   │   │   ├── EnlaceInstitucional.java
+│   │   │   │   │   │   │   └── ProgresoFormalizacion.java
+│   │   │   │   │   │   └── repository/
+│   │   │   │   │   ├── application/
+│   │   │   │   │   │   └── service/
+│   │   │   │   │   │       ├── RutaFormalizacionService.java
+│   │   │   │   │   │       ├── ProgresoFormalizacionService.java
+│   │   │   │   │   │       └── VinculacionInstitucionalService.java
+│   │   │   │   │   ├── infrastructure/
+│   │   │   │   │   │   └── persistence/
+│   │   │   │   │   │       ├── entity/
+│   │   │   │   │   │       ├── mapper/
+│   │   │   │   │   │       ├── jpa/
+│   │   │   │   │   │       └── adapter/
+│   │   │   │   │   ├── presentation/
+│   │   │   │   │   │   ├── controller/
+│   │   │   │   │   │   └── dto/
+│   │   │   │   │   └── insignia/                              # SPEC-18 Could
+│   │   │   │   │       ├── application/
+│   │   │   │   │       │   └── service/
+│   │   │   │   │       └── presentation/
+│   │   │   │   │           └── dto/
+│   │   │   │   │
+│   │   │   │   ├── preferencias/
+│   │   │   │   │   ├── domain/
+│   │   │   │   │   │   ├── model/
+│   │   │   │   │   │   │   └── PreferenciaNotificacion.java
+│   │   │   │   │   │   └── repository/
+│   │   │   │   │   ├── application/
+│   │   │   │   │   │   └── service/
+│   │   │   │   │   ├── infrastructure/
+│   │   │   │   │   │   └── persistence/
+│   │   │   │   │   │       ├── entity/
+│   │   │   │   │   │       ├── mapper/
+│   │   │   │   │   │       ├── jpa/
+│   │   │   │   │   │       └── adapter/
+│   │   │   │   │   └── presentation/
+│   │   │   │   │       ├── controller/
+│   │   │   │   │       └── dto/
+│   │   │   │   │
+│   │   │   │   ├── historial/
+│   │   │   │   │   ├── domain/
+│   │   │   │   │   │   ├── model/
+│   │   │   │   │   │   │   └── DescargaHistorial.java
+│   │   │   │   │   │   └── repository/
+│   │   │   │   │   ├── application/
+│   │   │   │   │   │   └── service/
+│   │   │   │   │   │       ├── HistorialService.java
+│   │   │   │   │   │       └── ExportacionHistorialService.java
+│   │   │   │   │   ├── infrastructure/
+│   │   │   │   │   │   └── persistence/
+│   │   │   │   │   │       ├── entity/
+│   │   │   │   │   │       ├── mapper/
+│   │   │   │   │   │       ├── jpa/
+│   │   │   │   │   │       └── adapter/
+│   │   │   │   │   └── presentation/
+│   │   │   │   │       ├── controller/
+│   │   │   │   │       └── dto/
+│   │   │   │   │
+│   │   │   │   ├── indicadores/
+│   │   │   │   │   ├── application/
+│   │   │   │   │   │   └── service/
+│   │   │   │   │   │       └── IndicadorService.java
+│   │   │   │   │   └── presentation/
+│   │   │   │   │       ├── controller/
+│   │   │   │   │       └── dto/
+│   │   │   │   │           └── IndicadorBasicoResponse.java
+│   │   │   │   │
+│   │   │   │   ├── actividad/
+│   │   │   │   │   ├── application/
+│   │   │   │   │   │   └── service/
+│   │   │   │   │   │       └── ActividadRecienteService.java
+│   │   │   │   │   └── presentation/
+│   │   │   │   │       ├── controller/
+│   │   │   │   │       └── dto/
+│   │   │   │   │
+│   │   │   │   ├── comunicacion/                              # Could — SPEC-15
+│   │   │   │   │   └── realtime/
+│   │   │   │   │       ├── application/
+│   │   │   │   │       │   └── service/
+│   │   │   │   │       └── infrastructure/
+│   │   │   │   │           ├── config/
+│   │   │   │   │           └── gateway/
+│   │   │   │   │
+│   │   │   │   ├── soporte/                                   # Could — SPEC-15
+│   │   │   │   │   ├── domain/{model/,repository/}
+│   │   │   │   │   ├── application/service/
+│   │   │   │   │   ├── infrastructure/persistence/{entity/,mapper/,jpa/,adapter/}
+│   │   │   │   │   └── presentation/{controller/,dto/}
+│   │   │   │   │
+│   │   │   │   ├── onboarding/                                # Could — SPEC-16
+│   │   │   │   │   ├── domain/{model/,repository/}
+│   │   │   │   │   ├── application/service/
+│   │   │   │   │   ├── infrastructure/persistence/{entity/,mapper/,jpa/,adapter/}
+│   │   │   │   │   └── presentation/{controller/,dto/}
+│   │   │   │   │
+│   │   │   │   ├── referidos/                                 # Could — SPEC-19
+│   │   │   │   │   ├── domain/{model/,repository/}
+│   │   │   │   │   ├── application/service/
+│   │   │   │   │   ├── infrastructure/persistence/{entity/,mapper/,jpa/,adapter/}
+│   │   │   │   │   └── presentation/{controller/,dto/}
+│   │   │   │   │
+│   │   │   │   ├── internacionalizacion/                      # Could — SPEC-19
+│   │   │   │   │   ├── domain/{model/,repository/}
+│   │   │   │   │   ├── application/service/
+│   │   │   │   │   ├── infrastructure/persistence/{entity/,mapper/,jpa/,adapter/}
+│   │   │   │   │   └── presentation/{controller/,dto/}
+│   │   │   │   │
+│   │   │   │   ├── pagos/                                     # Future — SPEC-20
+│   │   │   │   │   ├── domain/{model/,repository/}
+│   │   │   │   │   ├── application/
+│   │   │   │   │   │   └── service/
+│   │   │   │   │   │       ├── PagoPilotoService.java
+│   │   │   │   │   │       └── ReconciliacionPagoService.java
+│   │   │   │   │   ├── infrastructure/
+│   │   │   │   │   │   ├── persistence/{entity/,mapper/,jpa/,adapter/}
+│   │   │   │   │   │   └── gateway/
+│   │   │   │   │   │       └── PasarelaPago.java
+│   │   │   │   │   └── presentation/
+│   │   │   │   │       ├── controller/
+│   │   │   │   │       │   ├── PagoPilotoController.java
+│   │   │   │   │       │   └── PagoWebhookController.java
+│   │   │   │   │       └── dto/
+│   │   │   │   │
+│   │   │   │   └── common/             # Transversal, sin capas de dominio
+│   │   │   │       ├── config/{JacksonConfig.java, ApplicationConfig.java}
+│   │   │   │       ├── security/{SecurityConfig.java, CurrentUser.java}
+│   │   │   │       ├── exception/{GlobalExceptionHandler.java}
+│   │   │   │       ├── storage/{ArchivoStorageService.java, S3ArchivoStorageAdapter.java, StorageProperties.java}
+│   │   │   │       ├── featureflags/{FeatureFlagService.java, FeatureFlagsProperties.java}
+│   │   │   │       ├── idempotency/{IdempotencyService.java, IdempotencyFilter.java}
+│   │   │   │       ├── observability/{TraceIdFilter.java, MetricsConfig.java}
+│   │   │   │       ├── pagination/PageResponse.java
+│   │   │   │       └── validation/ValidationUtils.java
 │   │   ├── main/resources/
 │   │   │   ├── application.yml
 │   │   │   ├── application-dev.yml
@@ -464,7 +917,7 @@ aliado/
 └── README.md
 ```
 
-El árbol anterior es una vista lógica de los límites del repositorio. Los módulos `descubrimiento.mapa` y `formalizacion.insignia` se mantienen como submódulos internos de sus respectivos dominios, tal como establece el mapa de SPEC.
+
 
 ### 7.6 Regla para comunicación entre módulos
 
@@ -472,13 +925,13 @@ Un módulo no debe acceder directamente a los repositorios, entidades JPA ni tab
 
 Incorrecto:
 
-```text
+```json
 Propuestas → SolicitudJpaRepository
 ```
 
 Preferido:
 
-```text
+```json
 propuestas/application/
     → contrato público de consulta de solicitudes
         → solicitudes/application/
@@ -528,7 +981,7 @@ MVP → NO puede depender obligatoriamente de Could/Future
 
 Las pruebas se separan primero por tipo y luego por módulo:
 
-```text
+```json
 src/test/java/com/aliado/
 ├── contract/
 ├── integration/
@@ -538,7 +991,7 @@ src/test/java/com/aliado/
 
 Ejemplo:
 
-```text
+```json
 integration/
 ├── auth/
 ├── solicitudes/
@@ -549,7 +1002,7 @@ integration/
 
 Los tests cross-módulo pueden ubicarse en `integration/journeys/` para flujos como:
 
-```text
+```json
 Cliente publica solicitud
 → Prestador recibe oportunidad
 → crea propuesta
@@ -697,7 +1150,7 @@ flowchart LR
 
 ### 10.1 Identidad y privacidad
 
-```text
+```json
 usuarios
 consentimientos
 sesiones
@@ -709,7 +1162,7 @@ solicitudes_eliminacion
 
 ### 10.2 Catálogo, demanda y oferta
 
-```text
+```json
 categorias_servicio
 zonas
 solicitudes
@@ -727,7 +1180,7 @@ propuestas
 
 ### 10.3 Contratación y comunicación
 
-```text
+```json
 servicios_contratados
 historial_estado_servicio
 mensajes_servicio / canal autorizado
@@ -735,7 +1188,7 @@ mensajes_servicio / canal autorizado
 
 ### 10.4 Notificaciones y preferencias
 
-```text
+```json
 notificaciones
 preferencias_notificacion
 ```
@@ -744,7 +1197,7 @@ El objetivo arquitectónico es una sola tabla/modelo de notificación para event
 
 ### 10.5 Confianza
 
-```text
+```json
 calificaciones
 resenas
 reputaciones_prestador        # materialización derivada
@@ -754,7 +1207,7 @@ documentos_verificacion
 
 ### 10.6 Reportes y administración
 
-```text
+```json
 reportes
 evidencias_reporte
 bloqueos_preventivos
@@ -765,7 +1218,7 @@ auditoria_administrativa
 
 ### 10.7 Formalización e historial
 
-```text
+```json
 rutas_formalizacion
 pasos_formalizacion
 enlaces_institucionales
@@ -781,7 +1234,7 @@ descargas_historial           # metadata opcional
 
 Solo si se habilitan:
 
-```text
+```json
 interacciones_soporte
 sesiones_acompanamiento
 referidos
