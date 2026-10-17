@@ -158,6 +158,9 @@ function PrestadorApp() {
     case 'perfil':
       content = <PrestadorPerfil onNavigate={navigate} />;
       break;
+    case 'vista-publica':
+      content = <ClientePerfilPrestador onNavigate={navigate} providerId={param} preview />;
+      break;
     case 'progreso':
       content = <PrestadorProgreso onNavigate={navigate} />;
       break;

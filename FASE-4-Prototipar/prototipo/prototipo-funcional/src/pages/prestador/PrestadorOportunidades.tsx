@@ -22,7 +22,7 @@ export default function PrestadorOportunidades({ onNavigate }: PrestadorPageProp
     <PageContainer>
       <h1 className="text-xl font-bold text-gray-900 mb-4">Oportunidades</h1>
 
-      <div className="flex gap-3 mb-4">
+      <div className="flex flex-col sm:flex-row gap-3 mb-4">
         <select aria-label="Filtrar categoría" value={category} onChange={e => setCategory(e.target.value)} className="p-2 border rounded-xl"><option value="">Todas las categorías compatibles</option>{categories.filter(c => c.active && provider.categoryIds.includes(c.id)).map(c => c.name).map(c => <option key={c}>{c}</option>)}</select>
         <select aria-label="Filtrar urgencia" value={urgency} onChange={e => setUrgency(e.target.value)} className="p-2 border rounded-xl"><option value="">Toda urgencia</option>{['Baja','Normal','Alta','Urgente'].map(u => <option key={u}>{u}</option>)}</select>
       </div>
@@ -35,7 +35,7 @@ export default function PrestadorOportunidades({ onNavigate }: PrestadorPageProp
       ) : (
         <div className="space-y-3">
           {opportunities.map((req) => {
-            const hasProposal = req.proposals.some((p) => p.providerId === 'prov-1');
+            const hasProposal = req.proposals.some((p) => p.providerId === 'prov-1' && p.status === 'pendiente');
             return (
               <Card key={req.id} hover onClick={() => onNavigate('detalle-oportunidad', req.id)} className="p-4">
                 <div className="flex items-start justify-between gap-2 mb-2">

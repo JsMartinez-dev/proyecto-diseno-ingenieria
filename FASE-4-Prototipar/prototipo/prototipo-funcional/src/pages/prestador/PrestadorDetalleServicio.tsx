@@ -1,3 +1,7 @@
+import { useState } from 'react';
+import ReportForm from '@/components/ReportForm';
+import Modal from '@/components/ui/Modal';
+import ServiceCoordination from '@/components/ServiceCoordination';
 import { nextStage } from '@/store/rules';
 import ServiceHistory from '@/components/ui/ServiceHistory';
 import { useApp } from '@/store/AppContext';
@@ -12,6 +16,7 @@ import PageContainer from '@/components/layout/PageContainer';
 import type { PrestadorPageProps } from '../cliente/types';
 
 export default function PrestadorDetalleServicio({ onNavigate, serviceId }: PrestadorPageProps & { serviceId?: string }) {
+  const [showReport, setShowReport] = useState(false);
   const { services, advanceStage, cancelService } = useApp();
   const service = services.find((s) => s.id === serviceId && s.providerId === 'prov-1');
 
@@ -86,6 +91,9 @@ export default function PrestadorDetalleServicio({ onNavigate, serviceId }: Pres
         </div>
       </Card>
 
+      <ServiceCoordination service={service} />
+      <Button variant="danger" className="mb-4" onClick={() => setShowReport(true)}>Reportar problema con el servicio</Button>
+      <Modal open={showReport} onClose={() => setShowReport(false)} title="Reportar servicio"><ReportForm targetId={service.id} reportedName={service.clientName} type="Servicio" onDone={() => setShowReport(false)} /></Modal>
       <ServiceHistory service={service} />
       {!['FINALIZADO', 'CANCELADO'].includes(service.stage) && (
         <Button variant="danger" fullWidth className="mb-4" onClick={() => {

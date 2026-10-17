@@ -1,16 +1,12 @@
 import { useState } from 'react';
+import DemoAccess from '@/components/DemoAccess';
 import { useApp } from '@/store/AppContext';
-import { Shield, Users, Wrench, MapPin, ArrowRight, CheckCircle, Star, Lock } from 'lucide-react';
-import type { Role } from '@/types';
+import { MapPin, ArrowRight, CheckCircle, Star, Lock } from 'lucide-react';
 import Card from '@/components/ui/Card';
 
 export default function Landing() {
-  const { setRole } = useApp();
+  const { providers } = useApp();
   const [showRoleSelector, setShowRoleSelector] = useState(false);
-
-  const handleRoleSelect = (role: Role) => {
-    setRole(role);
-  };
 
   const categories = [
     { icon: '⚡', name: 'Electricidad' },
@@ -21,81 +17,7 @@ export default function Landing() {
     { icon: '🔨', name: 'Mantenimiento' },
   ];
 
-  if (showRoleSelector) {
-    return (
-      <div className="min-h-screen bg-gradient-to-b from-blue-900 via-blue-800 to-blue-900 flex items-center justify-center p-4">
-        <div className="max-w-md w-full">
-          <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-white mb-4">
-              <span className="text-blue-900 font-bold text-xl">A</span>
-            </div>
-            <h1 className="text-2xl font-bold text-white mb-1">ALIADO</h1>
-            <p className="text-blue-200 text-sm">Gestión y contratación de servicios técnicos.</p>
-          </div>
-
-          <Card className="p-6">
-            <h2 className="text-lg font-bold text-gray-900 mb-1 text-center">Selecciona tu rol</h2>
-            <p className="text-sm text-gray-500 text-center mb-6">Explora cuentas de ejemplo, sin credenciales reales</p>
-
-            <div className="space-y-3">
-              <button
-                onClick={() => handleRoleSelect('cliente')}
-                className="w-full flex items-center gap-4 p-4 rounded-xl border-2 border-gray-200 hover:border-blue-500 hover:bg-blue-50 transition-all text-left group"
-              >
-                <div className="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center text-blue-700 flex-shrink-0">
-                  <Users className="w-6 h-6" />
-                </div>
-                <div className="flex-1">
-                  <p className="font-bold text-gray-900">Cliente</p>
-                  <p className="text-xs text-gray-500">Necesito contratar un servicio</p>
-                </div>
-                <ArrowRight className="w-5 h-5 text-gray-300 group-hover:text-blue-500 transition-colors" />
-              </button>
-
-              <button
-                onClick={() => handleRoleSelect('prestador')}
-                className="w-full flex items-center gap-4 p-4 rounded-xl border-2 border-gray-200 hover:border-teal-500 hover:bg-teal-50 transition-all text-left group"
-              >
-                <div className="w-12 h-12 rounded-xl bg-teal-100 flex items-center justify-center text-teal-700 flex-shrink-0">
-                  <Wrench className="w-6 h-6" />
-                </div>
-                <div className="flex-1">
-                  <p className="font-bold text-gray-900">Prestador</p>
-                  <p className="text-xs text-gray-500">Ofrezco servicios técnicos</p>
-                </div>
-                <ArrowRight className="w-5 h-5 text-gray-300 group-hover:text-teal-500 transition-colors" />
-              </button>
-
-              <button
-                onClick={() => handleRoleSelect('admin')}
-                className="w-full flex items-center gap-4 p-4 rounded-xl border-2 border-gray-200 hover:border-blue-500 hover:bg-blue-50 transition-all text-left group"
-              >
-                <div className="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center text-blue-700 flex-shrink-0">
-                  <Shield className="w-6 h-6" />
-                </div>
-                <div className="flex-1">
-                  <p className="font-bold text-gray-900">Administrador</p>
-                  <p className="text-xs text-gray-500">Gestiono la plataforma</p>
-                </div>
-                <ArrowRight className="w-5 h-5 text-gray-300 group-hover:text-blue-500 transition-colors" />
-              </button>
-            </div>
-
-            <button
-              onClick={() => setShowRoleSelector(false)}
-              className="w-full mt-4 text-sm text-gray-500 hover:text-gray-700 font-medium"
-            >
-              Volver
-            </button>
-          </Card>
-
-          <p className="text-center text-blue-300 text-xs mt-6">
-            Demo académica - Universidad del Magdalena
-          </p>
-        </div>
-      </div>
-    );
-  }
+  if (showRoleSelector) return <DemoAccess onBack={() => setShowRoleSelector(false)} />;
 
   return (
     <div className="min-h-screen bg-white">
@@ -208,11 +130,7 @@ export default function Landing() {
         <h3 className="text-2xl font-bold text-gray-900 text-center mb-2">Prestadores destacados</h3>
         <p className="text-gray-500 text-center mb-8">Trabajadores con mejor reputación en Santa Marta</p>
         <div className="grid md:grid-cols-3 gap-4">
-          {[
-            { name: 'Jorge Ortiz', specialty: 'Plomería', rating: 4.8, jobs: 37 },
-            { name: 'Richard Núñez', specialty: 'Aires acondicionados', rating: 4.9, jobs: 58 },
-            { name: 'Yuranis Martínez', specialty: 'Electricidad', rating: 4.7, jobs: 29 },
-          ].map((p) => (
+          {providers.filter(p => !p.suspended).slice().sort((a,b) => b.rating - a.rating).slice(0,3).map((p) => (
             <Card key={p.name} className="p-5">
               <div className="flex items-center gap-3 mb-3">
                 <div className="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold">
@@ -229,7 +147,7 @@ export default function Landing() {
                   <span className="font-semibold text-gray-700">{p.rating}</span>
                 </div>
                 <span className="text-gray-400">|</span>
-                <span className="text-gray-500">{p.jobs} trabajos</span>
+                <span className="text-gray-500">{p.jobsCompleted} trabajos</span>
               </div>
             </Card>
           ))}

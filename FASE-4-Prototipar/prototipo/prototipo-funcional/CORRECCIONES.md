@@ -19,17 +19,26 @@ Referencia revisada: `proyecto-diseno-ingenieria` (commit `d349406`), plantilla 
 | SPEC-14 | Sin descarga; datos perdidos al recargar | Exportación del historial propio sin dirección/contactos; persistencia local de solicitudes, servicios, perfiles, reportes, avisos y catálogos |
 | SPEC-15–20 / MoSCoW | Insignias por reputación e incentivos de referidos no documentados; faltaban onboarding e idiomas | Descripciones alineadas: insignia de progreso orientativo, referidos sin incentivo definido, onboarding e idiomas como futuros; pagos fuera del MVP |
 
+## Recorridos completados en `feature/cambios-final-final`
+
+| Referencia | Representación en la demo |
+| --- | --- |
+| SPEC-01 | Registro local Cliente/Prestador con consentimiento, inicio de sesión, salida y recuperación por código temporal mostrado en un correo simulado; contraseñas derivadas localmente con PBKDF2; acceso rápido conservado |
+| SPEC-02 / SPEC-14 | Preferencias persistentes de nombre público/alias y visibilidad del catálogo, avisos opcionales, aceptación de términos con fecha, consulta y descarga de datos propios; solicitud de eliminación para ambos roles |
+| SPEC-05 | Experiencia editable, portafolio con descripción/evidencia, eliminación de trabajos, agenda por fecha y franjas, vista previa pública |
+| SPEC-06 / SPEC-07 | Compatibilidad con fecha/periodo cuando hay agenda; propuesta con fecha/hora concreta y edición activa; validación de franja y hora reservada; retirada y cierre diferenciados |
+| SPEC-08 | Mensajes locales privados del servicio contratado entre sus participantes, cierre del envío al finalizar/cancelar; vínculo con la propuesta aceptada; acceso al servicio desde la solicitud durante todo su ciclo |
+| SPEC-10 / SPEC-12 | Solicitud documental única pendiente, revisión administrativa justificada, resultado persistente; reporte de reseña y ocultamiento de su contenido con auditoría |
+| SPEC-11 | Evidencias de ejemplo descargables por administración, objetivo identificado, reportes desde ambos participantes del servicio, consolidación de reportes abiertos duplicados |
+| SPEC-13 | Enlaces externos a portales oficiales; progreso declarado sin certificación |
+
 ## Límites de la demostración
 
-La corrección de estos comportamientos no equivale a implementar todas las veinte SPEC en producción. Quedan por desarrollar:
+Estos recorridos representan las funciones propuestas y no sustituyen los servicios del producto final. El registro personaliza la cuenta de ejemplo de cada rol y reemplaza sus credenciales de acceso; no crea participantes independientes para múltiples personas. La recuperación muestra el código localmente y no envía correos. La selección rápida de rol permite presentar sin credenciales.
 
-- Autenticación, registro, recuperación y consentimiento real de SPEC-01; privacidad configurable y procesamiento de eliminación de SPEC-02.
-- Portafolio, agenda por franjas, vista previa profesional y verificación documental. El matching actual utiliza disponibilidad general, sin comprobar conflictos de agenda por fecha/hora.
-- Edición de propuestas, adjuntos de evidencia de reportes, moderación de contenido puntual, categorías de alto riesgo.
-- Canal de coordinación autorizado de SPEC-08, preferencias de notificación y recursos institucionales oficiales configurados. El chat en tiempo real continúa como función futura.
-- Backend, persistencia compartida entre dispositivos y autorización en servidor. Los controles del prototipo operan sobre los dos participantes de ejemplo; no representan seguridad para usuarios reales.
+Siguen pendientes para el producto real el backend, la persistencia compartida, autenticación/autorización de servidor, procesamiento efectivo de eliminaciones, verificación real de documentos, entrega de avisos entre dispositivos y garantías de seguridad, concurrencia y auditoría inmutable. La agenda reserva únicamente la hora de inicio, sin duración de trabajos. El canal local de coordinación no equivale al chat en tiempo real futuro.
 
-Los registros precargados son ejemplos, incluidas las verificaciones. Los servicios existentes solo tienen un estado inicial; no se reconstruye un historial inexistente. Las nuevas transiciones sí registran fecha y actor.
+Las capacidades Could/Future y pagos continúan fuera del recorrido comprometido del MVP. Los registros precargados, reseñas y verificaciones son ejemplos. Los servicios antiguos solo muestran un estado inicial; no se reconstruye un historial inexistente. Las nuevas transiciones registran fecha y actor.
 
 ## Validación
 

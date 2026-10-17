@@ -12,7 +12,7 @@ interface ProximasFuncionesProps {
 
 export default function ProximasFunciones({ onBack }: ProximasFuncionesProps) {
   const features = [
-    { icon: MessageSquare, name: 'Chat interno', desc: 'Comunicación directa entre cliente y prestador dentro de la plataforma.' },
+    { icon: MessageSquare, name: 'Chat en tiempo real', desc: 'Entrega instantánea entre dispositivos. La demo ya permite coordinar un servicio con mensajes locales al cambiar de rol.' },
     { icon: Map, name: 'Mapa visual', desc: 'Ubicación aproximada de prestadores, respetando la privacidad.' },
     { icon: Award, name: 'Insignia de progreso de formalización', desc: 'Progreso declarado en la ruta orientativa; no certifica un estado legal.' },
     { icon: Gift, name: 'Programa de referidos', desc: 'Invitaciones trazables, sin incentivos económicos definidos.' },

@@ -1,3 +1,6 @@
+import AccountSettings from '@/components/AccountSettings';
+import ProfessionalDetails from '@/components/ProfessionalDetails';
+import Verification from '@/components/Verification';
 import ProviderCatalog from '@/components/ProviderCatalog';
 import { useState } from 'react';
 import { useApp } from '@/store/AppContext';
@@ -14,6 +17,7 @@ export default function PrestadorPerfil({ onNavigate }: PrestadorPageProps) {
   const { providers, categories, zones: availableZones, updateProviderProfile, addToast, setRole } = useApp();
   const provider = providers.find((p) => p.id === 'prov-1')!;
   const [editing, setEditing] = useState(false);
+  const [experience, setExperience] = useState(provider.experienceYears);
   const [bio, setBio] = useState(provider.bio);
   const [categoryIds, setCategoryIds] = useState(provider.categoryIds);
   const [zones, setZones] = useState(provider.zones.join(', '));
@@ -21,7 +25,7 @@ export default function PrestadorPerfil({ onNavigate }: PrestadorPageProps) {
 
   const handleSave = () => {
     const saved = updateProviderProfile(provider.id, {
-      bio,
+      bio, experienceYears: experience,
       categoryIds,
       zones: zones.split(',').map((z) => z.trim()).filter(Boolean),
       available,
@@ -47,7 +51,7 @@ export default function PrestadorPerfil({ onNavigate }: PrestadorPageProps) {
         </div>
       </div>
 
-      <Button fullWidth className="mb-4" onClick={() => { setBio(provider.bio); setCategoryIds(provider.categoryIds); setZones(provider.zones.join(', ')); setAvailable(provider.available); setEditing(true); }}>
+      <Button fullWidth className="mb-4" onClick={() => { setExperience(provider.experienceYears); setBio(provider.bio); setCategoryIds(provider.categoryIds); setZones(provider.zones.join(', ')); setAvailable(provider.available); setEditing(true); }}>
         <Pencil className="w-4 h-4" />
         Editar perfil
       </Button>
@@ -76,7 +80,12 @@ export default function PrestadorPerfil({ onNavigate }: PrestadorPageProps) {
         </div>
       </Card>
 
+      <Button variant="secondary" fullWidth className="mb-4" onClick={() => onNavigate('vista-publica', provider.id)}>Ver vista previa de mi perfil público</Button>
       <ProviderCatalog provider={provider} editable />
+      <ProfessionalDetails provider={provider} editable />
+      <p className="text-xs text-gray-500 mb-3">La verificación ampliada indica revisión documental de ejemplo; no certifica calidad ni estado legal.</p>
+      <Verification />
+      <AccountSettings />
 
 
       <Card className="p-4 mb-3">
@@ -165,6 +174,7 @@ export default function PrestadorPerfil({ onNavigate }: PrestadorPageProps) {
 
       <Modal open={editing} onClose={() => setEditing(false)} title="Editar perfil profesional" size="md">
         <div className="space-y-4">
+          <label className="block text-sm">Años de experiencia<input type="number" min="0" max="80" value={experience} onChange={e => setExperience(Number(e.target.value))} className="block w-full p-3 border rounded-xl" /></label>
           <div>
             <label className="text-sm font-semibold text-gray-700 mb-1.5 block">Descripción profesional</label>
             <textarea

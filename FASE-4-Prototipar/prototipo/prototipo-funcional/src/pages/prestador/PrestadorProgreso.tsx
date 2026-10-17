@@ -22,10 +22,10 @@ export default function PrestadorProgreso({ onNavigate }: PrestadorPageProps) {
   const progress = Math.round((doneCount / checklist.length) * 100);
 
   const resources = [
-    { name: 'DIAN', desc: 'Registro tributario y declaraciones', icon: '📋' },
-    { name: 'Cámara de Comercio', desc: 'Matrícula de comerciante', icon: '🏛️' },
-    { name: 'Programas de emprendimiento', desc: 'Capacitación y apoyo', icon: '🚀' },
-    { name: 'Ruta 500+', desc: 'Programa de formalización', icon: '⭐' },
+    { href: 'https://www.dian.gov.co/', name: 'DIAN', desc: 'Registro tributario y declaraciones', icon: '📋' },
+    { href: 'https://www.ccsm.org.co/', name: 'Cámara de Comercio', desc: 'Matrícula de comerciante', icon: '🏛️' },
+    { href: 'https://www.sena.edu.co/', name: 'SENA', desc: 'Capacitación y apoyo', icon: '🚀' },
+
   ];
 
   return (
@@ -87,10 +87,10 @@ export default function PrestadorProgreso({ onNavigate }: PrestadorPageProps) {
             <div className="text-2xl mb-2">{res.icon}</div>
             <p className="font-semibold text-gray-900 text-sm">{res.name}</p>
             <p className="text-xs text-gray-500 mt-0.5">{res.desc}</p>
-            <div className="flex items-center gap-1 mt-2 text-blue-600">
-              <span className="text-xs font-medium">Recurso orientativo</span>
+            <a href={res.href} target="_blank" rel="noreferrer" className="flex items-center gap-1 mt-2 text-blue-600">
+              <span className="text-xs font-medium">Visitar sitio oficial</span>
               <ExternalLink className="w-3 h-3" />
-            </div>
+            </a>
           </Card>
         ))}
       </div>

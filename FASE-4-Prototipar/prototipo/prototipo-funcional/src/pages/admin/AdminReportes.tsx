@@ -1,3 +1,4 @@
+import { AttachmentList } from '@/components/Attachments';
 import { useState } from 'react';
 import { useApp } from '@/store/AppContext';
 import { Flag, AlertCircle, Ban, CheckCircle, Eye } from 'lucide-react';
@@ -9,7 +10,7 @@ import type { Report } from '@/types';
 import type { AdminPageProps } from '../cliente/types';
 
 export default function AdminReportes({ onNavigate: _onNavigate }: AdminPageProps) {
-  const { reports, updateReportStatus, suspendUser, warnUser, addToast } = useApp();
+  const { reports, updateReportStatus, suspendUser, warnUser, moderateReportContent, addToast } = useApp();
   const [resolution, setResolution] = useState('');
   const [selected, setSelected] = useState<Report | null>(null);
 
@@ -21,7 +22,7 @@ export default function AdminReportes({ onNavigate: _onNavigate }: AdminPageProp
       updateReportStatus(selected.id, 'EN_REVISION');
       addToast(`Advertencia enviada a ${selected.reportedName}`, 'success');
     } else if (action === 'suspender') {
-      suspendUser(selected.reportedName, resolution);
+      suspendUser(selected.reportedId || selected.reportedName, resolution);
       updateReportStatus(selected.id, 'RESUELTO', resolution);
       addToast(`${selected.reportedName} suspendido`, 'success');
     } else {
@@ -126,10 +127,12 @@ export default function AdminReportes({ onNavigate: _onNavigate }: AdminPageProp
               <p className="text-sm text-gray-700">{selected.description}</p>
             </div>
 
+            <AttachmentList files={selected.evidence || []} />
             {selected.resolution && <p className="text-sm">Decisión: {selected.resolution}</p>}
             {!['RESUELTO', 'DESCARTADO'].includes(selected.status) && (
               <div className="space-y-2">
                 <label className="block text-sm">Justificación de la decisión<textarea aria-label="Justificación de la decisión" value={resolution} onChange={e => setResolution(e.target.value)} className="w-full border rounded-xl p-3" /></label>
+                {selected.type === 'Contenido' && <Button variant="danger" fullWidth onClick={() => { if (moderateReportContent(selected.id, resolution)) setSelected(null); }}>Ocultar reseña reportada</Button>}
                 <Button variant="secondary" fullWidth onClick={() => handleAction('descartar')}>Descartar reporte</Button>
                 <Button variant="secondary" fullWidth onClick={() => handleAction('advertir')}>
                   <AlertCircle className="w-4 h-4" />

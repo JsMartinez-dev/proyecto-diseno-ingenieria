@@ -27,7 +27,7 @@ export default function ClienteDetalleSolicitud({ onNavigate, requestId }: Clien
   const handleAccept = (proposalId: string, providerName: string) => {
     if (!acceptProposal(req.id, proposalId)) return;
     addToast(`Prestador seleccionado: ${providerName}`, 'success');
-    setTimeout(() => onNavigate('solicitudes'), 1500);
+    onNavigate('solicitudes');
   };
 
   return (
@@ -99,6 +99,8 @@ export default function ClienteDetalleSolicitud({ onNavigate, requestId }: Clien
                     </div>
                   </div>
                   {prop.status === 'aceptada' && <Badge color="green">Aceptada</Badge>}
+                  {prop.status === 'retirada' && <Badge color="gray">Retirada</Badge>}
+                  {prop.status === 'cerrada' && <Badge color="gray">Cerrada</Badge>}
                   {prop.status === 'rechazada' && <Badge color="gray">Rechazada</Badge>}
                 </div>
 
@@ -154,7 +156,7 @@ export default function ClienteDetalleSolicitud({ onNavigate, requestId }: Clien
         </div>
       )}
 
-      {req.status === 'CONTRATADA' && req.serviceId && (
+      {req.serviceId && (
         <Button fullWidth className="mt-4" onClick={() => onNavigate('detalle-servicio', req.serviceId)}>
           Ver detalle del servicio
           <ChevronRight className="w-4 h-4" />

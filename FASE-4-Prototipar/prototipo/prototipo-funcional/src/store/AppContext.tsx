@@ -1,3 +1,5 @@
+import { defaultPreferences, notificationEnabled, canCoordinate, validSlot, proposalFitsAgenda } from './demoRules';
+import type { DemoPreferences, Attachment, AvailabilitySlot, VerificationRequest, CoordinationMessage } from '@/types';
 import { migrateProvider, type LegacyProvider } from './providerCatalog';
 import {
   createContext,
@@ -47,11 +49,26 @@ function useDemoState<T>(key: string, initial: T, migrate?: (value: T) => T) {
     latest.current = typeof update === 'function' ? (update as (previous: T) => T)(latest.current) : update;
     render(latest.current);
   }, []);
-  useEffect(() => { try { localStorage.setItem(`aliado-v1-${key}`, JSON.stringify(value)); } catch { /* storage unavailable */ } }, [key, value]);
+  useEffect(() => { try { localStorage.setItem(`aliado-v1-${key}`, JSON.stringify(value)); } catch { window.dispatchEvent(new Event('aliado-storage-error')); } }, [key, value]);
   return [value, set, latest] as const;
 }
 
 interface AppContextType {
+  preferences: DemoPreferences;
+  savePreferences: (updates: Partial<DemoPreferences>) => void;
+  consentDate?: string;
+  acceptConsent: () => void;
+  personalizeDemo: (role: 'cliente' | 'prestador', name: string) => void;
+  editProposal: (requestId: string, proposalId: string, updates: Pick<Proposal, 'price' | 'date' | 'time' | 'message'>) => boolean;
+  addPortfolioItem: (title: string, description: string, evidence: Attachment) => boolean;
+  removePortfolioItem: (id: string) => void;
+  saveSlot: (slot: Omit<AvailabilitySlot, 'id'>) => boolean;
+  removeSlot: (id: string) => void;
+  verifications: VerificationRequest[];
+  requestVerification: (documents: Attachment[]) => boolean;
+  reviewVerification: (id: string, approved: boolean, reason: string) => boolean;
+  messages: CoordinationMessage[];
+  sendMessage: (serviceId: string, text: string) => boolean;
   role: Role | null;
   setRole: (role: Role | null) => void;
   currentClient: { id: string; name: string; zone: string };
@@ -78,7 +95,8 @@ interface AppContextType {
   requestDeletion: () => void;
   updateClient: (updates: { name: string; zone: string }) => void;
   rateService: (serviceId: string, rating: number, comment: string, punctuality: number, quality: number, communication: number) => boolean;
-  createReport: (report: Omit<Report, 'id' | 'status' | 'date'>) => void;
+  createReport: (report: Omit<Report, 'id' | 'status' | 'date'>) => boolean;
+  moderateReportContent: (reportId: string, reason: string) => boolean;
   updateReportStatus: (reportId: string, status: Report['status'], reason?: string) => void;
   suspendUser: (userName: string, reason?: string) => void;
   warnUser: (userName: string) => void;
@@ -97,6 +115,20 @@ const AppContext = createContext<AppContextType | null>(null);
 
 export function AppProvider({ children }: { children: ReactNode }) {
   const [role, setRole] = useState<Role | null>(null);
+  const [allPreferences, setPreferences, preferencesRef] = useDemoState<Partial<Record<Role, DemoPreferences>>>('preferences', {});
+  const [consents, setConsents] = useDemoState<Partial<Record<Role, string>>>('consents', {});
+  const [verifications, setVerifications, verificationsRef] = useDemoState<VerificationRequest[]>('verifications', []);
+  const [messages, setMessages] = useDemoState<CoordinationMessage[]>('messages', []);
+  const preferences = role ? { ...defaultPreferences, ...allPreferences[role] } : defaultPreferences;
+  const savePreferences = (updates: Partial<DemoPreferences>) => {
+    if (role) { setPreferences(prev => ({ ...prev, [role]: { ...defaultPreferences, ...prev[role], ...updates } })); addToast('Preferencias guardadas'); }
+  };
+  const acceptConsent = () => { if (role) setConsents(prev => ({ ...prev, [role]: new Date().toISOString() })); };
+  const personalizeDemo = (accountRole: 'cliente' | 'prestador', name: string) => {
+    if (accountRole === 'cliente') setClient(prev => ({ ...prev, name }));
+    else setProviders(prev => prev.map(p => p.id === 'prov-1' ? { ...p, name } : p));
+    setConsents(prev => ({ ...prev, [accountRole]: new Date().toISOString() }));
+  };
   const [requests, setRequests, requestsRef] = useDemoState<ServiceRequest[]>('requests', initialRequests);
   const [services, setServices, servicesRef] = useDemoState<ServiceRecord[]>('services', initialServices);
   const [providers, setProviders, providersRef] = useDemoState<Provider[]>('providers', initialProviders, saved => saved.map(p => migrateProvider(p as LegacyProvider, (() => { try { return JSON.parse(localStorage.getItem('aliado-v1-categories') || 'null') || initialCategories; } catch { return initialCategories; } })())));
@@ -121,6 +153,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     addToast('Datos guardados');
   };
   const notify = (recipientRole: Role, type: Notification['type'], title: string, targetId: string) => {
+    if (!notificationEnabled({ ...defaultPreferences, ...preferencesRef.current[recipientRole] }, type)) return;
     setNotifications(prev => [{ id: crypto.randomUUID(), type, title, message: title, time: new Date().toLocaleString('es-CO'), read: false, recipientRole, targetId }, ...prev]);
   };
   const notificationRole = (n: Notification) => n.recipientRole || (n.type === 'oportunidad' || n.type === 'aceptada' ? 'prestador' : 'cliente');
@@ -133,6 +166,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setToasts((prev) => prev.filter((t) => t.id !== id));
     }, 3500);
   }, []);
+
+  useEffect(() => {
+    const onStorageError = () => addToast('No se pudo guardar en este navegador. Reduce los adjuntos; los cambios solo durarán esta sesión.', 'error');
+    window.addEventListener('aliado-storage-error', onStorageError);
+    return () => window.removeEventListener('aliado-storage-error', onStorageError);
+  }, [addToast]);
 
   const removeToast = useCallback((id: string) => {
     setToasts((prev) => prev.filter((t) => t.id !== id));
@@ -163,8 +202,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       ...req,
       id: requestId || crypto.randomUUID(),
       status: draft ? 'BORRADOR' : 'PUBLICADA',
-      proposals: [],
-      createdAt: new Date().toISOString().slice(0, 10),
+      proposals: existing?.proposals || [],
+      createdAt: existing?.createdAt || new Date().toISOString().slice(0, 10),
     };
     setRequests((prev) => [newReq, ...prev.filter(r => r.id !== newReq.id)]);
     const provider = providersRef.current.find(p => p.id === 'prov-1');
@@ -177,8 +216,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
     const provider = providersRef.current.find(p => p.id === proposal.providerId);
     if (!permitted('prestador') || proposal.providerId !== 'prov-1' || !request || !provider || !isCompatible(request, provider, categoriesRef.current, zonesRef.current)
       || request.proposals.some(p => p.providerId === proposal.providerId && p.status === 'pendiente')
+      || !proposalFitsAgenda(proposal.date, proposal.time, provider.agenda)
+      || servicesRef.current.some(s => s.providerId === provider.id && !['FINALIZADO', 'CANCELADO'].includes(s.stage) && s.date === proposal.date && s.time === proposal.time)
       || !Number.isFinite(proposal.price) || proposal.price <= 0 || !proposal.date || !proposal.time) {
-      addToast('No puedes enviar esta propuesta', 'error'); return false;
+      addToast('Revisa precio y horario: debe estar dentro de tu agenda y sin otra contratación.', 'error'); return false;
     }
     const newProposal: Proposal = {
       ...proposal,
@@ -202,11 +243,28 @@ export function AppProvider({ children }: { children: ReactNode }) {
     return true;
   };
 
+  const editProposal = (requestId: string, proposalId: string, updates: Pick<Proposal, 'price' | 'date' | 'time' | 'message'>) => {
+    const request = requestsRef.current.find(r => r.id === requestId);
+    const provider = providersRef.current.find(p => p.id === 'prov-1');
+    const proposal = request?.proposals.find(p => p.id === proposalId && p.providerId === 'prov-1' && p.status === 'pendiente');
+    if (!permitted('prestador') || !request || !provider || !proposal || !isCompatible(request, provider, categoriesRef.current, zonesRef.current)
+      || !Number.isFinite(updates.price) || updates.price <= 0 || !updates.date || !updates.time || !proposalFitsAgenda(updates.date, updates.time, provider.agenda)
+      || servicesRef.current.some(s => s.providerId === provider.id && !['FINALIZADO', 'CANCELADO'].includes(s.stage) && s.date === updates.date && s.time === updates.time)) {
+      addToast('La propuesta no admite cambios o el horario no está disponible', 'error'); return false;
+    }
+    setRequests(prev => prev.map(r => r.id !== requestId ? r : { ...r, proposals: r.proposals.map(p => p.id === proposalId ? { ...p, ...updates } : p) }));
+    addToast('Propuesta actualizada'); return true;
+  };
+
   const withdrawProposal = (requestId: string, proposalId: string) => {
     if (!permitted('prestador')) return;
     const request = requestsRef.current.find(r => r.id === requestId);
     if (!request || !['PUBLICADA', 'CON_PROPUESTAS'].includes(request.status)) return;
-    setRequests(prev => prev.map(r => r.id !== requestId ? r : { ...r, proposals: r.proposals.map(p => p.id === proposalId && p.providerId === 'prov-1' && p.status === 'pendiente' ? { ...p, status: 'rechazada' } : p) }));
+    setRequests(prev => prev.map(r => {
+      if (r.id !== requestId) return r;
+      const proposals = r.proposals.map(p => p.id === proposalId && p.providerId === 'prov-1' && p.status === 'pendiente' ? { ...p, status: 'retirada' as const } : p);
+      return { ...r, proposals, status: proposals.some(p => p.status === 'pendiente') ? 'CON_PROPUESTAS' : 'PUBLICADA' };
+    }));
     addToast('Propuesta retirada');
   };
 
@@ -215,9 +273,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
     if (!permitted('cliente') || !req || !canAccept(req, proposalId, role)) { addToast('La solicitud ya está contratada o la propuesta no está disponible', 'error'); return false; }
     const prop = req.proposals.find(p => p.id === proposalId)!;
     if (providersRef.current.find(p => p.id === prop.providerId)?.suspended) { addToast('Prestador restringido', 'error'); return false; }
+    const selectedProvider = providersRef.current.find(p => p.id === prop.providerId);
+    if (!selectedProvider || !proposalFitsAgenda(prop.date, prop.time, selectedProvider.agenda) || servicesRef.current.some(s => s.providerId === prop.providerId && !['FINALIZADO', 'CANCELADO'].includes(s.stage) && s.date === prop.date && s.time === prop.time)) {
+      addToast('El horario del prestador ya no está disponible', 'error'); return false;
+    }
     const id = crypto.randomUUID();
     const newService: ServiceRecord = {
-      id, requestId, clientId: req.clientId, clientName: req.clientName,
+      id, requestId, proposalId, clientId: req.clientId, clientName: req.clientName,
       providerId: prop.providerId, providerName: prop.providerName, category: req.category,
       date: prop.date, time: prop.time, price: prop.price,
       address: req.address || `Dirección pendiente de coordinación · ${req.zone}`,
@@ -225,7 +287,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       history: [{ stage: 'CONTRATADO', date: new Date().toISOString(), actor: 'Cliente' }],
     };
     setRequests(prev => prev.map(r => r.id !== requestId ? r : { ...r, status: 'CONTRATADA', serviceId: id,
-      proposals: r.proposals.map(p => ({ ...p, status: p.id === proposalId ? 'aceptada' : 'rechazada' })) }));
+      proposals: r.proposals.map(p => ({ ...p, status: p.id === proposalId ? 'aceptada' : p.status === 'pendiente' ? 'cerrada' : p.status })) }));
     setServices(prev => [newService, ...prev]);
     if (prop.providerId === 'prov-1') notify('prestador', 'aceptada', 'Tu propuesta fue aceptada', id);
     return true;
@@ -250,7 +312,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const cancelRequest = (requestId: string) => {
     const request = requestsRef.current.find(r => r.id === requestId);
     if (!permitted('cliente') || !request || request.clientId !== currentClient.id || !['BORRADOR', 'PUBLICADA', 'CON_PROPUESTAS'].includes(request.status)) return;
-    setRequests(prev => prev.map(r => r.id !== requestId ? r : { ...r, status: 'CANCELADA', proposals: r.proposals.map(p => ({ ...p, status: 'rechazada' })) }));
+    setRequests(prev => prev.map(r => r.id !== requestId ? r : { ...r, status: 'CANCELADA', proposals: r.proposals.map(p => ({ ...p, status: p.status === 'pendiente' ? 'cerrada' : p.status })) }));
     addToast('Solicitud cancelada');
   };
 
@@ -265,6 +327,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     if (service) {
       const review: Review = {
         id: `rev-${Date.now()}`,
+        authorId: service.clientId,
         authorName: service.clientName,
         rating,
         comment,
@@ -290,14 +353,25 @@ export function AppProvider({ children }: { children: ReactNode }) {
   };
 
   const createReport = (report: Omit<Report, 'id' | 'status' | 'date'>) => {
-    if (!role || !report.description.trim()) return;
+    if (!role || role === 'admin' || !permitted(role) || !report.description.trim() || !report.targetId) { addToast('Completa el reporte y su objetivo', 'error'); return false; }
+    const reporterId = role === 'cliente' ? 'client-1' : 'prov-1';
+    const reportedId = report.type === 'Usuario' ? report.targetId : report.type === 'Servicio'
+      ? (() => { const s = servicesRef.current.find(s => s.id === report.targetId); return role === 'cliente' ? s?.providerId : s?.clientId; })()
+      : providersRef.current.find(p => p.reviews.some(r => r.id === report.targetId))?.id;
+    const duplicate = reportsRef.current.find(r => r.reporterId === reporterId && r.targetId === report.targetId && r.type === report.type && r.reason === report.reason && ['PENDIENTE', 'EN_REVISION'].includes(r.status));
+    if (duplicate) {
+      if ((duplicate.evidence?.length || 0) + (report.evidence?.length || 0) > 3) { addToast('El reporte abierto admite como máximo 3 evidencias', 'error'); return false; }
+      setReports(prev => prev.map(r => r.id !== duplicate.id ? r : { ...r, evidence: [...(r.evidence || []), ...(report.evidence || [])].slice(0, 3) }));
+      addToast('Evidencia incorporada al reporte abierto'); return true;
+    }
     const newReport: Report = {
-      ...report,
+      ...report, reporterId, reportedId,
       id: `rep-${Date.now()}`,
       status: 'PENDIENTE',
       date: new Date().toISOString().slice(0, 10),
     };
     setReports((prev) => [newReport, ...prev]);
+    return true;
   };
 
   const updateReportStatus = (reportId: string, status: Report['status'], reason = '') => {
@@ -313,9 +387,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const suspendUser = (userName: string, reason = '') => {
     if (role !== 'admin') return;
     if (!reason.trim()) { addToast('Indica el motivo de la suspensión', 'error'); return; }
-    const userId = providersRef.current.find(p => p.name === userName)?.id || (userName === currentClient.name ? 'client-1' : userName);
+    const userId = providersRef.current.find(p => p.name === userName || p.id === userName)?.id || (userName === currentClient.name || userName === currentClient.id ? 'client-1' : userName);
     setSuspendedUsers(prev => [...new Set([...prev, userId])]);
-    setProviders(prev => prev.map(p => p.name === userName ? { ...p, suspended: true } : p));
+    setProviders(prev => prev.map(p => p.id === userId ? { ...p, suspended: true } : p));
     addAudit(`Administrador suspendió usuario: ${reason}`, userName);
   };
 
@@ -407,23 +481,89 @@ export function AppProvider({ children }: { children: ReactNode }) {
     if (updates.categoryIds && (!updates.categoryIds.length || updates.categoryIds.some(id => !categoriesRef.current.some(c => c.id === id && c.active)))) { addToast('Selecciona al menos una categoría activa', 'error'); return false; }
     if (updates.categoryIds && original.offeredServices.some(service => !updates.categoryIds!.includes(service.categoryId))) { addToast('Primero elimina o cambia de categoría los servicios asociados', 'error'); return false; }
     // Only professional fields can be changed by the owner.
-    const { bio, categoryIds, zones, available, formalizationSteps } = updates;
+    const { bio, categoryIds, zones, available, formalizationSteps, experienceYears } = updates;
+    if (experienceYears !== undefined && (!Number.isFinite(experienceYears) || experienceYears < 0 || experienceYears > 80)) { addToast('Experiencia inválida', 'error'); return false; }
     setProviders(prev => prev.map(p => p.id !== providerId ? p : { ...p,
+      experienceYears: experienceYears ?? p.experienceYears,
       bio: bio ?? p.bio, categoryIds: categoryIds ?? p.categoryIds, zones: zones ?? p.zones,
       specialty: categoryIds ? categoriesRef.current.find(c => c.id === categoryIds[0])?.name || p.specialty : p.specialty,
       available: available ?? p.available, formalizationSteps: formalizationSteps ?? p.formalizationSteps }));
     return true;
   };
 
+  const addPortfolioItem = (title: string, description: string, evidence: Attachment) => {
+    const provider = providersRef.current.find(p => p.id === 'prov-1');
+    if (!permitted('prestador') || !title.trim() || !description.trim() || !evidence || (provider?.portfolio?.length || 0) >= 6) { addToast('Completa el trabajo y una imagen. Máximo 6 trabajos.', 'error'); return false; }
+    setProviders(prev => prev.map(p => p.id !== 'prov-1' ? p : { ...p, portfolio: [...(p.portfolio || []), { id: crypto.randomUUID(), title: title.trim(), description: description.trim(), evidence }] }));
+    addToast('Trabajo agregado al portafolio'); return true;
+  };
+  const removePortfolioItem = (id: string) => {
+    if (permitted('prestador')) setProviders(prev => prev.map(p => p.id !== 'prov-1' ? p : { ...p, portfolio: (p.portfolio || []).filter(item => item.id !== id) }));
+  };
+  const saveSlot = (slot: Omit<AvailabilitySlot, 'id'>) => {
+    const provider = providersRef.current.find(p => p.id === 'prov-1');
+    if (!permitted('prestador') || !provider || !validSlot(slot, provider.agenda || [])) { addToast('Revisa la fecha y las horas; las franjas no pueden solaparse', 'error'); return false; }
+    setProviders(prev => prev.map(p => p.id !== 'prov-1' ? p : { ...p, agenda: [...(p.agenda || []), { ...slot, id: crypto.randomUUID() }].sort((a,b) => (a.date + a.start).localeCompare(b.date + b.start)) }));
+    return true;
+  };
+  const removeSlot = (id: string) => {
+    if (permitted('prestador')) setProviders(prev => prev.map(p => p.id !== 'prov-1' ? p : { ...p, agenda: (p.agenda || []).filter(s => s.id !== id) }));
+  };
+  const requestVerification = (documents: Attachment[]) => {
+    if (!permitted('prestador') || !documents.length || verificationsRef.current.some(v => v.providerId === 'prov-1' && v.status === 'PENDIENTE')) { addToast('Adjunta documentos; solo puede haber una solicitud pendiente', 'error'); return false; }
+    setVerifications(prev => [{ id: crypto.randomUUID(), providerId: 'prov-1', documents, status: 'PENDIENTE', createdAt: new Date().toISOString() }, ...prev]);
+    addToast('Verificación enviada a revisión'); return true;
+  };
+  const reviewVerification = (id: string, approved: boolean, reason: string) => {
+    const request = verificationsRef.current.find(v => v.id === id && v.status === 'PENDIENTE');
+    if (role !== 'admin' || !request || !reason.trim()) { addToast('Escribe el resultado de la revisión', 'error'); return false; }
+    setVerifications(prev => prev.map(v => v.id !== id ? v : { ...v, status: approved ? 'APROBADA' : 'RECHAZADA', reason: reason.trim() }));
+    setProviders(prev => prev.map(p => p.id !== request.providerId ? p : { ...p, verified: approved }));
+    addAudit(`Verificación ${approved ? 'aprobada' : 'rechazada'}: ${reason}`, request.providerId); return true;
+  };
+  const sendMessage = (serviceId: string, text: string) => {
+    const service = servicesRef.current.find(s => s.id === serviceId);
+    if (!service || !role || role === 'admin' || !permitted(role) || !canCoordinate(service, role) || !text.trim() || text.length > 1000) { addToast('No es posible enviar el mensaje', 'error'); return false; }
+    setMessages(prev => [...prev, { id: crypto.randomUUID(), serviceId, sender: role, text: text.trim(), date: new Date().toISOString() }]); return true;
+  };
+  const moderateReportContent = (reportId: string, reason: string) => {
+    const report = reportsRef.current.find(r => r.id === reportId);
+    if (role !== 'admin' || !reason.trim() || report?.type !== 'Contenido' || !providersRef.current.some(p => p.reviews.some(r => r.id === report.targetId))) { addToast('Selecciona una reseña reportada e indica el motivo', 'error'); return false; }
+    setProviders(prev => prev.map(p => ({ ...p, reviews: p.reviews.map(r => r.id === report.targetId ? { ...r, hidden: true } : r) })));
+    updateReportStatus(reportId, 'RESUELTO', reason);
+    addAudit(`Ocultó reseña: ${reason}`, report.targetId || reportId);
+    addToast('Reseña retirada de la vista pública'); return true;
+  };
+  const publicPreferences = { ...defaultPreferences, ...allPreferences.prestador };
+  const clientPreferences = { ...defaultPreferences, ...allPreferences.cliente };
+  const isPublicView = role === 'cliente' || role === null;
+  const visibleProviders = providers.filter(p => !isPublicView || p.id !== 'prov-1' || publicPreferences.profileVisible).map(p => ({ ...p,
+    name: isPublicView && p.id === 'prov-1' && !publicPreferences.publicName ? 'Prestador de ALIADO' : p.name,
+    reviews: p.reviews.map(r => role !== 'admin' && !clientPreferences.publicName && (r.authorId === 'client-1' || r.authorName === currentClient.name) ? { ...r, authorName: 'Cliente de ALIADO' } : r),
+  }));
+  const visibleRequests = requests.map(r => ({ ...r,
+    clientName: role === 'prestador' && !clientPreferences.publicName ? 'Cliente de ALIADO' : r.clientName,
+    proposals: r.proposals.map(p => role === 'cliente' && p.providerId === 'prov-1' && !publicPreferences.publicName ? { ...p, providerName: 'Prestador de ALIADO' } : p),
+  }));
+  const visibleServices = services.map(s => ({ ...s,
+    clientName: role === 'prestador' && s.clientId === 'client-1' && !clientPreferences.publicName ? 'Cliente de ALIADO' : s.clientName,
+    providerName: role === 'cliente' && s.providerId === 'prov-1' && !publicPreferences.publicName ? 'Prestador de ALIADO' : s.providerName,
+  }));
+
   return (
     <AppContext.Provider
       value={{
+        preferences, savePreferences, consentDate: role ? consents[role] : undefined, acceptConsent, personalizeDemo,
+        editProposal, addPortfolioItem, removePortfolioItem, saveSlot, removeSlot,
+        verifications: role === 'admin' ? verifications : verifications.filter(v => role === 'prestador' && v.providerId === 'prov-1'),
+        requestVerification, reviewVerification,
+        messages: messages.filter(m => { const s = services.find(s => s.id === m.serviceId); return s && ((role === 'cliente' && s.clientId === 'client-1') || (role === 'prestador' && s.providerId === 'prov-1')); }), sendMessage,
         role,
         setRole,
         currentClient,
-        requests,
-        services,
-        providers,
+        requests: visibleRequests,
+        services: visibleServices,
+        providers: visibleProviders,
         reports,
         audit,
         notifications: notifications.filter(n => notificationRole(n) === role),
@@ -445,6 +585,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         requestDeletion,
         rateService,
         createReport,
+        moderateReportContent,
         updateReportStatus,
         suspendUser,
         warnUser,

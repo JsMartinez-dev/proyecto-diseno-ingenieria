@@ -7,7 +7,15 @@ export function isCompatible(request: ServiceRequest, provider: Provider, catego
     && !provider.suspended && provider.available
     && Boolean(request.preferredDate && request.preferredTime)
     && Boolean(categories?.some(c => c.name === request.category && provider.categoryIds.includes(c.id)))
-    && provider.zones.includes(request.zone);
+    && provider.zones.includes(request.zone)
+    && (!provider.agenda?.length || provider.agenda.some(slot => {
+      const dateMatches = request.preferredDate === 'Flexible' || !/^\d{4}-\d{2}-\d{2}$/.test(request.preferredDate) || slot.date === request.preferredDate;
+      const period = request.preferredTime;
+      const timeMatches = period === 'Mañana' ? slot.start < '12:00' && slot.end > '00:00'
+        : period === 'Tarde' ? slot.start < '18:00' && slot.end > '12:00'
+        : period === 'Noche' ? slot.end > '18:00' : true;
+      return dateMatches && timeMatches;
+    }));
 }
 
 export function nextStage(service: ServiceRecord, role: Role | null): ServiceStage | null {

@@ -1,10 +1,10 @@
+import AccountSettings from '@/components/AccountSettings';
 import { useState } from 'react';
 import Modal from '@/components/ui/Modal';
 import { useApp } from '@/store/AppContext';
-import { User, MapPin, Shield, Lock, Info, ChevronRight, LogOut } from 'lucide-react';
+import { User, MapPin, Info, ChevronRight, LogOut } from 'lucide-react';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
-import Badge from '@/components/ui/Badge';
 import PageContainer from '@/components/layout/PageContainer';
 import type { ClientePageProps } from './types';
 
@@ -40,31 +40,7 @@ export default function ClientePerfil({ onNavigate }: ClientePageProps) {
         </div>
       </Card>
 
-      <Card className="p-4 mb-3">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-green-50 flex items-center justify-center text-green-700">
-            <Shield className="w-5 h-5" />
-          </div>
-          <div className="flex-1">
-            <p className="font-semibold text-gray-900 text-sm">Privacidad</p>
-            <p className="text-xs text-gray-500">Tu dirección no es visible públicamente</p>
-          </div>
-          <Badge color="green" size="sm">Activo</Badge>
-        </div>
-      </Card>
-
-      <Card className="p-4 mb-3">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center text-gray-600">
-            <Lock className="w-5 h-5" />
-          </div>
-          <div className="flex-1">
-            <p className="font-semibold text-gray-900 text-sm">Consentimiento de datos</p>
-            <p className="text-xs text-gray-500">Cuenta de ejemplo de la demo</p>
-          </div>
-          <Badge color="blue" size="sm">Simulado</Badge>
-        </div>
-      </Card>
+      <AccountSettings />
 
       <Card className="p-4 mb-3">
         <button onClick={() => onNavigate('acerca')} className="flex items-center gap-3 w-full">

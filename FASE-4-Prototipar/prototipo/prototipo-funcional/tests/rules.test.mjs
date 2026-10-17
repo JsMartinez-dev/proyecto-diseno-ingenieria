@@ -46,3 +46,11 @@ test('matching uses category IDs, never the name of a custom service or stale sp
   assert.equal(isCompatible({ ...request, category: 'Pintura' }, { ...provider, offeredServices: [{ name: 'Pintura', categoryId: 'cat-2' }] }), false);
   assert.equal(isCompatible(request, { ...provider, categoryIds: ['cat-4'] }), false);
 });
+
+test('matching respects agenda dates and preferred periods when agenda is configured', () => {
+ const scheduled = { ...provider, agenda:[{ date:'2026-10-20', start:'14:00', end:'17:00' }] };
+ assert.equal(isCompatible({ ...request, preferredDate:'2026-10-20', preferredTime:'Tarde' }, scheduled), true);
+ assert.equal(isCompatible({ ...request, preferredDate:'2026-10-20', preferredTime:'Mañana' }, scheduled), false);
+ assert.equal(isCompatible({ ...request, preferredDate:'2026-10-21', preferredTime:'Tarde' }, scheduled), false);
+ assert.equal(isCompatible({ ...request, preferredDate:'Flexible', preferredTime:'Flexible' }, scheduled), true);
+});

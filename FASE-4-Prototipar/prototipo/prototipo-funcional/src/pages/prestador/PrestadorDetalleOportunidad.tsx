@@ -9,13 +9,14 @@ import PageContainer from '@/components/layout/PageContainer';
 import type { PrestadorPageProps } from '../cliente/types';
 
 export default function PrestadorDetalleOportunidad({ onNavigate, requestId }: PrestadorPageProps & { requestId?: string }) {
-  const { requests, providers, categories, zones, addProposal, withdrawProposal, addToast } = useApp();
+  const { requests, providers, categories, zones, addProposal, editProposal, withdrawProposal, addToast } = useApp();
   const provider = providers.find(p => p.id === 'prov-1')!;
   const req = requests.find((r) => r.id === requestId && isCompatible(r, provider, categories, zones));
   const [price, setPrice] = useState('');
   const [date, setDate] = useState('');
   const [time, setTime] = useState('');
   const [message, setMessage] = useState('');
+  const [editing, setEditing] = useState(false);
   const [sent, setSent] = useState(false);
 
   if (!req) {
@@ -37,12 +38,16 @@ export default function PrestadorDetalleOportunidad({ onNavigate, requestId }: P
       addToast('Completa precio, fecha y hora', 'error');
       return;
     }
+    if (editing && existingProposal) {
+      if (editProposal(req.id, existingProposal.id, { price: Number(price), date, time, message })) setEditing(false);
+      return;
+    }
     const saved = addProposal(req.id, {
       providerId: 'prov-1',
       providerName: provider.name,
       providerRating: provider.rating,
       providerJobs: provider.jobsCompleted,
-      price: parseInt(price),
+      price: Number(price),
       date,
       time,
       message: message || 'Estoy disponible para realizar este servicio.',
@@ -96,7 +101,7 @@ export default function PrestadorDetalleOportunidad({ onNavigate, requestId }: P
         </div>
       </Card>
 
-      {existingProposal ? (
+      {existingProposal && !editing ? (
         <Card className="p-5">
           <div className="flex items-center gap-2 mb-3">
             <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center text-green-600">
@@ -107,6 +112,7 @@ export default function PrestadorDetalleOportunidad({ onNavigate, requestId }: P
               <p className="text-xs text-gray-500">Espera la respuesta del cliente</p>
             </div>
           </div>
+          <Button variant="secondary" className="mb-3 mr-2" onClick={() => { setPrice(String(existingProposal.price)); setDate(existingProposal.date); setTime(existingProposal.time); setMessage(existingProposal.message); setEditing(true); }}>Editar propuesta</Button>
           <Button variant="danger" className="mb-3" onClick={() => withdrawProposal(req.id, existingProposal.id)}>Retirar propuesta</Button>
           <div className="bg-gray-50 rounded-xl p-3 space-y-2">
             <div className="flex justify-between">
@@ -125,7 +131,7 @@ export default function PrestadorDetalleOportunidad({ onNavigate, requestId }: P
         </Card>
       ) : (
         <Card className="p-5">
-          <h2 className="font-bold text-gray-900 mb-4">Enviar propuesta</h2>
+          <h2 className="font-bold text-gray-900 mb-4">{editing ? 'Editar propuesta activa' : 'Enviar propuesta'}</h2>
           <div className="space-y-4">
             <div>
               <label className="text-sm font-semibold text-gray-700 mb-1.5 block">Precio estimado</label>
@@ -143,33 +149,11 @@ export default function PrestadorDetalleOportunidad({ onNavigate, requestId }: P
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="text-sm font-semibold text-gray-700 mb-1.5 block">Fecha disponible</label>
-                <select
-                  value={date}
-                  onChange={(e) => setDate(e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 outline-none text-sm bg-white"
-                >
-                  <option value="">Seleccionar</option>
-                  <option value="Hoy">Hoy</option>
-                  <option value="Mañana">Mañana</option>
-                  <option value="Pasado mañana">Pasado mañana</option>
-                </select>
+                <input type="date" aria-label="Fecha disponible" value={date} onChange={e => setDate(e.target.value)} className="w-full px-4 py-3 rounded-xl border border-gray-200" />
               </div>
               <div>
                 <label className="text-sm font-semibold text-gray-700 mb-1.5 block">Hora disponible</label>
-                <select
-                  value={time}
-                  onChange={(e) => setTime(e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 outline-none text-sm bg-white"
-                >
-                  <option value="">Seleccionar</option>
-                  <option value="9:00 AM">9:00 AM</option>
-                  <option value="10:00 AM">10:00 AM</option>
-                  <option value="11:00 AM">11:00 AM</option>
-                  <option value="2:00 PM">2:00 PM</option>
-                  <option value="3:00 PM">3:00 PM</option>
-                  <option value="4:00 PM">4:00 PM</option>
-                  <option value="5:00 PM">5:00 PM</option>
-                </select>
+                <input type="time" aria-label="Hora disponible" value={time} onChange={e => setTime(e.target.value)} className="w-full px-4 py-3 rounded-xl border border-gray-200" />
               </div>
             </div>
             <div>
@@ -182,9 +166,11 @@ export default function PrestadorDetalleOportunidad({ onNavigate, requestId }: P
                 className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 outline-none text-sm resize-none"
               />
             </div>
+            {provider.agenda?.length ? <p className="text-xs text-gray-500">Elige una hora dentro de tu agenda: {provider.agenda.map(s => `${s.date} ${s.start}–${s.end}`).join(' · ')}.</p> : null}
+            {editing && <Button variant="ghost" onClick={() => setEditing(false)}>Cancelar edición</Button>}
             <Button fullWidth onClick={handleSendProposal}>
               <Send className="w-4 h-4" />
-              Enviar propuesta
+              {editing ? 'Guardar cambios de propuesta' : 'Enviar propuesta'}
             </Button>
           </div>
         </Card>

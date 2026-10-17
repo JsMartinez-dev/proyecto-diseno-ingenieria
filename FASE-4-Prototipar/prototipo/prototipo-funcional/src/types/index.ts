@@ -42,6 +42,8 @@ export interface Zone {
 }
 
 export interface Review {
+  authorId?: string;
+  hidden?: boolean;
   id: string;
   authorName: string;
   rating: number;
@@ -59,6 +61,46 @@ export interface ProviderService {
   description: string;
 }
 
+export interface Attachment {
+  id: string;
+  name: string;
+  data: string;
+  mime: string;
+}
+export interface PortfolioItem {
+  id: string;
+  title: string;
+  description: string;
+  evidence: Attachment;
+}
+export interface AvailabilitySlot {
+  id: string;
+  date: string;
+  start: string;
+  end: string;
+}
+export interface VerificationRequest {
+  id: string;
+  providerId: string;
+  documents: Attachment[];
+  status: 'PENDIENTE' | 'APROBADA' | 'RECHAZADA';
+  createdAt: string;
+  reason?: string;
+}
+export interface DemoPreferences {
+  publicName: boolean;
+  profileVisible: boolean;
+  opportunities: boolean;
+  proposals: boolean;
+}
+export interface CoordinationMessage {
+  id: string;
+  serviceId: string;
+  sender: 'cliente' | 'prestador';
+  text: string;
+  date: string;
+}
+
 export interface Provider {
   id: string;
   name: string;
@@ -73,6 +115,8 @@ export interface Provider {
   available: boolean;
   suspended?: boolean;
   formalizationSteps?: string[];
+  portfolio?: PortfolioItem[];
+  agenda?: AvailabilitySlot[];
   bio: string;
   reviews: Review[];
   verified: boolean;
@@ -89,7 +133,7 @@ export interface Proposal {
   date: string;
   time: string;
   message: string;
-  status: 'pendiente' | 'aceptada' | 'rechazada';
+  status: 'pendiente' | 'aceptada' | 'rechazada' | 'retirada' | 'cerrada';
 }
 
 export interface ServiceRequest {
@@ -114,6 +158,7 @@ export interface ServiceRequest {
 export interface ServiceRecord {
   id: string;
   requestId: string;
+  proposalId?: string;
   clientId: string;
   clientName: string;
   providerId: string;
@@ -146,6 +191,9 @@ export interface Report {
   date: string;
   status: ReportStatus;
   type: 'Usuario' | 'Servicio' | 'Contenido';
+  reporterId?: string;
+  reportedId?: string;
+  evidence?: Attachment[];
   resolution?: string;
   targetId?: string;
 }

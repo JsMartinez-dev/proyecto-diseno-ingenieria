@@ -1,3 +1,5 @@
+import ReportForm from '@/components/ReportForm';
+import ServiceCoordination from '@/components/ServiceCoordination';
 import ServiceHistory from '@/components/ui/ServiceHistory';
 import { useApp } from '@/store/AppContext';
 import {
@@ -12,10 +14,9 @@ import { ServiceStageBadge } from '@/components/ui/StatusBadge';
 import Modal from '@/components/ui/Modal';
 import PageContainer from '@/components/layout/PageContainer';
 import type { ClientePageProps } from './types';
-import type { ReportReason } from '@/types';
 
 export default function ClienteDetalleServicio({ onNavigate, serviceId }: ClientePageProps & { serviceId?: string }) {
-  const { services, providers, currentClient, advanceStage, cancelService, rateService, createReport, addToast } = useApp();
+  const { services, providers, currentClient, advanceStage, cancelService, rateService, addToast } = useApp();
   const service = services.find((s) => s.id === serviceId && s.clientId === currentClient.id);
   const [showRating, setShowRating] = useState(false);
   const [showReport, setShowReport] = useState(false);
@@ -24,8 +25,7 @@ export default function ClienteDetalleServicio({ onNavigate, serviceId }: Client
   const [punctuality, setPunctuality] = useState(5);
   const [quality, setQuality] = useState(5);
   const [communication, setCommunication] = useState(5);
-  const [reportReason, setReportReason] = useState<ReportReason>('Incumplimiento');
-  const [reportDesc, setReportDesc] = useState('');
+
 
   if (!service) {
     return (
@@ -50,21 +50,6 @@ export default function ClienteDetalleServicio({ onNavigate, serviceId }: Client
     addToast('Reseña publicada correctamente', 'success');
     setShowRating(false);
   };
-
-  const handleReport = () => {
-    createReport({
-      reporterName: service.clientName,
-      reportedName: service.providerName,
-      reason: reportReason,
-      description: reportDesc || `Reporte de ${reportReason}`,
-      type: 'Servicio',
-    });
-    addToast('Reporte enviado', 'success');
-    setShowReport(false);
-    setReportDesc('');
-  };
-
-
 
   return (
     <PageContainer>
@@ -142,6 +127,7 @@ export default function ClienteDetalleServicio({ onNavigate, serviceId }: Client
         </div>
       </Card>
 
+      <ServiceCoordination service={service} />
       <ServiceHistory service={service} />
       {!['FINALIZADO', 'CANCELADO'].includes(service.stage) && (
         <Button variant="danger" fullWidth className="mb-4" onClick={() => {
@@ -258,36 +244,7 @@ export default function ClienteDetalleServicio({ onNavigate, serviceId }: Client
 
       {/* Report Modal */}
       <Modal open={showReport} onClose={() => setShowReport(false)} title="Reportar problema" size="sm">
-        <div className="space-y-4">
-          <div>
-            <label className="text-sm font-semibold text-gray-700 mb-1.5 block">Motivo</label>
-            <select
-              value={reportReason}
-              onChange={(e) => setReportReason(e.target.value as ReportReason)}
-              className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 outline-none text-sm bg-white"
-            >
-              <option>Comportamiento inapropiado</option>
-              <option>Incumplimiento</option>
-              <option>Posible fraude</option>
-              <option>Información falsa</option>
-              <option>Otro</option>
-            </select>
-          </div>
-          <div>
-            <label className="text-sm font-semibold text-gray-700 mb-1.5 block">Descripción</label>
-            <textarea
-              value={reportDesc}
-              onChange={(e) => setReportDesc(e.target.value)}
-              placeholder="Describe el problema..."
-              rows={3}
-              className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 outline-none text-sm resize-none"
-            />
-          </div>
-          <div className="flex gap-3">
-            <Button variant="ghost" fullWidth onClick={() => setShowReport(false)}>Cancelar</Button>
-            <Button variant="danger" fullWidth onClick={handleReport}>Enviar reporte</Button>
-          </div>
-        </div>
+        <ReportForm targetId={service.id} reportedName={service.providerName} type="Servicio" onDone={() => setShowReport(false)} />
       </Modal>
     </PageContainer>
   );

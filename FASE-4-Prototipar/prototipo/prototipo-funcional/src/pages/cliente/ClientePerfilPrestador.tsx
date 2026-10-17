@@ -1,3 +1,5 @@
+import ProfessionalDetails from '@/components/ProfessionalDetails';
+import ReportForm from '@/components/ReportForm';
 import ProviderCatalog from '@/components/ProviderCatalog';
 import { useApp } from '@/store/AppContext';
 import { MapPin, CheckCircle, Briefcase, Clock, AlertCircle, Flag } from 'lucide-react';
@@ -9,14 +11,12 @@ import StarRating from '@/components/ui/StarRating';
 import Modal from '@/components/ui/Modal';
 import PageContainer from '@/components/layout/PageContainer';
 import type { ClientePageProps } from './types';
-import type { ReportReason } from '@/types';
 
-export default function ClientePerfilPrestador({ onNavigate, providerId }: ClientePageProps & { providerId?: string }) {
-  const { providers, createReport, addToast } = useApp();
+export default function ClientePerfilPrestador({ onNavigate, providerId, preview = false }: ClientePageProps & { providerId?: string; preview?: boolean }) {
+  const { providers, role, preferences } = useApp();
   const provider = providers.find((p) => p.id === providerId && !p.suspended);
   const [showReport, setShowReport] = useState(false);
-  const [reportReason, setReportReason] = useState<ReportReason>('Comportamiento inapropiado');
-  const [reportDesc, setReportDesc] = useState('');
+  const [reviewTarget, setReviewTarget] = useState<string>();
 
   if (!provider) {
     return (
@@ -24,39 +24,27 @@ export default function ClientePerfilPrestador({ onNavigate, providerId }: Clien
         <div className="text-center py-12">
           <AlertCircle className="w-10 h-10 text-gray-300 mx-auto mb-3" />
           <p className="text-gray-500">Prestador no encontrado</p>
-          <Button variant="secondary" className="mt-4" onClick={() => onNavigate('buscar')}>Volver</Button>
+          <Button variant="secondary" className="mt-4" onClick={() => onNavigate(preview ? 'perfil' : 'buscar')}>Volver</Button>
         </div>
       </PageContainer>
     );
   }
 
-  const handleReport = () => {
-    createReport({
-      reporterName: 'Patricia Mercado',
-      reportedName: provider.name,
-      reason: reportReason,
-      description: reportDesc || `Reporte de ${reportReason}`,
-      type: 'Usuario',
-    });
-    addToast('Reporte enviado. El equipo lo revisará pronto.', 'success');
-    setShowReport(false);
-    setReportDesc('');
-  };
-
   return (
     <PageContainer>
-      <button onClick={() => onNavigate('buscar')} className="text-sm text-blue-600 font-medium mb-3">
+      <button onClick={() => onNavigate(preview ? 'perfil' : 'buscar')} className="text-sm text-blue-600 font-medium mb-3">
         ← Volver
       </button>
 
+      {preview && <p className="bg-blue-50 p-3 rounded-xl text-sm mb-4">Vista previa del perfil público.{!preferences.profileVisible && ' Tu perfil está oculto del catálogo.'}</p>}
       <Card className="p-5 mb-4">
         <div className="flex items-center gap-4 mb-4">
           <div className={`w-16 h-16 rounded-full ${provider.avatarColor} flex items-center justify-center text-white font-bold text-2xl flex-shrink-0`}>
-            {provider.name.charAt(0)}
+            {preview && !preferences.publicName ? 'P' : provider.name.charAt(0)}
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="text-lg font-bold text-gray-900">{provider.name}</h1>
+              <h1 className="text-lg font-bold text-gray-900">{preview && !preferences.publicName ? 'Prestador de ALIADO' : provider.name}</h1>
               {provider.verified && <CheckCircle className="w-5 h-5 text-green-500" />}
             </div>
             <p className="text-sm text-gray-500">{provider.specialty}</p>
@@ -109,15 +97,17 @@ export default function ClientePerfilPrestador({ onNavigate, providerId }: Clien
           </Badge>
         </div>
 
-        <Button variant="danger" size="sm" fullWidth onClick={() => setShowReport(true)}>
+        {role === 'cliente' && <Button variant="danger" size="sm" fullWidth onClick={() => { setReviewTarget(undefined); setShowReport(true); }}>
           <Flag className="w-4 h-4" />
           Reportar a este prestador
-        </Button>
+        </Button>}
       </Card>
 
+      <ProfessionalDetails provider={provider} />
+      <p className="text-xs text-gray-500 mb-4">{provider.verified ? 'Verificación ampliada de ejemplo: documentación revisada en la demo.' : 'Nivel básico: información declarada, sin revisión documental ampliada.'} No certifica estado legal ni calidad del servicio.</p>
       <h2 className="font-bold text-gray-900 mb-3">Reseñas ({provider.reviews.length})</h2>
       <div className="space-y-3">
-        {provider.reviews.map((review) => (
+        {provider.reviews.filter(review => !review.hidden).map((review) => (
           <Card key={review.id} className="p-4">
             <div className="flex items-center justify-between mb-2">
               <p className="font-semibold text-gray-900 text-sm">{review.authorName}</p>
@@ -125,42 +115,13 @@ export default function ClientePerfilPrestador({ onNavigate, providerId }: Clien
             </div>
             <StarRating rating={review.rating} size={14} />
             <p className="text-sm text-gray-600 mt-2">{review.comment}</p>
+            {role === 'cliente' && <button className="text-sm text-red-700 mt-2 underline" onClick={() => { setReviewTarget(review.id); setShowReport(true); }}>Reportar esta reseña</button>}
           </Card>
         ))}
       </div>
 
       <Modal open={showReport} onClose={() => setShowReport(false)} title="Reportar prestador" size="sm">
-        <div className="space-y-4">
-          <p className="text-sm text-gray-500">Reportando a <span className="font-semibold text-gray-700">{provider.name}</span></p>
-          <div>
-            <label className="text-sm font-semibold text-gray-700 mb-1.5 block">Motivo</label>
-            <select
-              value={reportReason}
-              onChange={(e) => setReportReason(e.target.value as ReportReason)}
-              className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 outline-none text-sm bg-white"
-            >
-              <option>Comportamiento inapropiado</option>
-              <option>Incumplimiento</option>
-              <option>Posible fraude</option>
-              <option>Información falsa</option>
-              <option>Otro</option>
-            </select>
-          </div>
-          <div>
-            <label className="text-sm font-semibold text-gray-700 mb-1.5 block">Descripción</label>
-            <textarea
-              value={reportDesc}
-              onChange={(e) => setReportDesc(e.target.value)}
-              placeholder="Cuenta qué ocurrió..."
-              rows={3}
-              className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 outline-none text-sm resize-none"
-            />
-          </div>
-          <div className="flex gap-3">
-            <Button variant="ghost" fullWidth onClick={() => setShowReport(false)}>Cancelar</Button>
-            <Button variant="danger" fullWidth onClick={handleReport}>Enviar reporte</Button>
-          </div>
-        </div>
+        <ReportForm key={reviewTarget || provider.id} targetId={reviewTarget || provider.id} reportedName={provider.name} type={reviewTarget ? 'Contenido' : 'Usuario'} onDone={() => setShowReport(false)} />
       </Modal>
     </PageContainer>
   );

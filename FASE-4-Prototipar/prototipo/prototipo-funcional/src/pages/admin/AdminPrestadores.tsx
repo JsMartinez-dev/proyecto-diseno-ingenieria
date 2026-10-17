@@ -1,3 +1,4 @@
+import Verification from '@/components/Verification';
 import ProviderCatalog from '@/components/ProviderCatalog';
 import Modal from '@/components/ui/Modal';
 import type { Provider } from '@/types';
@@ -25,6 +26,7 @@ export default function AdminPrestadores({ onNavigate: _onNavigate }: AdminPageP
         <p className="text-sm text-gray-500">Trabajadores independientes registrados</p>
       </div>
 
+      <Verification admin />
       <div className="relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
         <input
