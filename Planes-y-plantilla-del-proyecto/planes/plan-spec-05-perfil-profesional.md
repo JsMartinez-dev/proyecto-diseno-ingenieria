@@ -64,16 +64,20 @@ backend/src/main/java/com/aliado/
 ├── catalogo/         # SPEC-04 (reutilizado — CategoriaServicio, Zona)
 ├── solicitudes/      # SPEC-04 (reutilizado, sin cambios)
 ├── perfiles/         # nuevo
-│   ├── controller/   PerfilController
-│   ├── service/      PerfilService, DisponibilidadService
-│   ├── repository/   PerfilProfesionalRepository, ExperienciaProfesionalRepository, ServicioPortafolioRepository, DisponibilidadRepository, CompromisoAgendaRepository
-│   └── model/        PerfilProfesional, ExperienciaProfesional, ServicioPortafolio, Disponibilidad, CompromisoAgenda
+│   ├── presentation/controller/       PerfilController
+│   ├── application/service/           PerfilService, DisponibilidadService
+│   ├── domain/repository/             PerfilProfesionalRepository, ExperienciaProfesionalRepository, ServicioPortafolioRepository, DisponibilidadRepository, CompromisoAgendaRepository
+│   └── domain/model/                  PerfilProfesional, ExperienciaProfesional, ServicioPortafolio, Disponibilidad, CompromisoAgenda
 └── common/           # SPEC-01/SPEC-04 (reutilizado)
     ├── config/
     ├── security/
     ├── exception/
-    └── storage/       ArchivoStorageService (interfaz, SPEC-04, reutilizada)
+    └── storage/                       ArchivoStorageService (interfaz, SPEC-04, reutilizada)
 ```
+
+**Arquitectura por capas**: este SPEC conserva la organización modular y aplica Arquitectura Limpia según las secciones 7.1–7.5 de [plan-general-ALIADO](plan-general-ALIADO.md#7-estructura-lógica-del-repositorio). Las rutas del árbol son relativas a cada módulo: `domain/` contiene modelos, reglas y puertos; `application/` coordina los casos de uso; `presentation/` expone HTTP; `infrastructure/` implementa los detalles técnicos. El dominio no importa Spring, JPA ni DTO HTTP; la aplicación depende de contratos de dominio/aplicación, nunca de adaptadores concretos. Los DTO de aplicación van en `application/dto/` y los contratos HTTP en `presentation/dto/`, con conversión en presentación cuando corresponda.
+
+Cuando haya persistencia, los `*Repository` del árbol son puertos en `domain/repository/`, sin heredar de Spring Data. Las tareas existentes de persistencia incluyen sus implementaciones en `infrastructure/persistence/`: `entity/` para entidades JPA, `jpa/` para repositorios Spring Data, `adapter/` para implementar los puertos y `mapper/` para convertir dominio y persistencia. Las integraciones externas se definen mediante puertos de aplicación y adaptadores en `infrastructure/adapter/`; los contratos compartidos existentes de `common/` permanecen libres de detalles técnicos. Las dependencias entre módulos utilizan contratos de dominio o servicios públicos de aplicación, sin acceder a entidades JPA ni adaptadores ajenos. Los filtros de seguridad y la configuración de Spring pertenecen a infraestructura técnica; los controladores y la traducción de errores HTTP pertenecen a presentación. Se crean solo las carpetas necesarias para las tareas ya definidas; se conservan sus identificadores, orden y dependencias.
 
 **Structure Decision**: se mantiene el patrón modular por funcionalidad ya usado en `auth/` y `solicitudes/`. `perfiles/` reutiliza el catálogo compartido de `catalogo/` (SPEC-04) en vez de redefinir categorías o zonas, y reutiliza `ArchivoStorageService` de `common/storage/` para la evidencia del portafolio, sin crear un segundo mecanismo de almacenamiento. `DisponibilidadService` se separa de `PerfilService` dentro del mismo módulo porque su lógica de validación de conflictos (agenda vs. disponibilidad) es independiente de los datos generales del perfil y será consumida directamente por SPEC-06 para el cálculo de compatibilidad.
 
@@ -81,7 +85,7 @@ backend/src/main/java/com/aliado/
 
 ## Phase 1: Setup
 
-- [ ] T001 Crear el paquete `perfiles/` con sus subcarpetas en capas
+- [ ] T001 Crear el paquete `perfiles/` con sus subcarpetas en capas de Arquitectura Limpia (según Project Structure)
 - [ ] T002 Migración Flyway: tablas `perfiles_profesionales`, `perfil_categoria`, `perfil_zona_atencion`, `experiencia_profesional`, `servicio_portafolio`, `disponibilidad`, `compromiso_agenda`
 
 ---
@@ -107,11 +111,11 @@ No se requieren tareas fundacionales nuevas para este SPEC: autenticación/roles
 
 ### Implementation
 
-- [ ] T005 [P] [US1] Modelos `PerfilProfesional`, `ExperienciaProfesional` y tablas puente `PerfilCategoria`/`PerfilZonaAtencion` — `perfiles/model`
-- [ ] T006 [US1] `PerfilProfesionalRepository`, `ExperienciaProfesionalRepository` — `perfiles/repository`
+- [ ] T005 [P] [US1] Modelos `PerfilProfesional`, `ExperienciaProfesional` y tablas puente `PerfilCategoria`/`PerfilZonaAtencion` — `perfiles/domain/model`
+- [ ] T006 [US1] `PerfilProfesionalRepository`, `ExperienciaProfesionalRepository` — `perfiles/domain/repository`
 - [ ] T007 [US1] `PerfilService.crear()`: valida al menos una categoría y una zona (FR-024), asocia categorías existentes del catálogo (FR-026, reutiliza `CategoriaServicioRepository` de SPEC-04), asocia zonas (FR-027, reutiliza `ZonaRepository` de SPEC-04), registra experiencia opcional (FR-028) (depends on T005, T006)
 - [ ] T008 [US1] `PerfilService.actualizarCategorias()`, `agregarExperiencia()`: operan sobre perfil existente sin crear uno nuevo (depends on T007)
-- [ ] T009 [US1] Endpoints `POST /api/v1/perfiles`, `PUT /api/v1/perfiles/mio/categorias`, `POST /api/v1/perfiles/mio/experiencia`, restringidos a rol PRESTADOR — `perfiles/controller`
+- [ ] T009 [US1] Endpoints `POST /api/v1/perfiles`, `PUT /api/v1/perfiles/mio/categorias`, `POST /api/v1/perfiles/mio/experiencia`, restringidos a rol PRESTADOR — `perfiles/presentation/controller`
 
 **Checkpoint**: un Prestador puede crear su perfil con los datos obligatorios de forma independiente.
 
@@ -131,7 +135,7 @@ No se requieren tareas fundacionales nuevas para este SPEC: autenticación/roles
 ### Implementation
 
 - [ ] T012 [US2] `PerfilService.editarDatosGenerales()`: valida existencia y propiedad del perfil, rechaza si no existe o no pertenece al Prestador (FR-025) (depends on T007)
-- [ ] T013 [US2] Endpoint `PUT /api/v1/perfiles/mio` — `perfiles/controller`
+- [ ] T013 [US2] Endpoint `PUT /api/v1/perfiles/mio` — `perfiles/presentation/controller`
 
 **Checkpoint**: el Prestador puede mantener actualizado su perfil de forma independiente.
 
@@ -150,11 +154,11 @@ No se requieren tareas fundacionales nuevas para este SPEC: autenticación/roles
 
 ### Implementation
 
-- [ ] T016 [P] [US3] Modelo `ServicioPortafolio` — `perfiles/model` (depends on T005)
-- [ ] T017 [US3] `ServicioPortafolioRepository` — `perfiles/repository`
+- [ ] T016 [P] [US3] Modelo `ServicioPortafolio` — `perfiles/domain/model` (depends on T005)
+- [ ] T017 [US3] `ServicioPortafolioRepository` — `perfiles/domain/repository`
 - [ ] T018 [US3] `PerfilService.agregarServicioPortafolio()`: sube evidencia vía `ArchivoStorageService` de SPEC-04, asocia al perfil propio (FR-029) (depends on T017, dependencia externa: `ArchivoStorageService` de SPEC-04 T006)
 - [ ] T019 [US3] `PerfilService.eliminarServicioPortafolio()`: valida propiedad, elimina sin afectar otros servicios (FR-030) (depends on T017)
-- [ ] T020 [US3] Endpoints `POST /api/v1/perfiles/mio/portafolio`, `DELETE /api/v1/perfiles/mio/portafolio/{id}` — `perfiles/controller`
+- [ ] T020 [US3] Endpoints `POST /api/v1/perfiles/mio/portafolio`, `DELETE /api/v1/perfiles/mio/portafolio/{id}` — `perfiles/presentation/controller`
 
 **Checkpoint**: el portafolio del Prestador puede gestionarse de forma independiente.
 
@@ -173,11 +177,11 @@ No se requieren tareas fundacionales nuevas para este SPEC: autenticación/roles
 
 ### Implementation
 
-- [ ] T023 [P] [US4] Modelos `Disponibilidad`, `CompromisoAgenda` — `perfiles/model` (depends on T005) 
-- [ ] T024 [US4] `DisponibilidadRepository`, `CompromisoAgendaRepository` — `perfiles/repository`
+- [ ] T023 [P] [US4] Modelos `Disponibilidad`, `CompromisoAgenda` — `perfiles/domain/model` (depends on T005)
+- [ ] T024 [US4] `DisponibilidadRepository`, `CompromisoAgendaRepository` — `perfiles/domain/repository`
 - [ ] T025 [US4] `DisponibilidadService.configurar()`: guarda disponibilidad del perfil (FR-031) (depends on T024)
 - [ ] T026 [US4] `DisponibilidadService.gestionarCompromiso()`: agrega/modifica/consulta compromisos propios sin afectar los de otros prestadores (FR-032), rechaza si entra en conflicto con disponibilidad ya registrada (edge case del SPEC) (depends on T024, T025)
-- [ ] T027 [US4] Endpoints `PUT /api/v1/perfiles/mio/disponibilidad`, `POST|PUT|GET /api/v1/perfiles/mio/agenda` — `perfiles/controller`
+- [ ] T027 [US4] Endpoints `PUT /api/v1/perfiles/mio/disponibilidad`, `POST|PUT|GET /api/v1/perfiles/mio/agenda` — `perfiles/presentation/controller`
 
 **Checkpoint**: disponibilidad y agenda quedan configuradas y listas para ser consumidas por SPEC-06.
 
@@ -197,7 +201,7 @@ No se requieren tareas fundacionales nuevas para este SPEC: autenticación/roles
 ### Implementation
 
 - [ ] T030 [US5] `PerfilService.construirVistaPublica()`: define el subconjunto de datos expuestos públicamente a partir del perfil completo (FR-033); esta misma construcción debe ser la que use SPEC-03 (UC015) para no divergir (depends on T007, T018, T025) 
-- [ ] T031 [US5] Endpoint `GET /api/v1/perfiles/mio/vista-previa` — `perfiles/controller`
+- [ ] T031 [US5] Endpoint `GET /api/v1/perfiles/mio/vista-previa` — `perfiles/presentation/controller`
 
 **Checkpoint**: el Prestador puede validar su información pública antes de exponerla.
 

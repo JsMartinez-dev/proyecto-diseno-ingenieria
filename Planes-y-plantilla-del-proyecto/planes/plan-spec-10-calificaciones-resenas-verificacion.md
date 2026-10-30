@@ -71,18 +71,22 @@ backend/src/main/java/com/aliado/
 ├── servicios/             # SPEC-08
 ├── perfiles/              # SPEC-05
 ├── confianza/             # nuevo
-│   ├── controller/        CalificacionController, VerificacionController, ConfianzaController
-│   ├── service/           CalificacionService, ReputacionService, VerificacionService
-│   ├── repository/        CalificacionRepository, ResenaRepository, ReputacionRepository,
+│   ├── presentation/controller/       CalificacionController, VerificacionController, ConfianzaController
+│   ├── application/service/           CalificacionService, ReputacionService, VerificacionService
+│   ├── domain/repository/             CalificacionRepository, ResenaRepository, ReputacionRepository,
 │   │                      SolicitudVerificacionRepository, DocumentoVerificacionRepository
-│   └── model/             Calificacion, Resena, ReputacionPrestador,
+│   └── domain/model/                  Calificacion, Resena, ReputacionPrestador,
 │                          SolicitudVerificacion, DocumentoVerificacion
 ├── reportes/              # núcleo compartido, introducido aquí y ampliado en SPEC-11
-│   ├── service/           ReporteService
-│   ├── repository/        ReporteRepository
-│   └── model/             Reporte
+│   ├── application/service/           ReporteService
+│   ├── domain/repository/             ReporteRepository
+│   └── domain/model/                  Reporte
 └── common/storage/        # ArchivoStorageService de SPEC-04
 ```
+
+**Arquitectura por capas**: este SPEC conserva la organización modular y aplica Arquitectura Limpia según las secciones 7.1–7.5 de [plan-general-ALIADO](plan-general-ALIADO.md#7-estructura-lógica-del-repositorio). Las rutas del árbol son relativas a cada módulo: `domain/` contiene modelos, reglas y puertos; `application/` coordina los casos de uso; `presentation/` expone HTTP; `infrastructure/` implementa los detalles técnicos. El dominio no importa Spring, JPA ni DTO HTTP; la aplicación depende de contratos de dominio/aplicación, nunca de adaptadores concretos. Los DTO de aplicación van en `application/dto/` y los contratos HTTP en `presentation/dto/`, con conversión en presentación cuando corresponda.
+
+Cuando haya persistencia, los `*Repository` del árbol son puertos en `domain/repository/`, sin heredar de Spring Data. Las tareas existentes de persistencia incluyen sus implementaciones en `infrastructure/persistence/`: `entity/` para entidades JPA, `jpa/` para repositorios Spring Data, `adapter/` para implementar los puertos y `mapper/` para convertir dominio y persistencia. Las integraciones externas se definen mediante puertos de aplicación y adaptadores en `infrastructure/adapter/`; los contratos compartidos existentes de `common/` permanecen libres de detalles técnicos. Las dependencias entre módulos utilizan contratos de dominio o servicios públicos de aplicación, sin acceder a entidades JPA ni adaptadores ajenos. Los filtros de seguridad y la configuración de Spring pertenecen a infraestructura técnica; los controladores y la traducción de errores HTTP pertenecen a presentación. Se crean solo las carpetas necesarias para las tareas ya definidas; se conservan sus identificadores, orden y dependencias.
 
 **Structure Decision**: `confianza/` concentra calificaciones, reputación y verificación. El reporte de reseña se crea mediante un módulo `reportes/` mínimo y genérico para evitar que SPEC-10, SPEC-11 y SPEC-12 definan tres infraestructuras incompatibles. SPEC-11 ampliará sus tipos/objetivos y SPEC-12 administrará su ciclo de moderación.
 

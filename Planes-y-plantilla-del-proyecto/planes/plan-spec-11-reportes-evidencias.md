@@ -57,14 +57,18 @@ Reglas:
 ```text
 backend/src/main/java/com/aliado/
 ├── reportes/
-│   ├── controller/ ReporteController
-│   ├── service/    ReporteService, EvidenciaReporteService
-│   ├── repository/ ReporteRepository, EvidenciaReporteRepository
-│   └── model/      Reporte, EvidenciaReporte
+│   ├── presentation/controller/       ReporteController
+│   ├── application/service/           ReporteService, EvidenciaReporteService
+│   ├── domain/repository/             ReporteRepository, EvidenciaReporteRepository
+│   └── domain/model/                  Reporte, EvidenciaReporte
 ├── servicios/      # SPEC-08
 ├── confianza/      # SPEC-10
 └── common/storage/ # SPEC-04
 ```
+
+**Arquitectura por capas**: este SPEC conserva la organización modular y aplica Arquitectura Limpia según las secciones 7.1–7.5 de [plan-general-ALIADO](plan-general-ALIADO.md#7-estructura-lógica-del-repositorio). Las rutas del árbol son relativas a cada módulo: `domain/` contiene modelos, reglas y puertos; `application/` coordina los casos de uso; `presentation/` expone HTTP; `infrastructure/` implementa los detalles técnicos. El dominio no importa Spring, JPA ni DTO HTTP; la aplicación depende de contratos de dominio/aplicación, nunca de adaptadores concretos. Los DTO de aplicación van en `application/dto/` y los contratos HTTP en `presentation/dto/`, con conversión en presentación cuando corresponda.
+
+Cuando haya persistencia, los `*Repository` del árbol son puertos en `domain/repository/`, sin heredar de Spring Data. Las tareas existentes de persistencia incluyen sus implementaciones en `infrastructure/persistence/`: `entity/` para entidades JPA, `jpa/` para repositorios Spring Data, `adapter/` para implementar los puertos y `mapper/` para convertir dominio y persistencia. Las integraciones externas se definen mediante puertos de aplicación y adaptadores en `infrastructure/adapter/`; los contratos compartidos existentes de `common/` permanecen libres de detalles técnicos. Las dependencias entre módulos utilizan contratos de dominio o servicios públicos de aplicación, sin acceder a entidades JPA ni adaptadores ajenos. Los filtros de seguridad y la configuración de Spring pertenecen a infraestructura técnica; los controladores y la traducción de errores HTTP pertenecen a presentación. Se crean solo las carpetas necesarias para las tareas ya definidas; se conservan sus identificadores, orden y dependencias.
 
 **Structure Decision**: se amplía el módulo ya creado en SPEC-10 en lugar de crear `reporte_usuario`, `reporte_servicio` y `reporte_resena` como sistemas independientes. La discriminación por tipo queda centralizada y SPEC-12 consume el mismo repositorio/servicio.
 

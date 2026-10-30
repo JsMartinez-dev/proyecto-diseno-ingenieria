@@ -51,17 +51,21 @@ Relaciones: `Usuario` (SPEC-01) 1—1 `PerfilUsuario`, 1—1 `Ubicacion`, 1—N 
 ```text
 backend/src/main/java/com/aliado/
 └── perfil/
-    ├── controller/ PerfilController
-    ├── service/    PerfilService, EliminacionCuentaService
-    ├── repository/ PerfilRepository, UbicacionRepository, SolicitudEliminacionRepository
-    └── model/      PerfilUsuario, Ubicacion, SolicitudEliminacion
+    ├── presentation/controller/       PerfilController
+    ├── application/service/           PerfilService, EliminacionCuentaService
+    ├── domain/repository/             PerfilRepository, UbicacionRepository, SolicitudEliminacionRepository
+    └── domain/model/                  PerfilUsuario, Ubicacion, SolicitudEliminacion
 ```
+
+**Arquitectura por capas**: este SPEC conserva la organización modular y aplica Arquitectura Limpia según las secciones 7.1–7.5 de [plan-general-ALIADO](plan-general-ALIADO.md#7-estructura-lógica-del-repositorio). Las rutas del árbol son relativas a cada módulo: `domain/` contiene modelos, reglas y puertos; `application/` coordina los casos de uso; `presentation/` expone HTTP; `infrastructure/` implementa los detalles técnicos. El dominio no importa Spring, JPA ni DTO HTTP; la aplicación depende de contratos de dominio/aplicación, nunca de adaptadores concretos. Los DTO de aplicación van en `application/dto/` y los contratos HTTP en `presentation/dto/`, con conversión en presentación cuando corresponda.
+
+Cuando haya persistencia, los `*Repository` del árbol son puertos en `domain/repository/`, sin heredar de Spring Data. Las tareas existentes de persistencia incluyen sus implementaciones en `infrastructure/persistence/`: `entity/` para entidades JPA, `jpa/` para repositorios Spring Data, `adapter/` para implementar los puertos y `mapper/` para convertir dominio y persistencia. Las integraciones externas se definen mediante puertos de aplicación y adaptadores en `infrastructure/adapter/`; los contratos compartidos existentes de `common/` permanecen libres de detalles técnicos. Las dependencias entre módulos utilizan contratos de dominio o servicios públicos de aplicación, sin acceder a entidades JPA ni adaptadores ajenos. Los filtros de seguridad y la configuración de Spring pertenecen a infraestructura técnica; los controladores y la traducción de errores HTTP pertenecen a presentación. Se crean solo las carpetas necesarias para las tareas ya definidas; se conservan sus identificadores, orden y dependencias.
 
 ---
 
 ## Phase 1: Setup
 
-- [ ] T001 Crear el paquete `perfil/` con sus subcarpetas en capas
+- [ ] T001 Crear el paquete `perfil/` con sus subcarpetas en capas de Arquitectura Limpia (según Project Structure)
 - [ ] T002 Migración Flyway: tablas `perfiles`, `ubicaciones`, `solicitudes_eliminacion` (con FK hacia `usuarios` de SPEC-01)
 
 ---
@@ -78,9 +82,9 @@ backend/src/main/java/com/aliado/
 
 ### Implementation
 
-- [ ] T005 [P] [US1] Modelo `PerfilUsuario` — `perfil/model`
-- [ ] T006 [US1] `PerfilService.consultar()` / `actualizar()` con validación que no sobrescribe en caso de error (FR-002) — `perfil/service`
-- [ ] T007 [US1] Endpoints `GET/PATCH /api/v1/perfil/me` — `perfil/controller`
+- [ ] T005 [P] [US1] Modelo `PerfilUsuario` — `perfil/domain/model`
+- [ ] T006 [US1] `PerfilService.consultar()` / `actualizar()` con validación que no sobrescribe en caso de error (FR-002) — `perfil/application/service`
+- [ ] T007 [US1] Endpoints `GET/PATCH /api/v1/perfil/me` — `perfil/presentation/controller`
 
 **Checkpoint**: cualquier usuario autenticado mantiene sus datos básicos actualizados de forma independiente.
 
@@ -99,9 +103,9 @@ backend/src/main/java/com/aliado/
 
 ### Implementation
 
-- [ ] T010 [P] [US2] Modelo `Ubicacion` (cifrado de `direccionExacta` en reposo, RNF-004) — `perfil/model`
-- [ ] T011 [US2] `PerfilService`: lógica de exposición condicionada (zona por defecto, dirección exacta solo bajo regla explícita) — `perfil/service`
-- [ ] T012 [US2] Endpoints `PUT /ubicacion`, `PATCH /visibilidad`, `GET /{id}/publico` — `perfil/controller`
+- [ ] T010 [P] [US2] Modelo `Ubicacion` (cifrado de `direccionExacta` en reposo, RNF-004) — `perfil/domain/model`
+- [ ] T011 [US2] `PerfilService`: lógica de exposición condicionada (zona por defecto, dirección exacta solo bajo regla explícita) — `perfil/application/service`
+- [ ] T012 [US2] Endpoints `PUT /ubicacion`, `PATCH /visibilidad`, `GET /{id}/publico` — `perfil/presentation/controller`
 
 **Checkpoint**: ninguna ruta del sistema puede exponer `direccionExacta` fuera de la regla explícita, verificable con un solo punto de control en `PerfilService`.
 
@@ -120,9 +124,9 @@ backend/src/main/java/com/aliado/
 
 ### Implementation
 
-- [ ] T015 [P] [US3] Modelo `SolicitudEliminacion` — `perfil/model`
-- [ ] T016 [US3] `EliminacionCuentaService`: validación de servicios en ejecución, expiración a 24 h — `perfil/service`
-- [ ] T017 [US3] Endpoints `POST /eliminacion`, `/eliminacion/confirmar` — `perfil/controller`
+- [ ] T015 [P] [US3] Modelo `SolicitudEliminacion` — `perfil/domain/model`
+- [ ] T016 [US3] `EliminacionCuentaService`: validación de servicios en ejecución, expiración a 24 h — `perfil/application/service`
+- [ ] T017 [US3] Endpoints `POST /eliminacion`, `/eliminacion/confirmar` — `perfil/presentation/controller`
 - [ ] T018 [US3] Job programado (scheduler) que marca como `EXPIRADA` toda solicitud pendiente > 24 h
 
 > **Dependencia cruzada pendiente**: T016 necesita consultar si el usuario tiene un "servicio en ejecución", dato que vivirá en el módulo `propuestas` (SPEC-07/08, UC-04), que todavía no tiene su propio plan. Esta tarea no puede completarse de forma aislada; debe revisarse al escribir el plan de SPEC-07/08.
