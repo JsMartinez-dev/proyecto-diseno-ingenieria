@@ -154,3 +154,28 @@ Como Usuario, quiero consultar mi actividad reciente para recordar eventos relev
 - **SC-002**: Los indicadores básicos producen resultados reproducibles para el 100% de los conjuntos de datos de prueba definidos, una vez resuelta la política de inclusión/exclusión de la Historia 4.
 - **SC-003**: Los eventos de notificación configurables respetan las preferencias activas del usuario en el 100% de los casos de prueba.
 - **SC-004**: El contenido de toda descarga de historial coincide exactamente con el historial consultable en pantalla para la misma cuenta, en el 100% de los casos.
+
+## Arquitectura y trazabilidad de implementación
+
+Este SPEC se implementa como parte del monolito modular con Arquitectura Limpia. Se conservan historias, requisitos, entidades conceptuales y criterios de éxito anteriores; esta sección fija la separación técnica de responsabilidades.
+
+**Contrato de arquitectura**: cada operación tiene una interfaz `application/usecase/*UseCase` y una implementación `application/service/*Service implements *UseCase`. Controllers, filtros, gateways y workers inyectan las interfaces por constructor; no servicios concretos ni repositorios JPA. Los servicios coordinan dominio y puertos sin importar Spring, JPA o HTTP. Dominio contiene modelos, reglas, excepciones de negocio y repositorios propios; infraestructura implementa los puertos y configura transacciones. Los DTO HTTP y sus mappers pertenecen a presentación; Command/Query/Result de aplicación son independientes del transporte.
+
+Los contratos entre módulos son interfaces públicas de aplicación; no se accede a Service concreto, repositorio interno o entidad JPA de otro módulo. Cuando se requiera persistencia se separan `domain/repository`, `infrastructure/persistence/entity`, `mapper`, `jpa` y `adapter`. La configuración de Spring conecta puertos y adaptadores, y conserva la transacción completa del caso de uso. Solo crear clases/carpetas con responsabilidad real. `common` contiene infraestructura/contratos transversales acotados; el contexto de Spring Security no entra a aplicación. `SesionAutenticada` es contrato puro en `auth/application/port`; generación aleatoria segura del token y huella SHA-256 son responsabilidades separadas.
+
+El [plan técnico de SPEC-14](../../Planes-y-plantilla-del-proyecto/planes/plan-spec-14-preferencias-historial-indicadores.md) contiene el árbol de paquetes, puertos, persistencia, tareas backend, frontend e integración actualizados.
+
+### Interfaces de entrada e implementaciones
+
+| Módulo | UseCase (interfaz) | Service (implementación) |
+|---|---|---|
+| `preferencias` | `ConsultarPreferenciasNotificacionUseCase` | `ConsultarPreferenciasNotificacionService` |
+| `preferencias` | `ActualizarPreferenciasNotificacionUseCase` | `ActualizarPreferenciasNotificacionService` |
+| `historial` | `ConsultarHistorialTrabajosUseCase` | `ConsultarHistorialTrabajosService` |
+| `historial` | `ExportarHistorialTrabajosUseCase` | `ExportarHistorialTrabajosService` |
+| `indicadores` | `ConsultarIndicadoresPrestadorUseCase` | `ConsultarIndicadoresPrestadorService` |
+| `actividad` | `ConsultarActividadRecienteUseCase` | `ConsultarActividadRecienteService` |
+
+Puertos de salida: consultas públicas de servicios/confianza/eventos y ArchivoStorageService para exportación; ConsultaPreferenciasPort se consume desde notificaciones. Las interfaces de entrada no crean endpoints nuevos; mantener API Contracts y las condiciones Could/Future. Las tareas existentes conservan IDs, historias, dependencias y orden: los nombres de servicio agrupado de origen se descomponen en estas operaciones, sin añadir tareas funcionales.
+
+Persistencia de referencia: `preferencias_notificacion`, `descargas_historial`. El [manual entregado](../../tasks/fuentes/manual-base-de-datos-aliado.md) detalla el modelo MVP; no implica que los scripts V1–V6 ya estén disponibles o ejecutados.

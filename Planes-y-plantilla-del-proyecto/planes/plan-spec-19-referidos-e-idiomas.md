@@ -1,7 +1,7 @@
 # Implementation Plan: SPEC-19
 
 **Date**: 2026-10-02  
-**Spec**: [spec-19-referidos-e-idiomas](FASE-4-Prototipar/specs/spec-19-referidos-e-idiomas)  
+**Spec**: [spec-19-referidos-e-idiomas](../../FASE-4-Prototipar/specs/spec-19-referidos-e-idiomas.md)
 **Depends on**: `plan-spec-01-autenticacion.md`
 
 ## Summary
@@ -35,6 +35,8 @@ Referidos registra atribución sin permitir auto-referido ni atribución duplica
 
 ## Testing Strategy
 
+- **Arquitectura**: comprobar `Service implements UseCase`, constructores de entrada con interfaces, ausencia de Spring/JPA/HTTP en dominio/aplicación, mappers separados y transacciones verificadas con PostgreSQL cuando aplique.
+
 6 Acceptance Scenarios; auto-referido, duplicado y fallback por texto ausente. Feature off debe ocultar ambas capacidades.
 
 ## Project Structure
@@ -42,20 +44,79 @@ Referidos registra atribución sin permitir auto-referido ni atribución duplica
 ```text
 backend/src/main/java/com/aliado/
 ├── referidos/
-│   ├── presentation/controller/
-│   ├── application/service/
-│   ├── domain/repository/
-│   └── domain/model/
+│   ├── domain/
+│   │   ├── model/
+│   │   │   Referido
+│   │   └── repository/
+│   │       ReferidoRepository
+│   ├── application/
+│   │   ├── usecase/
+│   │   │   GenerarReferidoUseCase, AtribuirReferidoUseCase
+│   │   ├── service/
+│   │   │   GenerarReferidoService, AtribuirReferidoService
+│   │   ├── dto/
+│   │   │   Command/Query/Result de las operaciones del módulo (sin HTTP/JPA)
+│   │   └── port/
+│   │       Contratos de atribución e idiomas
+│   └── infrastructure/
+│       ├── persistence/
+│       │   ├── entity/
+│       │   │   ReferidoEntity
+│       │   ├── mapper/
+│       │   │   ReferidoMapper
+│       │   ├── jpa/
+│       │   │   ReferidoJpaRepository
+│       │   └── adapter/
+│       │       ReferidoPersistenceAdapter
+│       └── adapter/
+│           Adaptadores de puertos requeridos; reutilizar contratos existentes
 └── internacionalizacion/
-    ├── presentation/controller/
-    ├── application/service/
-    ├── domain/repository/
-    └── domain/model/
+    ├── domain/
+    │   ├── model/
+    │   │   IdiomaSoportado, PreferenciaIdioma
+    │   └── repository/
+    │       IdiomaSoportadoRepository, PreferenciaIdiomaRepository
+    ├── application/
+    │   ├── usecase/
+    │   │   ConsultarIdiomasUseCase, ConsultarPreferenciaIdiomaUseCase, ActualizarPreferenciaIdiomaUseCase
+    │   ├── service/
+    │   │   ConsultarIdiomasService, ConsultarPreferenciaIdiomaService, ActualizarPreferenciaIdiomaService
+    │   ├── dto/
+    │   │   Command/Query/Result de las operaciones del módulo (sin HTTP/JPA)
+    │   └── port/
+    │       Contratos de atribución e idiomas
+    └── infrastructure/
+        ├── persistence/
+        │   ├── entity/
+        │   │   IdiomaSoportadoEntity, PreferenciaIdiomaEntity
+        │   ├── mapper/
+        │   │   IdiomaSoportadoMapper, PreferenciaIdiomaMapper
+        │   ├── jpa/
+        │   │   IdiomaSoportadoJpaRepository, PreferenciaIdiomaJpaRepository
+        │   └── adapter/
+        │       IdiomaSoportadoPersistenceAdapter, PreferenciaIdiomaPersistenceAdapter
+        └── adapter/
+            Adaptadores de puertos requeridos; reutilizar contratos existentes
 ```
 
-**Arquitectura por capas**: este SPEC conserva la organización modular y aplica Arquitectura Limpia según las secciones 7.1–7.5 de [plan-general-ALIADO](plan-general-ALIADO.md#7-estructura-lógica-del-repositorio). Las rutas del árbol son relativas a cada módulo: `domain/` contiene modelos, reglas y puertos; `application/` coordina los casos de uso; `presentation/` expone HTTP; `infrastructure/` implementa los detalles técnicos. El dominio no importa Spring, JPA ni DTO HTTP; la aplicación depende de contratos de dominio/aplicación, nunca de adaptadores concretos. Los DTO de aplicación van en `application/dto/` y los contratos HTTP en `presentation/dto/`, con conversión en presentación cuando corresponda.
+**Contrato de arquitectura**: cada operación tiene una interfaz `application/usecase/*UseCase` y una implementación `application/service/*Service implements *UseCase`. Controllers, filtros, gateways y workers inyectan las interfaces por constructor; no servicios concretos ni repositorios JPA. Los servicios coordinan dominio y puertos sin importar Spring, JPA o HTTP. Dominio contiene modelos, reglas, excepciones de negocio y repositorios propios; infraestructura implementa los puertos y configura transacciones. Los DTO HTTP y sus mappers pertenecen a presentación; Command/Query/Result de aplicación son independientes del transporte.
 
-Cuando haya persistencia, los `*Repository` del árbol son puertos en `domain/repository/`, sin heredar de Spring Data. Las tareas existentes de persistencia incluyen sus implementaciones en `infrastructure/persistence/`: `entity/` para entidades JPA, `jpa/` para repositorios Spring Data, `adapter/` para implementar los puertos y `mapper/` para convertir dominio y persistencia. Las integraciones externas se definen mediante puertos de aplicación y adaptadores en `infrastructure/adapter/`; los contratos compartidos existentes de `common/` permanecen libres de detalles técnicos. Las dependencias entre módulos utilizan contratos de dominio o servicios públicos de aplicación, sin acceder a entidades JPA ni adaptadores ajenos. Los filtros de seguridad y la configuración de Spring pertenecen a infraestructura técnica; los controladores y la traducción de errores HTTP pertenecen a presentación. Se crean solo las carpetas necesarias para las tareas ya definidas; se conservan sus identificadores, orden y dependencias.
+Los contratos entre módulos son interfaces públicas de aplicación; no se accede a Service concreto, repositorio interno o entidad JPA de otro módulo. Cuando se requiera persistencia se separan `domain/repository`, `infrastructure/persistence/entity`, `mapper`, `jpa` y `adapter`. La configuración de Spring conecta puertos y adaptadores, y conserva la transacción completa del caso de uso. Solo crear clases/carpetas con responsabilidad real. `common` contiene infraestructura/contratos transversales acotados; el contexto de Spring Security no entra a aplicación. `SesionAutenticada` es contrato puro en `auth/application/port`; generación aleatoria segura del token y huella SHA-256 son responsabilidades separadas.
+
+### Interfaces de entrada e implementaciones
+
+| Módulo | UseCase (interfaz) | Service (implementación) |
+|---|---|---|
+| `referidos` | `GenerarReferidoUseCase` | `GenerarReferidoService` |
+| `referidos` | `AtribuirReferidoUseCase` | `AtribuirReferidoService` |
+| `internacionalizacion` | `ConsultarIdiomasUseCase` | `ConsultarIdiomasService` |
+| `internacionalizacion` | `ConsultarPreferenciaIdiomaUseCase` | `ConsultarPreferenciaIdiomaService` |
+| `internacionalizacion` | `ActualizarPreferenciaIdiomaUseCase` | `ActualizarPreferenciaIdiomaService` |
+
+Puertos de salida: reglas/puertos de atribución e idiomas independientes del controlador de registro. Las interfaces de entrada no crean endpoints nuevos; mantener API Contracts y las condiciones Could/Future. Las tareas existentes conservan IDs, historias, dependencias y orden: los nombres de servicio agrupado de origen se descomponen en estas operaciones, sin añadir tareas funcionales.
+
+Persistencia de referencia: `referidos`, `idiomas_soportados`, `preferencias_idioma`. Cualquier tabla opcional se diseña/aplica solo con aprobación de la feature; no es parte de las 42 tablas MVP. El [manual entregado](../../tasks/fuentes/manual-base-de-datos-aliado.md) detalla el modelo MVP; no implica que los scripts V1–V6 ya estén disponibles o ejecutados.
+
 
 ---
 
@@ -70,7 +131,7 @@ Cuando haya persistencia, los `*Repository` del árbol son puertos en `domain/re
 - [ ] T004 Tests feature off.
 - [ ] T005 Tests referido válido, auto-referido y duplicado.
 - [ ] T006 Modelo/repositorio `Referido`.
-- [ ] T007 `ReferidoService` con atribución idempotente.
+- [ ] T007 `GenerarReferidoService implements GenerarReferidoUseCase` y `AtribuirReferidoService implements AtribuirReferidoUseCase` con atribución idempotente.
 - [ ] T008 Integración opcional con registro de SPEC-01 sin hacerla bloqueante.
 - [ ] T009 Endpoints.
 
@@ -82,6 +143,27 @@ Cuando haya persistencia, los `*Repository` del árbol son puertos en `domain/re
 - [ ] T013 Endpoints.
 - [ ] T014 Integrar archivos/catálogo i18n en React Native y panel web.
 - [ ] T015 Si se retira un idioma soportado, fallback automático a español.
+
+## Frontend — app móvil y/o panel
+
+Destino principal: app-movil (React Native); panel-admin solo para superficies administrativas definidas.
+
+- [ ] **F19-FE-01** Compartir identificador/enlace y estado de atribución solo bajo reglas acordadas.
+- [ ] **F19-FE-02** Selector de idiomas y diccionario de mensajes propios por feature, respaldo español uniforme.
+- [ ] **F19-FE-03** No ofrecer beneficio no definido; no interrumpir registro por referido inválido.
+
+Aplicar [estados y contrato de cliente](../../tasks/01-arquitectura-y-stack.md#frontend) y reutilizar la demo como referencia de recorrido, no como autoridad de seguridad o esquema. No agregar CRUD administrativos o interfaces Cliente/Prestador fuera de lo especificado.
+
+## Integración y aceptación de la feature
+
+- [ ] **F19-QA-01** Idempotencia de atribución, auto-referido y duplicados; integrar F01 por puerto opcional.
+- [ ] **F19-QA-02** Claves faltantes y error de carga usan español; no mostrar mezcla confusa.
+- [ ] **F19-QA-03** Dos flags OFF mantienen registro y textos del MVP intactos.
+- [ ] **F19-QA-04** Ejecutar escenarios Given/When/Then del SPEC y todos los SC incluidos abajo con actores y datos independientes; adjuntar evidencia de API, DB y UI.
+
+Validación arquitectónica adicional: verificar Service implements UseCase, constructor de controlador/filtro solo con interfaces, dominio/aplicación sin Spring/JPA/HTTP, mappers separados y un test de integración que acredite el límite transaccional cuando haya mutaciones.
+
+Para cerrar esta feature: contratos y migraciones versionados, tareas de origen y suplementos aplicables terminados, escenarios del SPEC aprobados con API real, UI conectada, evidencia de aislamiento por rol y ninguna decisión bloqueante sin resolver. Las funciones OFF se cierran como preparadas/aisladas, nunca como disponibles para usuarios.
 
 ## Notes
 

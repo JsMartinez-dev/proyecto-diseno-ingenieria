@@ -1,7 +1,7 @@
 # Implementation Plan: SPEC-10
 
 **Date**: 2026-10-02  
-**Spec**: [spec-10-calificaciones-resenas-verificacion](FASE-4-Prototipar/specs/spec-10-calificaciones-resenas-verificacion)  
+**Spec**: [spec-10-calificaciones-resenas-verificacion](../../FASE-4-Prototipar/specs/spec-10-calificaciones-resenas-verificacion.md)
 **Depends on**: `plan-spec-01-autenticacion.md` (Cliente/Prestador autenticado), `plan-spec-04-gestion-solicitudes-servicio.md` (`ArchivoStorageService` para documentos), `plan-spec-05-perfil-profesional.md` (`PerfilProfesional` y vista pública), `plan-spec-08-contratacion-ciclo-servicio.md` (`ServicioContratado` finalizado)
 
 ## Summary
@@ -58,6 +58,8 @@ Todos los endpoints de escritura validan identidad y pertenencia; la consulta de
 
 ## Testing Strategy
 
+- **Arquitectura**: comprobar `Service implements UseCase`, constructores de entrada con interfaces, ausencia de Spring/JPA/HTTP en dominio/aplicación, mappers separados y transacciones verificadas con PostgreSQL cuando aplique.
+
 - **Contract tests**: todos los endpoints anteriores, incluyendo duplicados y estados no elegibles.
 - **Integration tests**: los 10 Acceptance Scenarios del SPEC con PostgreSQL real; calificación + recálculo de reputación dentro de una operación consistente.
 - **Unit tests**: elegibilidad para calificar, cálculo de reputación, límite de una solicitud de verificación pendiente, tope de nivel, creación de reporte de reseña.
@@ -67,26 +69,94 @@ Todos los endpoints de escritura validan identidad y pertenencia; la consulta de
 
 ```text
 backend/src/main/java/com/aliado/
-├── auth/                  # SPEC-01
-├── servicios/             # SPEC-08
-├── perfiles/              # SPEC-05
-├── confianza/             # nuevo
-│   ├── presentation/controller/       CalificacionController, VerificacionController, ConfianzaController
-│   ├── application/service/           CalificacionService, ReputacionService, VerificacionService
-│   ├── domain/repository/             CalificacionRepository, ResenaRepository, ReputacionRepository,
-│   │                      SolicitudVerificacionRepository, DocumentoVerificacionRepository
-│   └── domain/model/                  Calificacion, Resena, ReputacionPrestador,
-│                          SolicitudVerificacion, DocumentoVerificacion
-├── reportes/              # núcleo compartido, introducido aquí y ampliado en SPEC-11
-│   ├── application/service/           ReporteService
-│   ├── domain/repository/             ReporteRepository
-│   └── domain/model/                  Reporte
-└── common/storage/        # ArchivoStorageService de SPEC-04
+├── confianza/
+│   ├── domain/
+│   │   ├── model/
+│   │   │   Calificacion, Resena, ReputacionPrestador, SolicitudVerificacion, DocumentoVerificacion
+│   │   └── repository/
+│   │       CalificacionRepository, ResenaRepository, ReputacionRepository, SolicitudVerificacionRepository,
+│   │       DocumentoVerificacionRepository
+│   ├── application/
+│   │   ├── usecase/
+│   │   │   CalificarServicioUseCase, AgregarResenaUseCase, ConsultarConfianzaPrestadorUseCase,
+│   │   │   SolicitarVerificacionUseCase, ConsultarVerificacionPropiaUseCase
+│   │   ├── service/
+│   │   │   CalificarServicioService, AgregarResenaService, ConsultarConfianzaPrestadorService,
+│   │   │   SolicitarVerificacionService, ConsultarVerificacionPropiaService
+│   │   ├── dto/
+│   │   │   Command/Query/Result de las operaciones del módulo (sin HTTP/JPA)
+│   │   └── port/
+│   │       ArchivoStorageService (reutilizado), ConsultaServicioFinalizadoPort
+│   ├── infrastructure/
+│   │   ├── persistence/
+│   │   │   ├── entity/
+│   │   │   │   CalificacionEntity, ResenaEntity, ReputacionPrestadorEntity, SolicitudVerificacionEntity,
+│   │   │   │   DocumentoVerificacionEntity
+│   │   │   ├── mapper/
+│   │   │   │   CalificacionMapper, ResenaMapper, ReputacionPrestadorMapper, SolicitudVerificacionMapper,
+│   │   │   │   DocumentoVerificacionMapper
+│   │   │   ├── jpa/
+│   │   │   │   CalificacionJpaRepository, ResenaJpaRepository, ReputacionJpaRepository,
+│   │   │   │   SolicitudVerificacionJpaRepository, DocumentoVerificacionJpaRepository
+│   │   │   └── adapter/
+│   │   │       CalificacionPersistenceAdapter, ResenaPersistenceAdapter, ReputacionPersistenceAdapter,
+│   │   │       SolicitudVerificacionPersistenceAdapter, DocumentoVerificacionPersistenceAdapter
+│   │   └── adapter/
+│   │       Adaptadores de puertos requeridos; reutilizar contratos existentes
+│   └── presentation/
+│       ├── controller/
+│       │   CalificacionController, VerificacionController, ConfianzaController
+│       ├── dto/
+│       │   Request/Response HTTP según API Contracts
+│       └── mapper/
+│           Conversión HTTP ↔ Command/Query/Result
+└── reportes/
+    ├── domain/
+    │   ├── model/
+    │   │   Reporte
+    │   └── repository/
+    │       ReporteRepository
+    ├── application/
+    │   ├── usecase/
+    │   │   ReportarResenaUseCase
+    │   ├── service/
+    │   │   ReportarResenaService
+    │   ├── dto/
+    │   │   Command/Query/Result de las operaciones del módulo (sin HTTP/JPA)
+    │   └── port/
+    │       ArchivoStorageService (reutilizado), ConsultaServicioFinalizadoPort
+    └── infrastructure/
+        ├── persistence/
+        │   ├── entity/
+        │   │   ReporteEntity
+        │   ├── mapper/
+        │   │   ReporteMapper
+        │   ├── jpa/
+        │   │   ReporteJpaRepository
+        │   └── adapter/
+        │       ReportePersistenceAdapter
+        └── adapter/
+            Adaptadores de puertos requeridos; reutilizar contratos existentes
 ```
 
-**Arquitectura por capas**: este SPEC conserva la organización modular y aplica Arquitectura Limpia según las secciones 7.1–7.5 de [plan-general-ALIADO](plan-general-ALIADO.md#7-estructura-lógica-del-repositorio). Las rutas del árbol son relativas a cada módulo: `domain/` contiene modelos, reglas y puertos; `application/` coordina los casos de uso; `presentation/` expone HTTP; `infrastructure/` implementa los detalles técnicos. El dominio no importa Spring, JPA ni DTO HTTP; la aplicación depende de contratos de dominio/aplicación, nunca de adaptadores concretos. Los DTO de aplicación van en `application/dto/` y los contratos HTTP en `presentation/dto/`, con conversión en presentación cuando corresponda.
+**Contrato de arquitectura**: cada operación tiene una interfaz `application/usecase/*UseCase` y una implementación `application/service/*Service implements *UseCase`. Controllers, filtros, gateways y workers inyectan las interfaces por constructor; no servicios concretos ni repositorios JPA. Los servicios coordinan dominio y puertos sin importar Spring, JPA o HTTP. Dominio contiene modelos, reglas, excepciones de negocio y repositorios propios; infraestructura implementa los puertos y configura transacciones. Los DTO HTTP y sus mappers pertenecen a presentación; Command/Query/Result de aplicación son independientes del transporte.
 
-Cuando haya persistencia, los `*Repository` del árbol son puertos en `domain/repository/`, sin heredar de Spring Data. Las tareas existentes de persistencia incluyen sus implementaciones en `infrastructure/persistence/`: `entity/` para entidades JPA, `jpa/` para repositorios Spring Data, `adapter/` para implementar los puertos y `mapper/` para convertir dominio y persistencia. Las integraciones externas se definen mediante puertos de aplicación y adaptadores en `infrastructure/adapter/`; los contratos compartidos existentes de `common/` permanecen libres de detalles técnicos. Las dependencias entre módulos utilizan contratos de dominio o servicios públicos de aplicación, sin acceder a entidades JPA ni adaptadores ajenos. Los filtros de seguridad y la configuración de Spring pertenecen a infraestructura técnica; los controladores y la traducción de errores HTTP pertenecen a presentación. Se crean solo las carpetas necesarias para las tareas ya definidas; se conservan sus identificadores, orden y dependencias.
+Los contratos entre módulos son interfaces públicas de aplicación; no se accede a Service concreto, repositorio interno o entidad JPA de otro módulo. Cuando se requiera persistencia se separan `domain/repository`, `infrastructure/persistence/entity`, `mapper`, `jpa` y `adapter`. La configuración de Spring conecta puertos y adaptadores, y conserva la transacción completa del caso de uso. Solo crear clases/carpetas con responsabilidad real. `common` contiene infraestructura/contratos transversales acotados; el contexto de Spring Security no entra a aplicación. `SesionAutenticada` es contrato puro en `auth/application/port`; generación aleatoria segura del token y huella SHA-256 son responsabilidades separadas.
+
+### Interfaces de entrada e implementaciones
+
+| Módulo | UseCase (interfaz) | Service (implementación) |
+|---|---|---|
+| `confianza` | `CalificarServicioUseCase` | `CalificarServicioService` |
+| `confianza` | `AgregarResenaUseCase` | `AgregarResenaService` |
+| `confianza` | `ConsultarConfianzaPrestadorUseCase` | `ConsultarConfianzaPrestadorService` |
+| `confianza` | `SolicitarVerificacionUseCase` | `SolicitarVerificacionService` |
+| `confianza` | `ConsultarVerificacionPropiaUseCase` | `ConsultarVerificacionPropiaService` |
+| `reportes` | `ReportarResenaUseCase` | `ReportarResenaService` |
+
+Puertos de salida: ArchivoStorageService, ConsultaServicioFinalizadoPort y contratos públicos de reputación/reportes. Las interfaces de entrada no crean endpoints nuevos; mantener API Contracts y las condiciones Could/Future. Las tareas existentes conservan IDs, historias, dependencias y orden: los nombres de servicio agrupado de origen se descomponen en estas operaciones, sin añadir tareas funcionales.
+
+Persistencia de referencia: `calificaciones`, `resenas`, `reputaciones_prestador`, `solicitudes_verificacion`, `documentos_verificacion`, `reportes`. El [manual entregado](../../tasks/fuentes/manual-base-de-datos-aliado.md) detalla el modelo MVP; no implica que los scripts V1–V6 ya estén disponibles o ejecutados.
 
 **Structure Decision**: `confianza/` concentra calificaciones, reputación y verificación. El reporte de reseña se crea mediante un módulo `reportes/` mínimo y genérico para evitar que SPEC-10, SPEC-11 y SPEC-12 definan tres infraestructuras incompatibles. SPEC-11 ampliará sus tipos/objetivos y SPEC-12 administrará su ciclo de moderación.
 
@@ -102,9 +172,9 @@ Cuando haya persistencia, los `*Repository` del árbol son puertos en `domain/re
 
 ## Phase 2: Foundational
 
-- [ ] T004 Crear `ReputacionService.recalcular(prestadorId)` a partir de calificaciones persistidas.
+- [ ] T004 Crear la regla de dominio de recálculo de reputación del Prestador a partir de calificaciones persistidas.
 - [ ] T005 Integrar `ArchivoStorageService` para documentos de verificación con objetos privados y referencias persistidas, nunca archivos públicos.
-- [ ] T006 Crear `ReporteService.crearReporteResena()` como primer uso del módulo compartido.
+- [ ] T006 Crear `ReportarResenaUseCase.ejecutar()` como primer uso del módulo compartido.
 - [ ] T007 Extender el DTO público del Prestador de SPEC-05/03 con `reputacionAgregada` y `nivelVerificacion`, sin exponer documentos.
 
 **Checkpoint**: confianza base disponible; historias de calificación, verificación y reporte pueden avanzar.
@@ -126,8 +196,8 @@ Cuando haya persistencia, los `*Repository` del árbol son puertos en `domain/re
 ### Implementation
 
 - [ ] T011 [P] [US1] Modelos `Calificacion`, `ReputacionPrestador`.
-- [ ] T012 [US1] `CalificacionService.calificar()` valida actor, estado `FINALIZADO` y unicidad.
-- [ ] T013 [US1] Ejecutar persistencia de `Calificacion` + `ReputacionService.recalcular()` en transacción consistente.
+- [ ] T012 [US1] `CalificarServicioUseCase.ejecutar()` valida actor, estado `FINALIZADO` y unicidad.
+- [ ] T013 [US1] Ejecutar persistencia de `Calificacion` + recálculo de reputación por regla de dominio en transacción consistente.
 - [ ] T014 [US1] Endpoint de calificación.
 
 **Checkpoint**: reputación deriva exclusivamente de calificaciones válidas.
@@ -146,7 +216,7 @@ Cuando haya persistencia, los `*Repository` del árbol son puertos en `domain/re
 ### Implementation
 
 - [ ] T017 [P] [US2] Modelo `Resena`.
-- [ ] T018 [US2] `CalificacionService.agregarResena()` con relación 1:0..1.
+- [ ] T018 [US2] `AgregarResenaUseCase.ejecutar()` con relación 1:0..1.
 - [ ] T019 [US2] Endpoint de reseña.
 
 ---
@@ -164,7 +234,7 @@ Cuando haya persistencia, los `*Repository` del árbol son puertos en `domain/re
 - [ ] T023 [P] [US4] Contract tests de creación/consulta de solicitud.
 - [ ] T024 [P] [US4] Integration test: solicitud válida, duplicada pendiente y nivel máximo.
 - [ ] T025 [US4] Modelos `SolicitudVerificacion`, `DocumentoVerificacion`.
-- [ ] T026 [US4] `VerificacionService.solicitar()` y carga segura de documentos.
+- [ ] T026 [US4] `SolicitarVerificacionUseCase.ejecutar()` y carga segura de documentos.
 - [ ] T027 [US4] Endpoints de verificación.
 
 **Checkpoint**: la revisión administrativa queda pendiente de SPEC-12; este plan solo registra la solicitud y su estado.
@@ -175,10 +245,34 @@ Cuando haya persistencia, los `*Repository` del árbol son puertos en `domain/re
 
 - [ ] T028 [P] [US5] Contract test `POST /resenas/{id}/reportes`.
 - [ ] T029 [P] [US5] Integration test: reporte válido, reseña no disponible, reporte equivalente abierto.
-- [ ] T030 [US5] Integrar `ReporteService.crearReporteResena()`.
+- [ ] T030 [US5] Integrar `ReportarResenaUseCase.ejecutar()`.
 - [ ] T031 [US5] Endpoint de reporte.
 
 ---
+
+## Frontend — app móvil y/o panel
+
+Destino principal: app-movil (React Native); panel-admin solo para superficies administrativas definidas.
+
+- [ ] **F10-FE-01** Calificar una vez al finalizar servicio y agregar reseña a la calificación propia.
+- [ ] **F10-FE-02** Mostrar reputación y nivel de verificación con explicación; sin presentar garantía o certificación legal.
+- [ ] **F10-FE-03** Prestador carga documentos privados y consulta estado; impedir otra solicitud pendiente.
+- [ ] **F10-FE-04** Reportar reseña con motivo y comprobante; administración recibe resultado en cola F12.
+- [ ] **F10-FE-05** Integrar confianza en búsqueda/vista previa F03/F05 cuando el contrato quede disponible.
+
+Aplicar [estados y contrato de cliente](../../tasks/01-arquitectura-y-stack.md#frontend) y reutilizar la demo como referencia de recorrido, no como autoridad de seguridad o esquema. No agregar CRUD administrativos o interfaces Cliente/Prestador fuera de lo especificado.
+
+## Integración y aceptación de la feature
+
+- [ ] **F10-QA-01** Un servicio sin finalizar o calificado rechaza otra calificación; carrera concurrente protegida por UNIQUE.
+- [ ] **F10-QA-02** Recalcular/reconstruir reputación desde calificaciones, preservarla si moderación oculta una reseña.
+- [ ] **F10-QA-03** Documentos accesibles solo por solicitante y administración autorizada; una verificación pendiente por prestador.
+- [ ] **F10-QA-04** Reportes de reseña se almacenan en reportes, nunca en una tabla paralela.
+- [ ] **F10-QA-05** Ejecutar escenarios Given/When/Then del SPEC y todos los SC incluidos abajo con actores y datos independientes; adjuntar evidencia de API, DB y UI.
+
+Validación arquitectónica adicional: verificar Service implements UseCase, constructor de controlador/filtro solo con interfaces, dominio/aplicación sin Spring/JPA/HTTP, mappers separados y un test de integración que acredite el límite transaccional cuando haya mutaciones.
+
+Para cerrar esta feature: contratos y migraciones versionados, tareas de origen y suplementos aplicables terminados, escenarios del SPEC aprobados con API real, UI conectada, evidencia de aislamiento por rol y ninguna decisión bloqueante sin resolver. Las funciones OFF se cierran como preparadas/aisladas, nunca como disponibles para usuarios.
 
 ## Dependencies & Execution Order
 

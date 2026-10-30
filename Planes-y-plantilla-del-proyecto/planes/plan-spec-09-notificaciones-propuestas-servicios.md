@@ -1,19 +1,19 @@
 # Implementation Plan: SPEC-09
 
 **Date**: 2026-10-02
-**Spec**: [spec-09-notificaciones-propuestas-servicios](FASE-4-Prototipar/specs/spec-09-notificaciones-propuestas-servicios)
+**Spec**: [spec-09-notificaciones-propuestas-servicios](../../FASE-4-Prototipar/specs/spec-09-notificaciones-propuestas-servicios.md)
 **Depends on**: `plan-spec-01-autenticacion.md` (roles Cliente/Prestador), `plan-spec-08-contratacion-ciclo-servicio.md` (eventos de aceptación de propuesta y de cada transición de estado del servicio, que este plan debe enganchar sin modificarlos)
 
 ## Summary
 
-SPEC-09 cubre dos tipos de notificación automática, siempre disparadas por un evento real y nunca como acción independiente: la aceptación de una propuesta (hacia el Prestador) y los cambios de estado del servicio contratado (hacia la contraparte de quien ejecuta la transición). A diferencia de SPEC-06 y SPEC-07, que persistieron cada una su propio tipo de notificación de forma puntual, este SPEC describe explícitamente un actor "Proveedor de notificaciones" y un "Canal de entrega", lo que indica una infraestructura de notificación genérica. Este plan la introduce para los dos tipos que cubre este SPEC, y deja explícita la inconsistencia frente a lo ya construido en SPEC-06/SPEC-07 (ver Notes) en lugar de refactorizarlo sin que el usuario lo pida.
+SPEC-09 cubre avisos por aceptación y transiciones reales del servicio. Reutiliza el módulo/tabla notificaciones que también persiste eventos de SPEC-06/07; no existe un patrón paralelo de tablas puntuales. RegistrarNotificacionUseCase registra dentro de la transacción de negocio; EntregarNotificacionesPendientesUseCase coordina entrega externa posterior al commit.
 
 ## Technical Context
 
 **Language/Version**: Java 21 (LTS) — reutilizado de SPEC-01
 **Primary Dependencies**: Spring Boot 3.3.x (Web, Data JPA, Validation), Flyway — reutilizados de SPEC-01
 **Build tool**: Maven
-**Storage**: PostgreSQL 16 — nuevas tablas de este módulo
+**Storage**: PostgreSQL 16 — tabla notificaciones compartida por SPEC-06/07/09
 **Testing**: JUnit 5 + Mockito, Spring Boot Test + Testcontainers (PostgreSQL), MockMvc/WebTestClient — reutilizados de SPEC-01
 **Target Platform**: VPS Hostinger (Docker Compose) — reutilizado de SPEC-01
 **Project Type**: Web + Mobile (backend único) — reutilizado de SPEC-01
@@ -25,9 +25,9 @@ SPEC-09 cubre dos tipos de notificación automática, siempre disparadas por un 
 
 | Entidad | Campos clave |
 |---|---|
-| `Notificacion` | `id`, `destinatarioId` (FK Usuario), `tipo` (ACEPTACION_PROPUESTA, CAMBIO_ESTADO_SERVICIO), `servicioId` (FK `ServicioContratado` de SPEC-08), `detalle` (ej. nuevo estado), `estadoEntrega` (PENDIENTE, ENTREGADA, FALLIDA), `fechaGeneracion`, `fechaEntrega` |
+| `Notificacion` | id, destinatarioId, tipo, aggregateId, eventVersion, detalle, canal, estadoEntrega, intentos, fechaGeneracion, fechaEntrega; SPEC-09 usa ACEPTACION_PROPUESTA/CAMBIO_ESTADO_SERVICIO |
 
-Restricción de unicidad: `(tipo, servicioId, destinatarioId, detalle)` o equivalente que identifique el evento de origen de forma única — garantiza que un reintento de entrega no cree una segunda fila (SC-003), solo actualice `estadoEntrega`/`fechaEntrega` de la fila existente.
+Restricción de unicidad del evento: `(tipo, aggregateId, destinatarioId, eventVersion)` conforme al plan general; la política de multicanal debe concretarse antes de imponer unicidad por canal. Reintentar entrega actualiza el evento persistido, no crea otra notificación (SC-003). `servicioId` de la respuesta HTTP se proyecta de aggregateId cuando el evento corresponde a un servicio.
 
 
 
@@ -38,49 +38,91 @@ Restricción de unicidad: `(tipo, servicioId, destinatarioId, detalle)` o equiva
 |---|---|---|---|---|
 | GET | `/api/v1/notificaciones` | — | `200 [ { tipo, servicioId, detalle, estadoEntrega, fechaGeneracion }, ... ]` *(propias del actor autenticado)* | `401` sin sesión |
 
-No se expone ningún endpoint de creación: por diseño (FR del SPEC exige que una notificación nunca se genere sin un evento real asociado), `Notificacion` solo se crea internamente desde `ServicioService` de SPEC-08, nunca a través de la API pública. Esto es lo que garantiza SC-004 a nivel de contrato, no solo de validación de negocio.
+No se expone ningún endpoint de creación: por diseño (FR del SPEC exige que una notificación nunca se genere sin un evento real asociado), `Notificacion` se registra mediante RegistrarNotificacionUseCase por productores autorizados de SPEC-06/07/08, nunca a través de la API pública. Esto es lo que garantiza SC-004 a nivel de contrato, no solo de validación de negocio.
 
 ## Testing Strategy
 
+- **Arquitectura**: comprobar `Service implements UseCase`, constructores de entrada con interfaces, ausencia de Spring/JPA/HTTP en dominio/aplicación, mappers separados y transacciones verificadas con PostgreSQL cuando aplique.
+
 - **Contract tests**: el único endpoint de la tabla anterior, más una verificación explícita de que no existe ruta de creación pública.
 - **Integration tests**: uno por Acceptance Scenario del SPEC (7 escenarios entre las 2 historias), con Testcontainers, incluyendo falla simulada del canal de entrega (el evento permanece consultable y no se duplica al reintentar) y el intento de generar una notificación sin evento real (debe ser imposible, no solo rechazado).
-- **Unit tests**: `NotificacionService.notificar()` no crea una segunda fila para el mismo evento (unicidad), `CanalEntregaNotificacion` reintenta sin duplicar, disparo exclusivo desde los puntos de extensión de `ServicioService` (SPEC-08).
+- **Unit tests**: `RegistrarNotificacionUseCase.ejecutar()` no crea una segunda fila para el mismo evento (unicidad), `CanalEntregaNotificacion` reintenta sin duplicar, disparo exclusivo desde los puntos de extensión de los UseCase de servicio de SPEC-08 (SPEC-08).
 
 ## Project Structure
 
 ```text
 backend/src/main/java/com/aliado/
-├── auth/              # SPEC-01 (reutilizado)
-├── servicios/         # SPEC-08 (reutilizado — ServicioContratado, puntos de extensión de aceptación y transición)
-├── notificaciones/    # nuevo
-│   ├── presentation/controller/       NotificacionController
-│   ├── application/port/              CanalEntregaNotificacion (interfaz)
-│   ├── infrastructure/adapter/        Implementación mínima de CanalEntregaNotificacion
-│   ├── application/service/           NotificacionService
-│   ├── domain/repository/             NotificacionRepository
-│   └── domain/model/                  Notificacion
-└── common/            # SPEC-01/SPEC-04 (reutilizado)
+└── notificaciones/
+    ├── domain/
+    │   ├── model/
+    │   │   Notificacion
+    │   └── repository/
+    │       NotificacionRepository
+    ├── application/
+    │   ├── usecase/
+    │   │   RegistrarNotificacionUseCase, ConsultarNotificacionesPropiasUseCase,
+    │   │   EntregarNotificacionesPendientesUseCase
+    │   ├── service/
+    │   │   RegistrarNotificacionService, ConsultarNotificacionesPropiasService,
+    │   │   EntregarNotificacionesPendientesService
+    │   ├── dto/
+    │   │   Command/Query/Result de las operaciones del módulo (sin HTTP/JPA)
+    │   └── port/
+    │       CanalEntregaNotificacion, ConsultaPreferenciasPort
+    ├── infrastructure/
+    │   ├── persistence/
+    │   │   ├── entity/
+    │   │   │   NotificacionEntity
+    │   │   ├── mapper/
+    │   │   │   NotificacionMapper
+    │   │   ├── jpa/
+    │   │   │   NotificacionJpaRepository
+    │   │   └── adapter/
+    │   │       NotificacionPersistenceAdapter
+    │   ├── adapter/
+    │   │   Adaptadores de puertos requeridos; reutilizar contratos existentes
+    │   └── worker/
+    │       Worker de entrega (depende de EntregarNotificacionesPendientesUseCase)
+    └── presentation/
+        ├── controller/
+        │   NotificacionController
+        ├── dto/
+        │   Request/Response HTTP según API Contracts
+        └── mapper/
+            Conversión HTTP ↔ Command/Query/Result
 ```
 
-**Arquitectura por capas**: este SPEC conserva la organización modular y aplica Arquitectura Limpia según las secciones 7.1–7.5 de [plan-general-ALIADO](plan-general-ALIADO.md#7-estructura-lógica-del-repositorio). Las rutas del árbol son relativas a cada módulo: `domain/` contiene modelos, reglas y puertos; `application/` coordina los casos de uso; `presentation/` expone HTTP; `infrastructure/` implementa los detalles técnicos. El dominio no importa Spring, JPA ni DTO HTTP; la aplicación depende de contratos de dominio/aplicación, nunca de adaptadores concretos. Los DTO de aplicación van en `application/dto/` y los contratos HTTP en `presentation/dto/`, con conversión en presentación cuando corresponda.
+**Contrato de arquitectura**: cada operación tiene una interfaz `application/usecase/*UseCase` y una implementación `application/service/*Service implements *UseCase`. Controllers, filtros, gateways y workers inyectan las interfaces por constructor; no servicios concretos ni repositorios JPA. Los servicios coordinan dominio y puertos sin importar Spring, JPA o HTTP. Dominio contiene modelos, reglas, excepciones de negocio y repositorios propios; infraestructura implementa los puertos y configura transacciones. Los DTO HTTP y sus mappers pertenecen a presentación; Command/Query/Result de aplicación son independientes del transporte.
 
-Cuando haya persistencia, los `*Repository` del árbol son puertos en `domain/repository/`, sin heredar de Spring Data. Las tareas existentes de persistencia incluyen sus implementaciones en `infrastructure/persistence/`: `entity/` para entidades JPA, `jpa/` para repositorios Spring Data, `adapter/` para implementar los puertos y `mapper/` para convertir dominio y persistencia. Las integraciones externas se definen mediante puertos de aplicación y adaptadores en `infrastructure/adapter/`; los contratos compartidos existentes de `common/` permanecen libres de detalles técnicos. Las dependencias entre módulos utilizan contratos de dominio o servicios públicos de aplicación, sin acceder a entidades JPA ni adaptadores ajenos. Los filtros de seguridad y la configuración de Spring pertenecen a infraestructura técnica; los controladores y la traducción de errores HTTP pertenecen a presentación. Se crean solo las carpetas necesarias para las tareas ya definidas; se conservan sus identificadores, orden y dependencias.
+Los contratos entre módulos son interfaces públicas de aplicación; no se accede a Service concreto, repositorio interno o entidad JPA de otro módulo. Cuando se requiera persistencia se separan `domain/repository`, `infrastructure/persistence/entity`, `mapper`, `jpa` y `adapter`. La configuración de Spring conecta puertos y adaptadores, y conserva la transacción completa del caso de uso. Solo crear clases/carpetas con responsabilidad real. `common` contiene infraestructura/contratos transversales acotados; el contexto de Spring Security no entra a aplicación. `SesionAutenticada` es contrato puro en `auth/application/port`; generación aleatoria segura del token y huella SHA-256 son responsabilidades separadas.
 
-**Structure Decision**: se introduce `notificaciones/` como módulo genérico, en vez de repetir el patrón puntual de `NotificacionOportunidad` (SPEC-06) y `NotificacionPropuestaRecibida` (SPEC-07). `NotificacionService.notificar()` se invoca directamente desde `ServicioService` (SPEC-08) en el mismo método que ejecuta la aceptación de propuesta (T008 de SPEC-08) y cada transición de estado (T018-T021 de SPEC-08), dentro de la misma transacción, para que el evento de dominio y el registro de notificación sean atómicos — así se cumple el edge case de "el evento permanece consultable y no se duplica" incluso si el canal de entrega externo falla después. `CanalEntregaNotificacion` queda como interfaz separada de `NotificacionService` para que la lógica de negocio (qué notificar, a quién, una sola vez) no dependa del mecanismo real de entrega, que queda pendiente de definir.
+### Interfaces de entrada e implementaciones
+
+| Módulo | UseCase (interfaz) | Service (implementación) |
+|---|---|---|
+| `notificaciones` | `RegistrarNotificacionUseCase` | `RegistrarNotificacionService` |
+| `notificaciones` | `ConsultarNotificacionesPropiasUseCase` | `ConsultarNotificacionesPropiasService` |
+| `notificaciones` | `EntregarNotificacionesPendientesUseCase` | `EntregarNotificacionesPendientesService` |
+
+Puertos de salida: CanalEntregaNotificacion, ConsultaPreferenciasPort y puertos de entrega; worker invoca interfaz de entrada. Las interfaces de entrada no crean endpoints nuevos; mantener API Contracts y las condiciones Could/Future. Las tareas existentes conservan IDs, historias, dependencias y orden: los nombres de servicio agrupado de origen se descomponen en estas operaciones, sin añadir tareas funcionales.
+
+Persistencia de referencia: `notificaciones`. El [manual entregado](../../tasks/fuentes/manual-base-de-datos-aliado.md) detalla el modelo MVP; no implica que los scripts V1–V6 ya estén disponibles o ejecutados.
+
+**Structure Decision**: el módulo propietario expone RegistrarNotificacionUseCase, ConsultarNotificacionesPropiasUseCase y EntregarNotificacionesPendientesUseCase. Sus Service implementan las interfaces; productores y worker dependen de contratos. CanalEntregaNotificacion es puerto de salida. Persistencia atómica con el negocio y entrega externa asíncrona con reintentos/idempotencia; ningún consumidor inyecta una implementación de notificaciones.
 
 ---
 
 ## Phase 1: Setup
 
-- [ ] T001 Crear el paquete `notificaciones/` con sus subcarpetas en capas de Arquitectura Limpia (según Project Structure)
-- [ ] T002 Migración Flyway: tabla `notificaciones` con restricción de unicidad `(tipo, servicio_id, destinatario_id, detalle)`
+- [ ] T001 Crear el paquete `notificaciones/` con interfaces UseCase, implementaciones Service y puertos/adaptadores de Arquitectura Limpia (según Project Structure)
+- [ ] T002 Migración/verificación de tabla compartida notificaciones según manual, con clave de evento (tipo, aggregate_id, destinatario_id, event_version); no crear tablas paralelas ni reescribir migraciones aplicadas.
 
 ---
 
 ## Phase 2: Foundational
 
 - [ ] T003 Definir interfaz `CanalEntregaNotificacion` (contrato de entrega, con una implementación mínima que registra el intento sin proveedor externo real) — puerto en `notificaciones/application/port` e implementación en `notificaciones/infrastructure/adapter`
-- [ ] T004 `NotificacionService.notificar(destinatarioId, tipo, servicioId, detalle)`: crea una `Notificacion` solo si no existe ya una fila con la misma clave de unicidad (idempotencia ante reintentos), delega la entrega a `CanalEntregaNotificacion` sin bloquear la transacción de origen (depends on T003)
+- [ ] T004 RegistrarNotificacionUseCase y RegistrarNotificacionService: persistencia idempotente junto al negocio; EntregarNotificacionesPendientesUseCase y su Service: consumir CanalEntregaNotificacion después del commit, con reintentos (depends on T003).
 
 **Checkpoint**: el mecanismo genérico de notificación está listo para que SPEC-08 lo invoque desde sus puntos de extensión.
 
@@ -101,7 +143,7 @@ Cuando haya persistencia, los `*Repository` del árbol son puertos en `domain/re
 
 - [ ] T007 [P] [US1] Modelo `Notificacion` — `notificaciones/domain/model`
 - [ ] T008 [US1] `NotificacionRepository` — `notificaciones/domain/repository`
-- [ ] T009 [US1] Enganchar `NotificacionService.notificar()` dentro de `ServicioService.aceptarPropuesta()` (T008 de SPEC-08), notificando al Prestador cuya propuesta fue aceptada (FR-057) (depends on T004, T008, dependencia externa: `ServicioService.aceptarPropuesta()` de SPEC-08 — modificación mínima de ese método para invocar el punto de extensión, sin alterar su lógica transaccional ya probada)
+- [ ] T009 [US1] Enganchar `RegistrarNotificacionUseCase.ejecutar()` dentro de `AceptarPropuestaUseCase.ejecutar()` (T008 de SPEC-08), notificando al Prestador cuya propuesta fue aceptada (FR-057) (depends on T004, T008, dependencia externa: `AceptarPropuestaUseCase.ejecutar()` de SPEC-08 — modificación mínima de ese método para invocar el punto de extensión, sin alterar su lógica transaccional ya probada)
 - [ ] T010 [US1] Endpoint `GET /api/v1/notificaciones` (propias del actor autenticado) — `notificaciones/presentation/controller`
 
 **Checkpoint**: el Prestador recibe notificación automática de aceptación, sin que ningún actor deba solicitarla.
@@ -121,21 +163,44 @@ Cuando haya persistencia, los `*Repository` del árbol son puertos en `domain/re
 
 ### Implementation
 
-- [ ] T013 [US2] Enganchar `NotificacionService.notificar()` dentro de `ServicioService.marcarEnEjecucion()`, `marcarTerminado()`, `confirmarFinalizacion()` y `cancelar()` (T018-T021 de SPEC-08), notificando en cada caso a la contraparte de quien ejecutó la transición (FR-058) (depends on T004, T008, dependencia externa: esos cuatro métodos de `ServicioService` de SPEC-08)
+- [ ] T013 [US2] RegistrarNotificacionUseCase se invoca mediante puerto dentro de las transiciones MarcarServicioEnEjecucionUseCase, MarcarServicioTerminadoUseCase, ConfirmarFinalizacionServicioUseCase y CancelarServicioUseCase de SPEC-08 (T018-T021); avisar a contraparte según FR-058, sin envío externo dentro de la transacción (depends on T004, T008).
 
 **Checkpoint**: ambas partes del servicio quedan siempre informadas de los cambios de estado que no ejecutaron ellas mismas.
 
 ---
 
+## Frontend — app móvil y/o panel
+
+Destino principal: app-movil (React Native); panel-admin solo para superficies administrativas definidas.
+
+- [ ] **F09-FE-01** Bandeja propia y navegación al recurso correspondiente; permitir consultar eventos aunque push haya fallado.
+- [ ] **F09-FE-02** Registrar/renovar y retirar token de dispositivo por sesión mediante contrato a definir en D-08.
+- [ ] **F09-FE-03** Estados de permisos push denegados y canal no disponible sin impedir usar la app.
+- [ ] **F09-FE-04** No añadir marcación leído/no leído persistida hasta definir contrato y migración: el modelo no tiene ese campo.
+
+Aplicar [estados y contrato de cliente](../../tasks/01-arquitectura-y-stack.md#frontend) y reutilizar la demo como referencia de recorrido, no como autoridad de seguridad o esquema. No agregar CRUD administrativos o interfaces Cliente/Prestador fuera de lo especificado.
+
+## Integración y aceptación de la feature
+
+- [ ] **F09-QA-01** F09.base ofrece puerto/persistencia/fake para F06–F08 antes de integrar los productores; no depende de sus controladores.
+- [ ] **F09-QA-02** Simular caída proveedor: negocio confirma, notificación queda pendiente y worker reintenta sin generar otro evento lógico.
+- [ ] **F09-QA-03** Probar clave de unicidad tipo/aggregate_id/destinatario/event_version, preferencias F14 y múltiples workers.
+- [ ] **F09-QA-04** Sin endpoint público para fabricar notificaciones; notificación solo por evento real.
+- [ ] **F09-QA-05** Ejecutar escenarios Given/When/Then del SPEC y todos los SC incluidos abajo con actores y datos independientes; adjuntar evidencia de API, DB y UI.
+
+Validación arquitectónica adicional: verificar Service implements UseCase, constructor de controlador/filtro solo con interfaces, dominio/aplicación sin Spring/JPA/HTTP, mappers separados y un test de integración que acredite el límite transaccional cuando haya mutaciones.
+
+Para cerrar esta feature: contratos y migraciones versionados, tareas de origen y suplementos aplicables terminados, escenarios del SPEC aprobados con API real, UI conectada, evidencia de aislamiento por rol y ninguna decisión bloqueante sin resolver. Las funciones OFF se cierran como preparadas/aisladas, nunca como disponibles para usuarios.
+
 ## Dependencies & Execution Order
 
 - **Setup (Phase 1)** → depende de SPEC-01 y SPEC-08 ya completos.
 - **Foundational (Phase 2)** → bloquea Phases 3-4 de este plan.
-- **User Story 1 (Phase 3)** → depende de Foundational. Requiere modificar `ServicioService.aceptarPropuesta()` de SPEC-08 para invocar el punto de extensión.
-- **User Story 2 (Phase 4)** → depende de Foundational; puede avanzar en paralelo a User Story 1. Requiere modificar los cuatro métodos de transición de `ServicioService` de SPEC-08.
+- **User Story 1 (Phase 3)** → depende de Foundational. Requiere modificar `AceptarPropuestaUseCase.ejecutar()` de SPEC-08 para invocar el punto de extensión.
+- **User Story 2 (Phase 4)** → depende de Foundational; puede avanzar en paralelo a User Story 1. Requiere modificar los cuatro métodos de transición de los UseCase de servicio de SPEC-08 de SPEC-08.
 
 ## Notes
 
-- **Inconsistencia arquitectónica pendiente de decisión explícita** (no resuelta unilateralmente por este plan): SPEC-06 (`NotificacionOportunidad`) y SPEC-07 (`NotificacionPropuestaRecibida`) persisten cada uno su propio tipo de notificación de forma puntual, mientras que este plan introduce `notificaciones/` como módulo genérico para los dos tipos que cubre SPEC-09. El equipo debe decidir si migra las notificaciones de SPEC-06/SPEC-07 a este modelo genérico en una iteración posterior, o si el sistema queda con dos patrones de notificación coexistiendo. Este plan no modifica SPEC-06 ni SPEC-07 para no alterar arquitectura ya establecida sin instrucción explícita.
-- Este plan modifica mínimamente cuatro métodos ya implementados en `plan-spec-08-contratacion-ciclo-servicio.md` (T008, T018, T019, T020, T021) para invocar `NotificacionService.notificar()`. Esa modificación debe hacerse como un punto de extensión (ej. una línea de llamada al final del método, dentro de la misma transacción), no como una reescritura de la lógica ya probada de SPEC-08.
+- Se utiliza una sola tabla notificaciones para SPEC-06/07/09, conforme al plan general/manual; cada productor registra mediante una interfaz pública. No se requiere una migración futura desde tablas puntuales que este plan no crea.
+- Este plan modifica mínimamente cuatro métodos ya implementados en `plan-spec-08-contratacion-ciclo-servicio.md` (T008, T018, T019, T020, T021) para invocar `RegistrarNotificacionUseCase.ejecutar()`. Esa modificación debe hacerse como un punto de extensión (ej. una línea de llamada al final del método, dentro de la misma transacción), no como una reescritura de la lógica ya probada de SPEC-08.
 - Pendiente de aclaración real: mecanismo concreto de `CanalEntregaNotificacion` (push, SMS, correo) y si el actor "Proveedor de notificaciones" es un servicio externo a integrar — ninguna fuente entregada lo define.

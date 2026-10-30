@@ -38,3 +38,9 @@ Cada SPEC debe representar una funcionalidad coherente, independiente y comproba
 | **Total** | **CU001–CU093** | **20 SPEC**      |
 
 La agrupación conserva la trazabilidad con los diagramas y permite que cada SPEC tenga sus propias historias de usuario, requisitos funcionales, entidades, escenarios de aceptación y criterios de éxito medibles.
+
+### Arquitectura de implementación actualizada
+
+Los 20 SPEC y sus planes técnicos originales incluyen interfaces `application/usecase/*UseCase`, clases `application/service/*Service implements *UseCase`, puertos/adaptadores y controladores que reciben interfaces por constructor. Consultar las secciones «Arquitectura y trazabilidad de implementación» de cada SPEC y «Project Structure» del plan correspondiente. [Plan general](../../Planes-y-plantilla-del-proyecto/planes/plan-general-ALIADO.md#7-estructura-lógica-del-repositorio).
+
+El consolidado `TODOS LOS SPEC.md` conserva los SPEC-01–14 que ya incluía y sus mismas restricciones arquitectónicas. No cambia requisitos, historias ni criterios de aceptación y no reemplaza los 20 archivos individuales. La copia histórica de `tasks/fuentes` se conserva como evidencia de su fecha de captura.

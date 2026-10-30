@@ -1,7 +1,7 @@
 # Implementation Plan: SPEC-02 
 
 **Date**: 2026-09-18
-**Spec**: [spec-02-gestion-perfil-privacidad](FASE-4-Prototipar/specs/spec-02-gestion-perfil-privacidad)
+**Spec**: [spec-02-gestion-perfil-privacidad](../../FASE-4-Prototipar/specs/spec-02-gestion-perfil-privacidad.md)
 **Depends on**: `plan-spec-01-autenticacion.md` (Phase 2 Foundational + Phase 4 User Story 2 deben estar completas  este plan requiere `Usuario` autenticado)
 
 ## Summary
@@ -41,6 +41,8 @@ Relaciones: `Usuario` (SPEC-01) 1—1 `PerfilUsuario`, 1—1 `Ubicacion`, 1—N 
 
 ## Testing Strategy
 
+- **Arquitectura**: comprobar `Service implements UseCase`, constructores de entrada con interfaces, ausencia de Spring/JPA/HTTP en dominio/aplicación, mappers separados y transacciones verificadas con PostgreSQL cuando aplique.
+
 - **Contract tests**: uno por endpoint de la tabla anterior.
 - **Integration tests**: uno por Acceptance Scenario del SPEC, con Testcontainers.
 - **Unit tests**: regla de separación zona aproximada/dirección exacta, expiración automática de `SolicitudEliminacion` a las 24 h.
@@ -51,21 +53,68 @@ Relaciones: `Usuario` (SPEC-01) 1—1 `PerfilUsuario`, 1—1 `Ubicacion`, 1—N 
 ```text
 backend/src/main/java/com/aliado/
 └── perfil/
-    ├── presentation/controller/       PerfilController
-    ├── application/service/           PerfilService, EliminacionCuentaService
-    ├── domain/repository/             PerfilRepository, UbicacionRepository, SolicitudEliminacionRepository
-    └── domain/model/                  PerfilUsuario, Ubicacion, SolicitudEliminacion
+    ├── domain/
+    │   ├── model/
+    │   │   PerfilUsuario, Ubicacion, SolicitudEliminacion
+    │   └── repository/
+    │       PerfilRepository, UbicacionRepository, SolicitudEliminacionRepository
+    ├── application/
+    │   ├── usecase/
+    │   │   ConsultarPerfilUseCase, ActualizarPerfilUseCase, ConfigurarUbicacionUseCase, ConfigurarPrivacidadUseCase,
+    │   │   SolicitarEliminacionCuentaUseCase, ConfirmarEliminacionCuentaUseCase
+    │   ├── service/
+    │   │   ConsultarPerfilService, ActualizarPerfilService, ConfigurarUbicacionService, ConfigurarPrivacidadService,
+    │   │   SolicitarEliminacionCuentaService, ConfirmarEliminacionCuentaService
+    │   ├── dto/
+    │   │   Command/Query/Result de las operaciones del módulo (sin HTTP/JPA)
+    │   └── port/
+    │       ConsultaServiciosActivosPort, CifradoDatosPort
+    ├── infrastructure/
+    │   ├── persistence/
+    │   │   ├── entity/
+    │   │   │   PerfilUsuarioEntity, UbicacionEntity, SolicitudEliminacionEntity
+    │   │   ├── mapper/
+    │   │   │   PerfilUsuarioMapper, UbicacionMapper, SolicitudEliminacionMapper
+    │   │   ├── jpa/
+    │   │   │   PerfilJpaRepository, UbicacionJpaRepository, SolicitudEliminacionJpaRepository
+    │   │   └── adapter/
+    │   │       PerfilPersistenceAdapter, UbicacionPersistenceAdapter, SolicitudEliminacionPersistenceAdapter
+    │   └── adapter/
+    │       Adaptadores de puertos requeridos; reutilizar contratos existentes
+    └── presentation/
+        ├── controller/
+        │   PerfilController
+        ├── dto/
+        │   Request/Response HTTP según API Contracts
+        └── mapper/
+            Conversión HTTP ↔ Command/Query/Result
 ```
 
-**Arquitectura por capas**: este SPEC conserva la organización modular y aplica Arquitectura Limpia según las secciones 7.1–7.5 de [plan-general-ALIADO](plan-general-ALIADO.md#7-estructura-lógica-del-repositorio). Las rutas del árbol son relativas a cada módulo: `domain/` contiene modelos, reglas y puertos; `application/` coordina los casos de uso; `presentation/` expone HTTP; `infrastructure/` implementa los detalles técnicos. El dominio no importa Spring, JPA ni DTO HTTP; la aplicación depende de contratos de dominio/aplicación, nunca de adaptadores concretos. Los DTO de aplicación van en `application/dto/` y los contratos HTTP en `presentation/dto/`, con conversión en presentación cuando corresponda.
+**Contrato de arquitectura**: cada operación tiene una interfaz `application/usecase/*UseCase` y una implementación `application/service/*Service implements *UseCase`. Controllers, filtros, gateways y workers inyectan las interfaces por constructor; no servicios concretos ni repositorios JPA. Los servicios coordinan dominio y puertos sin importar Spring, JPA o HTTP. Dominio contiene modelos, reglas, excepciones de negocio y repositorios propios; infraestructura implementa los puertos y configura transacciones. Los DTO HTTP y sus mappers pertenecen a presentación; Command/Query/Result de aplicación son independientes del transporte.
 
-Cuando haya persistencia, los `*Repository` del árbol son puertos en `domain/repository/`, sin heredar de Spring Data. Las tareas existentes de persistencia incluyen sus implementaciones en `infrastructure/persistence/`: `entity/` para entidades JPA, `jpa/` para repositorios Spring Data, `adapter/` para implementar los puertos y `mapper/` para convertir dominio y persistencia. Las integraciones externas se definen mediante puertos de aplicación y adaptadores en `infrastructure/adapter/`; los contratos compartidos existentes de `common/` permanecen libres de detalles técnicos. Las dependencias entre módulos utilizan contratos de dominio o servicios públicos de aplicación, sin acceder a entidades JPA ni adaptadores ajenos. Los filtros de seguridad y la configuración de Spring pertenecen a infraestructura técnica; los controladores y la traducción de errores HTTP pertenecen a presentación. Se crean solo las carpetas necesarias para las tareas ya definidas; se conservan sus identificadores, orden y dependencias.
+Los contratos entre módulos son interfaces públicas de aplicación; no se accede a Service concreto, repositorio interno o entidad JPA de otro módulo. Cuando se requiera persistencia se separan `domain/repository`, `infrastructure/persistence/entity`, `mapper`, `jpa` y `adapter`. La configuración de Spring conecta puertos y adaptadores, y conserva la transacción completa del caso de uso. Solo crear clases/carpetas con responsabilidad real. `common` contiene infraestructura/contratos transversales acotados; el contexto de Spring Security no entra a aplicación. `SesionAutenticada` es contrato puro en `auth/application/port`; generación aleatoria segura del token y huella SHA-256 son responsabilidades separadas.
+
+### Interfaces de entrada e implementaciones
+
+| Módulo | UseCase (interfaz) | Service (implementación) |
+|---|---|---|
+| `perfil` | `ConsultarPerfilUseCase` | `ConsultarPerfilService` |
+| `perfil` | `ActualizarPerfilUseCase` | `ActualizarPerfilService` |
+| `perfil` | `ConfigurarUbicacionUseCase` | `ConfigurarUbicacionService` |
+| `perfil` | `ConfigurarPrivacidadUseCase` | `ConfigurarPrivacidadService` |
+| `perfil` | `SolicitarEliminacionCuentaUseCase` | `SolicitarEliminacionCuentaService` |
+| `perfil` | `ConfirmarEliminacionCuentaUseCase` | `ConfirmarEliminacionCuentaService` |
+
+Puertos de salida: SesionAutenticada y ConsultaServiciosActivosPort; cifrado mediante puerto/adaptador sin dependencia del SDK. Las interfaces de entrada no crean endpoints nuevos; mantener API Contracts y las condiciones Could/Future. Las tareas existentes conservan IDs, historias, dependencias y orden: los nombres de servicio agrupado de origen se descomponen en estas operaciones, sin añadir tareas funcionales.
+
+Persistencia de referencia: `perfiles`, `ubicaciones`, `solicitudes_eliminacion`. El [manual entregado](../../tasks/fuentes/manual-base-de-datos-aliado.md) detalla el modelo MVP; no implica que los scripts V1–V6 ya estén disponibles o ejecutados.
+
 
 ---
 
 ## Phase 1: Setup
 
-- [ ] T001 Crear el paquete `perfil/` con sus subcarpetas en capas de Arquitectura Limpia (según Project Structure)
+- [ ] T001 Crear el paquete `perfil/` con interfaces UseCase, implementaciones Service y puertos/adaptadores de Arquitectura Limpia (según Project Structure)
 - [ ] T002 Migración Flyway: tablas `perfiles`, `ubicaciones`, `solicitudes_eliminacion` (con FK hacia `usuarios` de SPEC-01)
 
 ---
@@ -83,7 +132,7 @@ Cuando haya persistencia, los `*Repository` del árbol son puertos en `domain/re
 ### Implementation
 
 - [ ] T005 [P] [US1] Modelo `PerfilUsuario` — `perfil/domain/model`
-- [ ] T006 [US1] `PerfilService.consultar()` / `actualizar()` con validación que no sobrescribe en caso de error (FR-002) — `perfil/application/service`
+- [ ] T006 [US1] ConsultarPerfilUseCase y ActualizarPerfilUseCase con sus Service; validación que no sobrescribe datos previos ante error (FR-002) — perfil/application.
 - [ ] T007 [US1] Endpoints `GET/PATCH /api/v1/perfil/me` — `perfil/presentation/controller`
 
 **Checkpoint**: cualquier usuario autenticado mantiene sus datos básicos actualizados de forma independiente.
@@ -104,10 +153,10 @@ Cuando haya persistencia, los `*Repository` del árbol son puertos en `domain/re
 ### Implementation
 
 - [ ] T010 [P] [US2] Modelo `Ubicacion` (cifrado de `direccionExacta` en reposo, RNF-004) — `perfil/domain/model`
-- [ ] T011 [US2] `PerfilService`: lógica de exposición condicionada (zona por defecto, dirección exacta solo bajo regla explícita) — `perfil/application/service`
+- [ ] T011 [US2] ConfigurarUbicacionUseCase y ConfigurarPrivacidadUseCase con sus Service: exposición condicionada de zona/dirección exacta según regla explícita — perfil/application.
 - [ ] T012 [US2] Endpoints `PUT /ubicacion`, `PATCH /visibilidad`, `GET /{id}/publico` — `perfil/presentation/controller`
 
-**Checkpoint**: ninguna ruta del sistema puede exponer `direccionExacta` fuera de la regla explícita, verificable con un solo punto de control en `PerfilService`.
+**Checkpoint**: ninguna ruta del sistema puede exponer `direccionExacta` fuera de la regla explícita, verificable con una política de dominio aplicada por los UseCase de perfil/privacidad.
 
 ---
 
@@ -125,7 +174,7 @@ Cuando haya persistencia, los `*Repository` del árbol son puertos en `domain/re
 ### Implementation
 
 - [ ] T015 [P] [US3] Modelo `SolicitudEliminacion` — `perfil/domain/model`
-- [ ] T016 [US3] `EliminacionCuentaService`: validación de servicios en ejecución, expiración a 24 h — `perfil/application/service`
+- [ ] T016 [US3] SolicitarEliminacionCuentaUseCase y ConfirmarEliminacionCuentaUseCase: usar ConsultaServiciosActivosPort y expiración a 24 h; Service separados, sin acceder al repositorio JPA de servicios.
 - [ ] T017 [US3] Endpoints `POST /eliminacion`, `/eliminacion/confirmar` — `perfil/presentation/controller`
 - [ ] T018 [US3] Job programado (scheduler) que marca como `EXPIRADA` toda solicitud pendiente > 24 h
 
@@ -135,13 +184,35 @@ Cuando haya persistencia, los `*Repository` del árbol son puertos en `domain/re
 
 ---
 
+## Frontend — app móvil y/o panel
+
+Destino principal: app-movil (React Native); panel-admin solo para superficies administrativas definidas.
+
+- [ ] **F02-FE-01** Pantalla de datos propios y edición con validación, conservación del valor previo ante error y conflictos de versión.
+- [ ] **F02-FE-02** Configurar privacidad y separar zona aproximada de dirección exacta en formularios y vistas públicas.
+- [ ] **F02-FE-03** Solicitud y confirmación de eliminación con expiración, resultado y estado pendientes visibles.
+- [ ] **F02-FE-04** Integrar bloqueo de eliminación por servicios activos con el puerto de SPEC-08 cuando esté disponible; no simular aprobación.
+
+Aplicar [estados y contrato de cliente](../../tasks/01-arquitectura-y-stack.md#frontend) y reutilizar la demo como referencia de recorrido, no como autoridad de seguridad o esquema. No agregar CRUD administrativos o interfaces Cliente/Prestador fuera de lo especificado.
+
+## Integración y aceptación de la feature
+
+- [ ] **F02-QA-01** Comprobar cifrado de dirección y ausencia de teléfono/email/dirección en DTO públicos.
+- [ ] **F02-QA-02** Probar eliminación sin confirmación, confirmación expirada y servicio activo; E2E diferido hasta F08.
+- [ ] **F02-QA-03** Evitar borrado físico en cascada que destruya historial/auditoría; probar política de anonimización acordada.
+- [ ] **F02-QA-04** Ejecutar escenarios Given/When/Then del SPEC y todos los SC incluidos abajo con actores y datos independientes; adjuntar evidencia de API, DB y UI.
+
+Validación arquitectónica adicional: verificar Service implements UseCase, constructor de controlador/filtro solo con interfaces, dominio/aplicación sin Spring/JPA/HTTP, mappers separados y un test de integración que acredite el límite transaccional cuando haya mutaciones.
+
+Para cerrar esta feature: contratos y migraciones versionados, tareas de origen y suplementos aplicables terminados, escenarios del SPEC aprobados con API real, UI conectada, evidencia de aislamiento por rol y ninguna decisión bloqueante sin resolver. Las funciones OFF se cierran como preparadas/aisladas, nunca como disponibles para usuarios.
+
 ## Dependencies & Execution Order
 
 - **Depende externamente de**: `plan-spec-01-autenticacion.md` — Phase 2 (Foundational) y Phase 4 (User Story 2, `auth` completo) deben estar terminadas antes de iniciar cualquier fase de este plan.
 - **Setup (Phase 1)** → depende solo de lo anterior.
 - **User Story 1 (Phase 2)** → depende de Phase 1.
 - **User Story 2 (Phase 3)** → depende de Phase 1; puede paralelizarse con la Phase 2.
-- **User Story 3 (Phase 4)** → depende de Phase 3 (reutiliza `PerfilService`) y tiene una dependencia cruzada pendiente hacia SPEC-07/08 (ver nota en T016).
+- **User Story 3 (Phase 4)** → depende de Phase 3 (reutiliza contratos de perfil/privacidad) y tiene una dependencia cruzada pendiente hacia SPEC-07/08 (ver nota en T016).
 
 ## Notes
 

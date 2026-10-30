@@ -284,8 +284,8 @@ modulo/
 │   └── exception/             # Excepciones del dominio, cuando aplique
 │
 ├── application/
-│   ├── service/               # Servicios de aplicación/casos de uso
-│   ├── usecase/               # Casos de uso explícitos, si mejora la claridad
+│   ├── usecase/               # Interfaces de entrada *UseCase
+│   ├── service/               # *Service implements *UseCase
 │   ├── dto/                   # Consultas o resultados de aplicación
 │   └── port/                  # Otros puertos de entrada/salida, cuando aplique
 │
@@ -305,7 +305,7 @@ modulo/
     └── exception/              # Traducción de errores a respuestas HTTP
 ```
 
-Los nombres `service/` y `usecase/` no tienen que coexistir si el módulo puede expresar claramente sus casos de uso con una sola organización. Del mismo modo, `application/port/`, `exception/`, `mapper/` y las carpetas de persistencia solo se crean cuando exista una necesidad real.
+En la variante elegida, `application/usecase/` y `application/service/` coexisten: interfaces de entrada e implementaciones respectivas. Controllers, filtros, gateways y workers inyectan interfaces por constructor; nunca Service concreto. Las excepciones de negocio viven en `domain/exception`; `application/exception` solo si surge un error propio de coordinación. Puertos, mappers y persistencia se crean cuando exista una necesidad real.
 
 Los nombres de carpeta no determinan por sí solos la arquitectura, lo determinante son las dependencias entre clases. El dominio no debe importar Spring, JPA, controladores ni DTO HTTP. La aplicación debe depender de contratos, no de implementaciones técnicas.
 
@@ -313,43 +313,62 @@ Los nombres de carpeta no determinan por sí solos la arquitectura, lo determina
 
 El módulo `auth` servirá como ejemplo para los demás módulos cuando necesiten persistencia:
 
-```json
-com/aliado/auth/
-├── domain/
-│   ├── model/
-│   │   ├── Usuario.java
-│   │   ├── Consentimiento.java
-│   │   ├── Sesion.java
-│   │   ├── TokenRecuperacion.java
-│   │   └── RolUsuario.java
-│   └── repository/
-│       ├── UsuarioRepository.java
-│       ├── ConsentimientoRepository.java
-│       ├── SesionRepository.java
-│       └── TokenRecuperacionRepository.java
-│
-├── application/
-│   └── service/
-│       ├── AuthService.java
-│       ├── RegistroService.java
-│       ├── SesionService.java
-│       └── RecuperacionAccesoService.java
-│
-├── infrastructure/
-│   └── persistence/
-│       ├── entity/
-│       ├── mapper/
-│       ├── jpa/
-│       └── adapter/
-│
-└── presentation/
-    ├── controller/
-    │   └── AuthController.java
-    └── dto/
-        ├── RegistroRequest.java
-        ├── LoginRequest.java
-        ├── LoginResponse.java
-        └── RecuperacionRequest.java
+```text
+backend/src/main/java/com/aliado/
+├── auth/
+│   ├── domain/
+│   │   ├── model/
+│   │   │   Usuario, RolUsuario, Consentimiento, Sesion, TokenRecuperacion
+│   │   ├── repository/
+│   │   │   UsuarioRepository, ConsentimientoRepository, SesionRepository, TokenRecuperacionRepository
+│   │   └── exception/
+│   │       CorreoYaRegistradoException, TerminosNoAceptadosException, CredencialesInvalidasException,
+│   │       TokenRecuperacionInvalidoException, CuentaBloqueadaException
+│   ├── application/
+│   │   ├── usecase/
+│   │   │   RegistrarUsuarioUseCase, IniciarSesionUseCase, CerrarSesionUseCase, ResolverSesionUseCase,
+│   │   │   SolicitarRecuperacionAccesoUseCase, ConfirmarRecuperacionAccesoUseCase, ConsultarUsuarioActualUseCase
+│   │   ├── service/
+│   │   │   RegistrarUsuarioService, IniciarSesionService, CerrarSesionService, ResolverSesionService,
+│   │   │   SolicitarRecuperacionAccesoService, ConfirmarRecuperacionAccesoService, ConsultarUsuarioActualService
+│   │   ├── dto/
+│   │   │   RegistroCommand, ResultadoRegistro, LoginCommand, ResultadoLogin, UsuarioActual, RecuperacionCommand,
+│   │   │   ConfirmarRecuperacionCommand
+│   │   └── port/
+│   │       HasheadorPassword, GeneradorTokenSesion, HuellaToken, NotificadorRecuperacion, UsuarioConsultaPort,
+│   │       SesionAutenticada
+│   ├── infrastructure/
+│   │   ├── persistence/
+│   │   │   ├── entity/
+│   │   │   │   UsuarioEntity, ConsentimientoEntity, SesionEntity, TokenRecuperacionEntity
+│   │   │   ├── mapper/
+│   │   │   │   UsuarioMapper, ConsentimientoMapper, SesionMapper, TokenRecuperacionMapper
+│   │   │   ├── jpa/
+│   │   │   │   UsuarioJpaRepository, ConsentimientoJpaRepository, SesionJpaRepository, TokenRecuperacionJpaRepository
+│   │   │   └── adapter/
+│   │   │       UsuarioPersistenceAdapter, ConsentimientoPersistenceAdapter, SesionPersistenceAdapter,
+│   │   │       TokenRecuperacionPersistenceAdapter
+│   │   └── adapter/
+│   │       BCryptHasheadorAdapter, GeneradorTokenSeguroAdapter, HuellaTokenSha256Adapter, CorreoRecuperacionAdapter,
+│   │       SesionAutenticadaAdapter, UsuarioConsultaAdapter
+│   └── presentation/
+│       ├── controller/
+│       │   AuthController
+│       ├── dto/
+│       │   Request/Response HTTP según API Contracts
+│       └── mapper/
+│           Conversión HTTP ↔ Command/Query/Result
+└── common/
+    ├── config/
+    │   PasswordConfig, ApplicationConfig (composición y transacciones)
+    ├── security/
+    │   SecurityConfig, AutorizacionRolFilter (depende de ResolverSesionUseCase), @RequiereRol, CurrentUser
+    ├── exception/
+    │   GlobalExceptionHandler, ErrorResponse
+    ├── idempotency/
+    │   IdempotencyService, IdempotencyFilter
+    └── observability/
+        TraceIdFilter
 ```
 
 El árbol anterior representa la **separación objetivo**, no afirma que las entidades JPA, sus mappers, los repositorios Spring Data o sus adaptadores ya estén implementados. Esas clases concretas se añadirán cuando se implemente la persistencia del módulo. 
@@ -361,7 +380,7 @@ El árbol anterior representa la **separación objetivo**, no afirma que las ent
 | `domain/`         | Modelos, invariantes y contratos esenciales del dominio   | Java y abstracciones propias                            | Spring, JPA, HTTP, infraestructura concreta         |
 | `application/`    | Casos de uso, coordinación y transacciones de aplicación  | `domain/` y puertos necesarios                          | Adaptadores concretos, controladores, entidades JPA |
 | `infrastructure/` | Persistencia, proveedores externos, configuración técnica | Contratos de dominio/aplicación y tecnologías concretas | -                                                   |
-| `presentation/`   | Endpoints, validación del request y respuestas HTTP       | Casos de uso/servicios públicos de aplicación           | Repositorios JPA o acceso directo a tablas          |
+| `presentation/`   | Endpoints, validación del request y respuestas HTTP       | Interfaces UseCase de aplicación y DTO propios           | Repositorios JPA o acceso directo a tablas          |
 
 La dirección de dependencias del código apunta hacia el interior: infraestructura y presentación pueden invocar abstracciones de aplicación/dominio, pero el dominio no conoce esas capas externas. La inyección de dependencias de Spring conecta las implementaciones concretas en tiempo de ejecución.
 
@@ -370,7 +389,7 @@ La dirección de dependencias del código apunta hacia el interior: infraestruct
 Los repositorios se dividirán en tres responsabilidades cuando un módulo utilice persistencia:
 
 1. `domain/repository/`: interfaz propia del módulo, con las operaciones que el dominio o la aplicación necesitan. No extiende `JpaRepository` ni importa Spring Data.
-2. `infrastructure/persistence/jpa/`: interfaz específica de Spring Data, por ejemplo `UsuarioJpaRepository extends JpaRepository<UsuarioEntity, Long>`.
+2. `infrastructure/persistence/jpa/`: interfaz específica de Spring Data, por ejemplo `UsuarioJpaRepository extends JpaRepository<UsuarioEntity, UUID>`.
 3. `infrastructure/persistence/adapter/`: implementación del puerto de dominio, por ejemplo `UsuarioPersistenceAdapter implements UsuarioRepository`, utiliza el repositorio JPA y los mappers para traducir entre modelos.
 
 ### 7.5 Criterio de organización modular
@@ -419,480 +438,795 @@ aliado/
 │   │   │   │   ├── auth/
 │   │   │   │   │   ├── domain/
 │   │   │   │   │   │   ├── model/
-│   │   │   │   │   │   │   ├── Usuario.java
-│   │   │   │   │   │   │   ├── Consentimiento.java
-│   │   │   │   │   │   │   ├── Sesion.java
-│   │   │   │   │   │   │   ├── TokenRecuperacion.java
-│   │   │   │   │   │   │   └── RolUsuario.java
-│   │   │   │   │   │   └── repository/
-│   │   │   │   │   │       ├── UsuarioRepository.java
-│   │   │   │   │   │       ├── ConsentimientoRepository.java
-│   │   │   │   │   │       ├── SesionRepository.java
-│   │   │   │   │   │       └── TokenRecuperacionRepository.java
+│   │   │   │   │   │   │   Usuario, RolUsuario, Consentimiento, Sesion, TokenRecuperacion
+│   │   │   │   │   │   ├── repository/
+│   │   │   │   │   │   │   UsuarioRepository, ConsentimientoRepository, SesionRepository, TokenRecuperacionRepository
+│   │   │   │   │   │   └── exception/
+│   │   │   │   │   │       CorreoYaRegistradoException, TerminosNoAceptadosException, CredencialesInvalidasException,
+│   │   │   │   │   │       TokenRecuperacionInvalidoException, CuentaBloqueadaException
 │   │   │   │   │   ├── application/
-│   │   │   │   │   │   └── service/
-│   │   │   │   │   │       ├── AuthService.java
-│   │   │   │   │   │       ├── RegistroService.java
-│   │   │   │   │   │       ├── SesionService.java
-│   │   │   │   │   │       └── RecuperacionAccesoService.java
-│   │   │   │   │   ├── infrastructure/
-│   │   │   │   │   │   └── persistence/
-│   │   │   │   │   │       ├── entity/
-│   │   │   │   │   │       ├── mapper/
-│   │   │   │   │   │       ├── jpa/
-│   │   │   │   │   │       └── adapter/
-│   │   │   │   │   └── presentation/
-│   │   │   │   │       ├── controller/
-│   │   │   │   │       │   └── AuthController.java
-│   │   │   │   │       └── dto/
-│   │   │   │   │           ├── RegistroRequest.java
-│   │   │   │   │           ├── LoginRequest.java
-│   │   │   │   │           ├── LoginResponse.java
-│   │   │   │   │           └── RecuperacionRequest.java
-│   │   │   │   │
-│   │   │   │   ├── perfil/
-│   │   │   │   │   ├── domain/
-│   │   │   │   │   │   ├── model/
-│   │   │   │   │   │   │   ├── PerfilUsuario.java
-│   │   │   │   │   │   │   ├── Ubicacion.java
-│   │   │   │   │   │   │   └── SolicitudEliminacion.java
-│   │   │   │   │   │   └── repository/
-│   │   │   │   │   ├── application/
-│   │   │   │   │   │   └── service/
-│   │   │   │   │   │       ├── PerfilUsuarioService.java
-│   │   │   │   │   │       ├── UbicacionService.java
-│   │   │   │   │   │       └── EliminacionCuentaService.java
-│   │   │   │   │   ├── infrastructure/
-│   │   │   │   │   │   └── persistence/
-│   │   │   │   │   │       ├── entity/
-│   │   │   │   │   │       ├── mapper/
-│   │   │   │   │   │       ├── jpa/
-│   │   │   │   │   │       └── adapter/
-│   │   │   │   │   └── presentation/
-│   │   │   │   │       ├── controller/
-│   │   │   │   │       └── dto/
-│   │   │   │   │
-│   │   │   │   ├── catalogo/
-│   │   │   │   │   ├── domain/
-│   │   │   │   │   │   ├── model/
-│   │   │   │   │   │   │   ├── CategoriaServicio.java
-│   │   │   │   │   │   │   └── Zona.java
-│   │   │   │   │   │   └── repository/
-│   │   │   │   │   │       ├── CategoriaServicioRepository.java
-│   │   │   │   │   │       └── ZonaRepository.java
-│   │   │   │   │   ├── application/
-│   │   │   │   │   │   └── service/
-│   │   │   │   │   │       └── CatalogoService.java
-│   │   │   │   │   ├── infrastructure/
-│   │   │   │   │   │   └── persistence/
-│   │   │   │   │   │       ├── entity/
-│   │   │   │   │   │       ├── mapper/
-│   │   │   │   │   │       ├── jpa/
-│   │   │   │   │   │       └── adapter/
-│   │   │   │   │   └── presentation/
-│   │   │   │   │       ├── controller/
-│   │   │   │   │       │   └── CatalogoController.java
-│   │   │   │   │       └── dto/
-│   │   │   │   │
-│   │   │   │   ├── solicitudes/
-│   │   │   │   │   ├── domain/
-│   │   │   │   │   │   ├── model/
-│   │   │   │   │   │   │   ├── Solicitud.java
-│   │   │   │   │   │   │   ├── FotoSolicitud.java
-│   │   │   │   │   │   │   ├── HistorialEstadoSolicitud.java
-│   │   │   │   │   │   │   ├── EstadoSolicitud.java
-│   │   │   │   │   │   │   └── UrgenciaSolicitud.java
-│   │   │   │   │   │   └── repository/
-│   │   │   │   │   │       ├── SolicitudRepository.java
-│   │   │   │   │   │       ├── FotoSolicitudRepository.java
-│   │   │   │   │   │       └── HistorialEstadoSolicitudRepository.java
-│   │   │   │   │   ├── application/
-│   │   │   │   │   │   └── service/
-│   │   │   │   │   │       ├── SolicitudService.java
-│   │   │   │   │   │       └── FotoSolicitudService.java
-│   │   │   │   │   ├── infrastructure/
-│   │   │   │   │   │   └── persistence/
-│   │   │   │   │   │       ├── entity/
-│   │   │   │   │   │       ├── mapper/
-│   │   │   │   │   │       ├── jpa/
-│   │   │   │   │   │       └── adapter/
-│   │   │   │   │   └── presentation/
-│   │   │   │   │       ├── controller/
-│   │   │   │   │       │   └── SolicitudController.java
-│   │   │   │   │       └── dto/
-│   │   │   │   │
-│   │   │   │   ├── perfiles/
-│   │   │   │   │   ├── domain/
-│   │   │   │   │   │   ├── model/
-│   │   │   │   │   │   │   ├── PerfilProfesional.java
-│   │   │   │   │   │   │   ├── PerfilCategoria.java
-│   │   │   │   │   │   │   ├── PerfilZonaAtencion.java
-│   │   │   │   │   │   │   ├── ExperienciaProfesional.java
-│   │   │   │   │   │   │   ├── ServicioPortafolio.java
-│   │   │   │   │   │   │   ├── Disponibilidad.java
-│   │   │   │   │   │   │   └── CompromisoAgenda.java
-│   │   │   │   │   │   └── repository/
-│   │   │   │   │   ├── application/
-│   │   │   │   │   │   └── service/
-│   │   │   │   │   │       ├── PerfilProfesionalService.java
-│   │   │   │   │   │       ├── ExperienciaProfesionalService.java
-│   │   │   │   │   │       ├── PortafolioService.java
-│   │   │   │   │   │       ├── DisponibilidadService.java
-│   │   │   │   │   │       └── AgendaService.java
-│   │   │   │   │   ├── infrastructure/
-│   │   │   │   │   │   └── persistence/
-│   │   │   │   │   │       ├── entity/
-│   │   │   │   │   │       ├── mapper/
-│   │   │   │   │   │       ├── jpa/
-│   │   │   │   │   │       └── adapter/
-│   │   │   │   │   └── presentation/
-│   │   │   │   │       ├── controller/
-│   │   │   │   │       │   └── PerfilProfesionalController.java
-│   │   │   │   │       └── dto/
-│   │   │   │   │           ├── PerfilProfesionalRequest.java
-│   │   │   │   │           ├── PerfilProfesionalResponse.java
-│   │   │   │   │           └── PerfilPublicoResponse.java
-│   │   │   │   │
-│   │   │   │   ├── descubrimiento/
-│   │   │   │   │   ├── application/
-│   │   │   │   │   │   └── service/
-│   │   │   │   │   │       └── DescubrimientoService.java
-│   │   │   │   │   ├── infrastructure/
-│   │   │   │   │   │   └── adapter/
-│   │   │   │   │   ├── presentation/
-│   │   │   │   │   │   ├── controller/
-│   │   │   │   │   │   └── dto/
-│   │   │   │   │   └── mapa/                              # SPEC-17 Could
-│   │   │   │   │       ├── application/
-│   │   │   │   │       │   └── service/
-│   │   │   │   │       └── presentation/
-│   │   │   │   │           ├── controller/
-│   │   │   │   │           └── dto/
-│   │   │   │   │
-│   │   │   │   ├── oportunidades/
-│   │   │   │   │   ├── application/
-│   │   │   │   │   │   └── service/
-│   │   │   │   │   │       └── CompatibilidadService.java
-│   │   │   │   │   ├── infrastructure/
-│   │   │   │   │   │   └── adapter/
-│   │   │   │   │   └── presentation/
-│   │   │   │   │       ├── controller/
-│   │   │   │   │       └── dto/
-│   │   │   │   │           ├── OportunidadResponse.java
-│   │   │   │   │           └── FiltroOportunidadesRequest.java
-│   │   │   │   │
-│   │   │   │   ├── propuestas/
-│   │   │   │   │   ├── domain/
-│   │   │   │   │   │   ├── model/
-│   │   │   │   │   │   │   ├── Propuesta.java
-│   │   │   │   │   │   │   └── EstadoPropuesta.java
-│   │   │   │   │   │   └── repository/
-│   │   │   │   │   │       └── PropuestaRepository.java
-│   │   │   │   │   ├── application/
-│   │   │   │   │   │   └── service/
-│   │   │   │   │   │       └── PropuestaService.java
-│   │   │   │   │   ├── infrastructure/
-│   │   │   │   │   │   └── persistence/
-│   │   │   │   │   │       ├── entity/
-│   │   │   │   │   │       ├── mapper/
-│   │   │   │   │   │       ├── jpa/
-│   │   │   │   │   │       └── adapter/
-│   │   │   │   │   └── presentation/
-│   │   │   │   │       ├── controller/
-│   │   │   │   │       └── dto/
-│   │   │   │   │
-│   │   │   │   ├── servicios/
-│   │   │   │   │   ├── domain/
-│   │   │   │   │   │   ├── model/
-│   │   │   │   │   │   │   ├── ServicioContratado.java
-│   │   │   │   │   │   │   ├── HistorialEstadoServicio.java
-│   │   │   │   │   │   │   ├── MensajeServicio.java
-│   │   │   │   │   │   │   └── EstadoServicio.java
-│   │   │   │   │   │   └── repository/
-│   │   │   │   │   │       ├── ServicioContratadoRepository.java
-│   │   │   │   │   │       ├── HistorialEstadoServicioRepository.java
-│   │   │   │   │   │       └── MensajeServicioRepository.java
-│   │   │   │   │   ├── application/
-│   │   │   │   │   │   └── service/
-│   │   │   │   │   │       ├── ServicioService.java
-│   │   │   │   │   │       ├── EstadoServicioService.java
-│   │   │   │   │   │       └── ComunicacionServicioService.java
-│   │   │   │   │   ├── infrastructure/
-│   │   │   │   │   │   └── persistence/
-│   │   │   │   │   │       ├── entity/
-│   │   │   │   │   │       ├── mapper/
-│   │   │   │   │   │       ├── jpa/
-│   │   │   │   │   │       └── adapter/
-│   │   │   │   │   └── presentation/
-│   │   │   │   │       ├── controller/
-│   │   │   │   │       │   └── ServicioController.java
-│   │   │   │   │       └── dto/
-│   │   │   │   │
-│   │   │   │   ├── notificaciones/
-│   │   │   │   │   ├── domain/
-│   │   │   │   │   │   ├── model/
-│   │   │   │   │   │   │   ├── Notificacion.java
-│   │   │   │   │   │   │   ├── TipoNotificacion.java
-│   │   │   │   │   │   │   └── EstadoEntrega.java
-│   │   │   │   │   │   └── repository/
-│   │   │   │   │   │       └── NotificacionRepository.java
-│   │   │   │   │   ├── application/
-│   │   │   │   │   │   └── service/
-│   │   │   │   │   │       ├── NotificacionService.java
-│   │   │   │   │   │       ├── EntregaNotificacionService.java
-│   │   │   │   │   │       └── ReintentoNotificacionService.java
+│   │   │   │   │   │   ├── usecase/
+│   │   │   │   │   │   │   RegistrarUsuarioUseCase, IniciarSesionUseCase, CerrarSesionUseCase, ResolverSesionUseCase,
+│   │   │   │   │   │   │   SolicitarRecuperacionAccesoUseCase, ConfirmarRecuperacionAccesoUseCase, ConsultarUsuarioActualUseCase
+│   │   │   │   │   │   ├── service/
+│   │   │   │   │   │   │   RegistrarUsuarioService, IniciarSesionService, CerrarSesionService, ResolverSesionService,
+│   │   │   │   │   │   │   SolicitarRecuperacionAccesoService, ConfirmarRecuperacionAccesoService, ConsultarUsuarioActualService
+│   │   │   │   │   │   ├── dto/
+│   │   │   │   │   │   │   RegistroCommand, ResultadoRegistro, LoginCommand, ResultadoLogin, UsuarioActual, RecuperacionCommand,
+│   │   │   │   │   │   │   ConfirmarRecuperacionCommand
+│   │   │   │   │   │   └── port/
+│   │   │   │   │   │       HasheadorPassword, GeneradorTokenSesion, HuellaToken, NotificadorRecuperacion, UsuarioConsultaPort,
+│   │   │   │   │   │       SesionAutenticada
 │   │   │   │   │   ├── infrastructure/
 │   │   │   │   │   │   ├── persistence/
 │   │   │   │   │   │   │   ├── entity/
+│   │   │   │   │   │   │   │   UsuarioEntity, ConsentimientoEntity, SesionEntity, TokenRecuperacionEntity
 │   │   │   │   │   │   │   ├── mapper/
+│   │   │   │   │   │   │   │   UsuarioMapper, ConsentimientoMapper, SesionMapper, TokenRecuperacionMapper
 │   │   │   │   │   │   │   ├── jpa/
+│   │   │   │   │   │   │   │   UsuarioJpaRepository, ConsentimientoJpaRepository, SesionJpaRepository, TokenRecuperacionJpaRepository
 │   │   │   │   │   │   │   └── adapter/
-│   │   │   │   │   │   └── gateway/
-│   │   │   │   │   │       ├── CanalEntregaNotificacion.java
-│   │   │   │   │   │       ├── PushNotificationGateway.java
-│   │   │   │   │   │       └── EmailNotificationGateway.java
+│   │   │   │   │   │   │       UsuarioPersistenceAdapter, ConsentimientoPersistenceAdapter, SesionPersistenceAdapter,
+│   │   │   │   │   │   │       TokenRecuperacionPersistenceAdapter
+│   │   │   │   │   │   └── adapter/
+│   │   │   │   │   │       BCryptHasheadorAdapter, GeneradorTokenSeguroAdapter, HuellaTokenSha256Adapter, CorreoRecuperacionAdapter,
+│   │   │   │   │   │       SesionAutenticadaAdapter, UsuarioConsultaAdapter
 │   │   │   │   │   └── presentation/
 │   │   │   │   │       ├── controller/
-│   │   │   │   │       └── dto/
-│   │   │   │   │
+│   │   │   │   │       │   AuthController
+│   │   │   │   │       ├── dto/
+│   │   │   │   │       │   Request/Response HTTP según API Contracts
+│   │   │   │   │       └── mapper/
+│   │   │   │   │           Conversión HTTP ↔ Command/Query/Result
+│   │   │   │   ├── perfil/
+│   │   │   │   │   ├── domain/
+│   │   │   │   │   │   ├── model/
+│   │   │   │   │   │   │   PerfilUsuario, Ubicacion, SolicitudEliminacion
+│   │   │   │   │   │   └── repository/
+│   │   │   │   │   │       PerfilRepository, UbicacionRepository, SolicitudEliminacionRepository
+│   │   │   │   │   ├── application/
+│   │   │   │   │   │   ├── usecase/
+│   │   │   │   │   │   │   ConsultarPerfilUseCase, ActualizarPerfilUseCase, ConfigurarUbicacionUseCase, ConfigurarPrivacidadUseCase,
+│   │   │   │   │   │   │   SolicitarEliminacionCuentaUseCase, ConfirmarEliminacionCuentaUseCase
+│   │   │   │   │   │   ├── service/
+│   │   │   │   │   │   │   ConsultarPerfilService, ActualizarPerfilService, ConfigurarUbicacionService, ConfigurarPrivacidadService,
+│   │   │   │   │   │   │   SolicitarEliminacionCuentaService, ConfirmarEliminacionCuentaService
+│   │   │   │   │   │   ├── dto/
+│   │   │   │   │   │   │   Command/Query/Result de las operaciones del módulo (sin HTTP/JPA)
+│   │   │   │   │   │   └── port/
+│   │   │   │   │   │       ConsultaServiciosActivosPort, CifradoDatosPort
+│   │   │   │   │   ├── infrastructure/
+│   │   │   │   │   │   ├── persistence/
+│   │   │   │   │   │   │   ├── entity/
+│   │   │   │   │   │   │   │   PerfilUsuarioEntity, UbicacionEntity, SolicitudEliminacionEntity
+│   │   │   │   │   │   │   ├── mapper/
+│   │   │   │   │   │   │   │   PerfilUsuarioMapper, UbicacionMapper, SolicitudEliminacionMapper
+│   │   │   │   │   │   │   ├── jpa/
+│   │   │   │   │   │   │   │   PerfilJpaRepository, UbicacionJpaRepository, SolicitudEliminacionJpaRepository
+│   │   │   │   │   │   │   └── adapter/
+│   │   │   │   │   │   │       PerfilPersistenceAdapter, UbicacionPersistenceAdapter, SolicitudEliminacionPersistenceAdapter
+│   │   │   │   │   │   └── adapter/
+│   │   │   │   │   │       Adaptadores de puertos requeridos; reutilizar contratos existentes
+│   │   │   │   │   └── presentation/
+│   │   │   │   │       ├── controller/
+│   │   │   │   │       │   PerfilController
+│   │   │   │   │       ├── dto/
+│   │   │   │   │       │   Request/Response HTTP según API Contracts
+│   │   │   │   │       └── mapper/
+│   │   │   │   │           Conversión HTTP ↔ Command/Query/Result
+│   │   │   │   ├── descubrimiento/
+│   │   │   │   │   ├── application/
+│   │   │   │   │   │   ├── usecase/
+│   │   │   │   │   │   │   BuscarPrestadoresUseCase, ConsultarPerfilPublicoUseCase, ConsultarMapaPrestadoresUseCase
+│   │   │   │   │   │   ├── service/
+│   │   │   │   │   │   │   BuscarPrestadoresService, ConsultarPerfilPublicoService, ConsultarMapaPrestadoresService
+│   │   │   │   │   │   ├── dto/
+│   │   │   │   │   │   │   Command/Query/Result de las operaciones del módulo (sin HTTP/JPA)
+│   │   │   │   │   │   └── port/
+│   │   │   │   │   │       ConsultaPerfilesPublicosPort, ConsultaConfianzaPort, ConsultaPrestadoresPublicosPort,
+│   │   │   │   │   │       RepresentacionGeograficaPort
+│   │   │   │   │   ├── infrastructure/
+│   │   │   │   │   │   └── adapter/
+│   │   │   │   │   │       Adaptadores de puertos requeridos; reutilizar contratos existentes
+│   │   │   │   │   └── presentation/
+│   │   │   │   │       ├── controller/
+│   │   │   │   │       │   DescubrimientoController, MapaPrestadoresController
+│   │   │   │   │       ├── dto/
+│   │   │   │   │       │   Request/Response HTTP según API Contracts
+│   │   │   │   │       └── mapper/
+│   │   │   │   │           Conversión HTTP ↔ Command/Query/Result
+│   │   │   │   ├── catalogo/
+│   │   │   │   │   ├── domain/
+│   │   │   │   │   │   ├── model/
+│   │   │   │   │   │   │   CategoriaServicio, Zona
+│   │   │   │   │   │   └── repository/
+│   │   │   │   │   │       CategoriaServicioRepository, ZonaRepository
+│   │   │   │   │   ├── application/
+│   │   │   │   │   │   ├── usecase/
+│   │   │   │   │   │   │   ConsultarCategoriasUseCase, ConsultarZonasUseCase
+│   │   │   │   │   │   ├── service/
+│   │   │   │   │   │   │   ConsultarCategoriasService, ConsultarZonasService
+│   │   │   │   │   │   ├── dto/
+│   │   │   │   │   │   │   Command/Query/Result de las operaciones del módulo (sin HTTP/JPA)
+│   │   │   │   │   │   └── port/
+│   │   │   │   │   │       ArchivoStorageService (contrato compartido)
+│   │   │   │   │   └── infrastructure/
+│   │   │   │   │       ├── persistence/
+│   │   │   │   │       │   ├── entity/
+│   │   │   │   │       │   │   CategoriaServicioEntity, ZonaEntity
+│   │   │   │   │       │   ├── mapper/
+│   │   │   │   │       │   │   CategoriaServicioMapper, ZonaMapper
+│   │   │   │   │       │   ├── jpa/
+│   │   │   │   │       │   │   CategoriaServicioJpaRepository, ZonaJpaRepository
+│   │   │   │   │       │   └── adapter/
+│   │   │   │   │       │       CategoriaServicioPersistenceAdapter, ZonaPersistenceAdapter
+│   │   │   │   │       └── adapter/
+│   │   │   │   │           Adaptadores de puertos requeridos; reutilizar contratos existentes
+│   │   │   │   ├── solicitudes/
+│   │   │   │   │   ├── domain/
+│   │   │   │   │   │   ├── model/
+│   │   │   │   │   │   │   Solicitud, FotoSolicitud, HistorialEstadoSolicitud
+│   │   │   │   │   │   └── repository/
+│   │   │   │   │   │       SolicitudRepository, FotoSolicitudRepository, HistorialEstadoSolicitudRepository
+│   │   │   │   │   ├── application/
+│   │   │   │   │   │   ├── usecase/
+│   │   │   │   │   │   │   CrearSolicitudUseCase, EditarSolicitudUseCase, CancelarSolicitudUseCase, ListarSolicitudesPropiasUseCase,
+│   │   │   │   │   │   │   ConsultarSolicitudPropiaUseCase
+│   │   │   │   │   │   ├── service/
+│   │   │   │   │   │   │   CrearSolicitudService, EditarSolicitudService, CancelarSolicitudService, ListarSolicitudesPropiasService,
+│   │   │   │   │   │   │   ConsultarSolicitudPropiaService
+│   │   │   │   │   │   ├── dto/
+│   │   │   │   │   │   │   Command/Query/Result de las operaciones del módulo (sin HTTP/JPA)
+│   │   │   │   │   │   └── port/
+│   │   │   │   │   │       ArchivoStorageService (contrato compartido)
+│   │   │   │   │   ├── infrastructure/
+│   │   │   │   │   │   ├── persistence/
+│   │   │   │   │   │   │   ├── entity/
+│   │   │   │   │   │   │   │   SolicitudEntity, FotoSolicitudEntity, HistorialEstadoSolicitudEntity
+│   │   │   │   │   │   │   ├── mapper/
+│   │   │   │   │   │   │   │   SolicitudMapper, FotoSolicitudMapper, HistorialEstadoSolicitudMapper
+│   │   │   │   │   │   │   ├── jpa/
+│   │   │   │   │   │   │   │   SolicitudJpaRepository, FotoSolicitudJpaRepository, HistorialEstadoSolicitudJpaRepository
+│   │   │   │   │   │   │   └── adapter/
+│   │   │   │   │   │   │       SolicitudPersistenceAdapter, FotoSolicitudPersistenceAdapter, HistorialEstadoSolicitudPersistenceAdapter
+│   │   │   │   │   │   └── adapter/
+│   │   │   │   │   │       Adaptadores de puertos requeridos; reutilizar contratos existentes
+│   │   │   │   │   └── presentation/
+│   │   │   │   │       ├── controller/
+│   │   │   │   │       │   SolicitudController
+│   │   │   │   │       ├── dto/
+│   │   │   │   │       │   Request/Response HTTP según API Contracts
+│   │   │   │   │       └── mapper/
+│   │   │   │   │           Conversión HTTP ↔ Command/Query/Result
+│   │   │   │   ├── perfiles/
+│   │   │   │   │   ├── domain/
+│   │   │   │   │   │   ├── model/
+│   │   │   │   │   │   │   PerfilProfesional, ExperienciaProfesional, ServicioPortafolio, Disponibilidad, CompromisoAgenda
+│   │   │   │   │   │   └── repository/
+│   │   │   │   │   │       PerfilProfesionalRepository, ExperienciaProfesionalRepository, ServicioPortafolioRepository,
+│   │   │   │   │   │       DisponibilidadRepository, CompromisoAgendaRepository
+│   │   │   │   │   ├── application/
+│   │   │   │   │   │   ├── usecase/
+│   │   │   │   │   │   │   CrearPerfilProfesionalUseCase, EditarPerfilProfesionalUseCase, ActualizarCategoriasProfesionalesUseCase,
+│   │   │   │   │   │   │   ActualizarZonasAtencionUseCase, RegistrarExperienciaProfesionalUseCase, AgregarServicioPortafolioUseCase,
+│   │   │   │   │   │   │   EliminarServicioPortafolioUseCase, ConfigurarDisponibilidadUseCase, GestionarCompromisoAgendaUseCase,
+│   │   │   │   │   │   │   ConsultarVistaPreviaPerfilUseCase
+│   │   │   │   │   │   ├── service/
+│   │   │   │   │   │   │   CrearPerfilProfesionalService, EditarPerfilProfesionalService, ActualizarCategoriasProfesionalesService,
+│   │   │   │   │   │   │   ActualizarZonasAtencionService, RegistrarExperienciaProfesionalService, AgregarServicioPortafolioService,
+│   │   │   │   │   │   │   EliminarServicioPortafolioService, ConfigurarDisponibilidadService, GestionarCompromisoAgendaService,
+│   │   │   │   │   │   │   ConsultarVistaPreviaPerfilService
+│   │   │   │   │   │   ├── dto/
+│   │   │   │   │   │   │   Command/Query/Result de las operaciones del módulo (sin HTTP/JPA)
+│   │   │   │   │   │   └── port/
+│   │   │   │   │   │       ArchivoStorageService (reutilizado)
+│   │   │   │   │   ├── infrastructure/
+│   │   │   │   │   │   ├── persistence/
+│   │   │   │   │   │   │   ├── entity/
+│   │   │   │   │   │   │   │   PerfilProfesionalEntity, ExperienciaProfesionalEntity, ServicioPortafolioEntity, DisponibilidadEntity,
+│   │   │   │   │   │   │   │   CompromisoAgendaEntity
+│   │   │   │   │   │   │   ├── mapper/
+│   │   │   │   │   │   │   │   PerfilProfesionalMapper, ExperienciaProfesionalMapper, ServicioPortafolioMapper, DisponibilidadMapper,
+│   │   │   │   │   │   │   │   CompromisoAgendaMapper
+│   │   │   │   │   │   │   ├── jpa/
+│   │   │   │   │   │   │   │   PerfilProfesionalJpaRepository, ExperienciaProfesionalJpaRepository, ServicioPortafolioJpaRepository,
+│   │   │   │   │   │   │   │   DisponibilidadJpaRepository, CompromisoAgendaJpaRepository
+│   │   │   │   │   │   │   └── adapter/
+│   │   │   │   │   │   │       PerfilProfesionalPersistenceAdapter, ExperienciaProfesionalPersistenceAdapter,
+│   │   │   │   │   │   │       ServicioPortafolioPersistenceAdapter, DisponibilidadPersistenceAdapter,
+│   │   │   │   │   │   │       CompromisoAgendaPersistenceAdapter
+│   │   │   │   │   │   └── adapter/
+│   │   │   │   │   │       Adaptadores de puertos requeridos; reutilizar contratos existentes
+│   │   │   │   │   └── presentation/
+│   │   │   │   │       ├── controller/
+│   │   │   │   │       │   PerfilController
+│   │   │   │   │       ├── dto/
+│   │   │   │   │       │   Request/Response HTTP según API Contracts
+│   │   │   │   │       └── mapper/
+│   │   │   │   │           Conversión HTTP ↔ Command/Query/Result
+│   │   │   │   ├── oportunidades/
+│   │   │   │   │   ├── application/
+│   │   │   │   │   │   ├── usecase/
+│   │   │   │   │   │   │   ConsultarTableroOportunidadesUseCase, ConsultarDetalleOportunidadUseCase, CalcularCompatibilidadUseCase,
+│   │   │   │   │   │   │   DetectarNuevaOportunidadUseCase
+│   │   │   │   │   │   ├── service/
+│   │   │   │   │   │   │   ConsultarTableroOportunidadesService, ConsultarDetalleOportunidadService, CalcularCompatibilidadService,
+│   │   │   │   │   │   │   DetectarNuevaOportunidadService
+│   │   │   │   │   │   ├── dto/
+│   │   │   │   │   │   │   Command/Query/Result de las operaciones del módulo (sin HTTP/JPA)
+│   │   │   │   │   │   └── port/
+│   │   │   │   │   │       ConsultaSolicitudesAbiertasPort, ConsultaCoberturaDisponibilidadPort, RegistroNotificacionPort
+│   │   │   │   │   ├── infrastructure/
+│   │   │   │   │   │   └── adapter/
+│   │   │   │   │   │       Adaptadores de puertos requeridos; reutilizar contratos existentes
+│   │   │   │   │   └── presentation/
+│   │   │   │   │       ├── controller/
+│   │   │   │   │       │   OportunidadController
+│   │   │   │   │       ├── dto/
+│   │   │   │   │       │   Request/Response HTTP según API Contracts
+│   │   │   │   │       └── mapper/
+│   │   │   │   │           Conversión HTTP ↔ Command/Query/Result
+│   │   │   │   ├── propuestas/
+│   │   │   │   │   ├── domain/
+│   │   │   │   │   │   ├── model/
+│   │   │   │   │   │   │   Propuesta
+│   │   │   │   │   │   └── repository/
+│   │   │   │   │   │       PropuestaRepository
+│   │   │   │   │   ├── application/
+│   │   │   │   │   │   ├── usecase/
+│   │   │   │   │   │   │   CrearPropuestaUseCase, EditarPropuestaUseCase, RetirarPropuestaUseCase
+│   │   │   │   │   │   ├── service/
+│   │   │   │   │   │   │   CrearPropuestaService, EditarPropuestaService, RetirarPropuestaService
+│   │   │   │   │   │   ├── dto/
+│   │   │   │   │   │   │   Command/Query/Result de las operaciones del módulo (sin HTTP/JPA)
+│   │   │   │   │   │   └── port/
+│   │   │   │   │   │       ConsultaCompatibilidadPort, ConsultaSolicitudPort, RegistroNotificacionPort
+│   │   │   │   │   ├── infrastructure/
+│   │   │   │   │   │   ├── persistence/
+│   │   │   │   │   │   │   ├── entity/
+│   │   │   │   │   │   │   │   PropuestaEntity
+│   │   │   │   │   │   │   ├── mapper/
+│   │   │   │   │   │   │   │   PropuestaMapper
+│   │   │   │   │   │   │   ├── jpa/
+│   │   │   │   │   │   │   │   PropuestaJpaRepository
+│   │   │   │   │   │   │   └── adapter/
+│   │   │   │   │   │   │       PropuestaPersistenceAdapter
+│   │   │   │   │   │   └── adapter/
+│   │   │   │   │   │       Adaptadores de puertos requeridos; reutilizar contratos existentes
+│   │   │   │   │   └── presentation/
+│   │   │   │   │       ├── controller/
+│   │   │   │   │       │   PropuestaController
+│   │   │   │   │       ├── dto/
+│   │   │   │   │       │   Request/Response HTTP según API Contracts
+│   │   │   │   │       └── mapper/
+│   │   │   │   │           Conversión HTTP ↔ Command/Query/Result
+│   │   │   │   ├── servicios/
+│   │   │   │   │   ├── domain/
+│   │   │   │   │   │   ├── model/
+│   │   │   │   │   │   │   ServicioContratado, HistorialEstadoServicio, MensajeServicio
+│   │   │   │   │   │   └── repository/
+│   │   │   │   │   │       ServicioContratadoRepository, HistorialEstadoServicioRepository, MensajeServicioRepository
+│   │   │   │   │   ├── application/
+│   │   │   │   │   │   ├── usecase/
+│   │   │   │   │   │   │   ListarPropuestasRecibidasUseCase, AceptarPropuestaUseCase, ConsultarServicioUseCase,
+│   │   │   │   │   │   │   MarcarServicioEnEjecucionUseCase, MarcarServicioTerminadoUseCase, ConfirmarFinalizacionServicioUseCase,
+│   │   │   │   │   │   │   CancelarServicioUseCase, ConsultarHistorialServicioUseCase, EnviarMensajeServicioUseCase,
+│   │   │   │   │   │   │   ConsultarMensajesServicioUseCase
+│   │   │   │   │   │   ├── service/
+│   │   │   │   │   │   │   ListarPropuestasRecibidasService, AceptarPropuestaService, ConsultarServicioService,
+│   │   │   │   │   │   │   MarcarServicioEnEjecucionService, MarcarServicioTerminadoService, ConfirmarFinalizacionServicioService,
+│   │   │   │   │   │   │   CancelarServicioService, ConsultarHistorialServicioService, EnviarMensajeServicioService,
+│   │   │   │   │   │   │   ConsultarMensajesServicioService
+│   │   │   │   │   │   ├── dto/
+│   │   │   │   │   │   │   Command/Query/Result de las operaciones del módulo (sin HTTP/JPA)
+│   │   │   │   │   │   └── port/
+│   │   │   │   │   │       ConsultaGestionPropuestasPort, ConsultaGestionSolicitudPort, RegistroNotificacionPort
+│   │   │   │   │   ├── infrastructure/
+│   │   │   │   │   │   ├── persistence/
+│   │   │   │   │   │   │   ├── entity/
+│   │   │   │   │   │   │   │   ServicioContratadoEntity, HistorialEstadoServicioEntity, MensajeServicioEntity
+│   │   │   │   │   │   │   ├── mapper/
+│   │   │   │   │   │   │   │   ServicioContratadoMapper, HistorialEstadoServicioMapper, MensajeServicioMapper
+│   │   │   │   │   │   │   ├── jpa/
+│   │   │   │   │   │   │   │   ServicioContratadoJpaRepository, HistorialEstadoServicioJpaRepository, MensajeServicioJpaRepository
+│   │   │   │   │   │   │   └── adapter/
+│   │   │   │   │   │   │       ServicioContratadoPersistenceAdapter, HistorialEstadoServicioPersistenceAdapter,
+│   │   │   │   │   │   │       MensajeServicioPersistenceAdapter
+│   │   │   │   │   │   └── adapter/
+│   │   │   │   │   │       Adaptadores de puertos requeridos; reutilizar contratos existentes
+│   │   │   │   │   └── presentation/
+│   │   │   │   │       ├── controller/
+│   │   │   │   │       │   ServicioController, MensajeServicioController
+│   │   │   │   │       ├── dto/
+│   │   │   │   │       │   Request/Response HTTP según API Contracts
+│   │   │   │   │       └── mapper/
+│   │   │   │   │           Conversión HTTP ↔ Command/Query/Result
+│   │   │   │   ├── notificaciones/
+│   │   │   │   │   ├── domain/
+│   │   │   │   │   │   ├── model/
+│   │   │   │   │   │   │   Notificacion
+│   │   │   │   │   │   └── repository/
+│   │   │   │   │   │       NotificacionRepository
+│   │   │   │   │   ├── application/
+│   │   │   │   │   │   ├── usecase/
+│   │   │   │   │   │   │   RegistrarNotificacionUseCase, ConsultarNotificacionesPropiasUseCase,
+│   │   │   │   │   │   │   EntregarNotificacionesPendientesUseCase
+│   │   │   │   │   │   ├── service/
+│   │   │   │   │   │   │   RegistrarNotificacionService, ConsultarNotificacionesPropiasService,
+│   │   │   │   │   │   │   EntregarNotificacionesPendientesService
+│   │   │   │   │   │   ├── dto/
+│   │   │   │   │   │   │   Command/Query/Result de las operaciones del módulo (sin HTTP/JPA)
+│   │   │   │   │   │   └── port/
+│   │   │   │   │   │       CanalEntregaNotificacion, ConsultaPreferenciasPort
+│   │   │   │   │   ├── infrastructure/
+│   │   │   │   │   │   ├── persistence/
+│   │   │   │   │   │   │   ├── entity/
+│   │   │   │   │   │   │   │   NotificacionEntity
+│   │   │   │   │   │   │   ├── mapper/
+│   │   │   │   │   │   │   │   NotificacionMapper
+│   │   │   │   │   │   │   ├── jpa/
+│   │   │   │   │   │   │   │   NotificacionJpaRepository
+│   │   │   │   │   │   │   └── adapter/
+│   │   │   │   │   │   │       NotificacionPersistenceAdapter
+│   │   │   │   │   │   ├── adapter/
+│   │   │   │   │   │   │   Adaptadores de puertos requeridos; reutilizar contratos existentes
+│   │   │   │   │   │   └── worker/
+│   │   │   │   │   │       Worker de entrega (depende de EntregarNotificacionesPendientesUseCase)
+│   │   │   │   │   └── presentation/
+│   │   │   │   │       ├── controller/
+│   │   │   │   │       │   NotificacionController
+│   │   │   │   │       ├── dto/
+│   │   │   │   │       │   Request/Response HTTP según API Contracts
+│   │   │   │   │       └── mapper/
+│   │   │   │   │           Conversión HTTP ↔ Command/Query/Result
 │   │   │   │   ├── confianza/
 │   │   │   │   │   ├── domain/
 │   │   │   │   │   │   ├── model/
-│   │   │   │   │   │   │   ├── Calificacion.java
-│   │   │   │   │   │   │   ├── Resena.java
-│   │   │   │   │   │   │   ├── ReputacionPrestador.java
-│   │   │   │   │   │   │   ├── SolicitudVerificacion.java
-│   │   │   │   │   │   │   └── DocumentoVerificacion.java
+│   │   │   │   │   │   │   Calificacion, Resena, ReputacionPrestador, SolicitudVerificacion, DocumentoVerificacion
 │   │   │   │   │   │   └── repository/
+│   │   │   │   │   │       CalificacionRepository, ResenaRepository, ReputacionRepository, SolicitudVerificacionRepository,
+│   │   │   │   │   │       DocumentoVerificacionRepository
 │   │   │   │   │   ├── application/
-│   │   │   │   │   │   └── service/
-│   │   │   │   │   │       ├── CalificacionService.java
-│   │   │   │   │   │       ├── ReputacionService.java
-│   │   │   │   │   │       └── VerificacionService.java
+│   │   │   │   │   │   ├── usecase/
+│   │   │   │   │   │   │   CalificarServicioUseCase, AgregarResenaUseCase, ConsultarConfianzaPrestadorUseCase,
+│   │   │   │   │   │   │   SolicitarVerificacionUseCase, ConsultarVerificacionPropiaUseCase
+│   │   │   │   │   │   ├── service/
+│   │   │   │   │   │   │   CalificarServicioService, AgregarResenaService, ConsultarConfianzaPrestadorService,
+│   │   │   │   │   │   │   SolicitarVerificacionService, ConsultarVerificacionPropiaService
+│   │   │   │   │   │   ├── dto/
+│   │   │   │   │   │   │   Command/Query/Result de las operaciones del módulo (sin HTTP/JPA)
+│   │   │   │   │   │   └── port/
+│   │   │   │   │   │       ArchivoStorageService (reutilizado), ConsultaServicioFinalizadoPort
 │   │   │   │   │   ├── infrastructure/
-│   │   │   │   │   │   └── persistence/
-│   │   │   │   │   │       ├── entity/
-│   │   │   │   │   │       ├── mapper/
-│   │   │   │   │   │       ├── jpa/
-│   │   │   │   │   │       └── adapter/
+│   │   │   │   │   │   ├── persistence/
+│   │   │   │   │   │   │   ├── entity/
+│   │   │   │   │   │   │   │   CalificacionEntity, ResenaEntity, ReputacionPrestadorEntity, SolicitudVerificacionEntity,
+│   │   │   │   │   │   │   │   DocumentoVerificacionEntity
+│   │   │   │   │   │   │   ├── mapper/
+│   │   │   │   │   │   │   │   CalificacionMapper, ResenaMapper, ReputacionPrestadorMapper, SolicitudVerificacionMapper,
+│   │   │   │   │   │   │   │   DocumentoVerificacionMapper
+│   │   │   │   │   │   │   ├── jpa/
+│   │   │   │   │   │   │   │   CalificacionJpaRepository, ResenaJpaRepository, ReputacionJpaRepository,
+│   │   │   │   │   │   │   │   SolicitudVerificacionJpaRepository, DocumentoVerificacionJpaRepository
+│   │   │   │   │   │   │   └── adapter/
+│   │   │   │   │   │   │       CalificacionPersistenceAdapter, ResenaPersistenceAdapter, ReputacionPersistenceAdapter,
+│   │   │   │   │   │   │       SolicitudVerificacionPersistenceAdapter, DocumentoVerificacionPersistenceAdapter
+│   │   │   │   │   │   └── adapter/
+│   │   │   │   │   │       Adaptadores de puertos requeridos; reutilizar contratos existentes
 │   │   │   │   │   └── presentation/
 │   │   │   │   │       ├── controller/
-│   │   │   │   │       │   ├── CalificacionController.java
-│   │   │   │   │       │   ├── ConfianzaController.java
-│   │   │   │   │       │   └── VerificacionController.java
-│   │   │   │   │       └── dto/
-│   │   │   │   │
+│   │   │   │   │       │   CalificacionController, VerificacionController, ConfianzaController
+│   │   │   │   │       ├── dto/
+│   │   │   │   │       │   Request/Response HTTP según API Contracts
+│   │   │   │   │       └── mapper/
+│   │   │   │   │           Conversión HTTP ↔ Command/Query/Result
 │   │   │   │   ├── reportes/
 │   │   │   │   │   ├── domain/
 │   │   │   │   │   │   ├── model/
-│   │   │   │   │   │   │   ├── Reporte.java
-│   │   │   │   │   │   │   ├── EvidenciaReporte.java
-│   │   │   │   │   │   │   ├── TipoReporte.java
-│   │   │   │   │   │   │   └── EstadoReporte.java
+│   │   │   │   │   │   │   Reporte, EvidenciaReporte
 │   │   │   │   │   │   └── repository/
-│   │   │   │   │   │       ├── ReporteRepository.java
-│   │   │   │   │   │       └── EvidenciaReporteRepository.java
+│   │   │   │   │   │       ReporteRepository, EvidenciaReporteRepository
 │   │   │   │   │   ├── application/
-│   │   │   │   │   │   └── service/
-│   │   │   │   │   │       ├── ReporteService.java
-│   │   │   │   │   │       └── EvidenciaReporteService.java
+│   │   │   │   │   │   ├── usecase/
+│   │   │   │   │   │   │   ReportarResenaUseCase, ReportarUsuarioUseCase, ReportarServicioUseCase, AdjuntarEvidenciaReporteUseCase,
+│   │   │   │   │   │   │   ConsultarReportePropioUseCase
+│   │   │   │   │   │   ├── service/
+│   │   │   │   │   │   │   ReportarResenaService, ReportarUsuarioService, ReportarServicioService, AdjuntarEvidenciaReporteService,
+│   │   │   │   │   │   │   ConsultarReportePropioService
+│   │   │   │   │   │   ├── dto/
+│   │   │   │   │   │   │   Command/Query/Result de las operaciones del módulo (sin HTTP/JPA)
+│   │   │   │   │   │   └── port/
+│   │   │   │   │   │       ArchivoStorageService (reutilizado), ConsultaServicioFinalizadoPort
 │   │   │   │   │   ├── infrastructure/
-│   │   │   │   │   │   └── persistence/
-│   │   │   │   │   │       ├── entity/
-│   │   │   │   │   │       ├── mapper/
-│   │   │   │   │   │       ├── jpa/
-│   │   │   │   │   │       └── adapter/
+│   │   │   │   │   │   ├── persistence/
+│   │   │   │   │   │   │   ├── entity/
+│   │   │   │   │   │   │   │   ReporteEntity, EvidenciaReporteEntity
+│   │   │   │   │   │   │   ├── mapper/
+│   │   │   │   │   │   │   │   ReporteMapper, EvidenciaReporteMapper
+│   │   │   │   │   │   │   ├── jpa/
+│   │   │   │   │   │   │   │   ReporteJpaRepository, EvidenciaReporteJpaRepository
+│   │   │   │   │   │   │   └── adapter/
+│   │   │   │   │   │   │       ReportePersistenceAdapter, EvidenciaReportePersistenceAdapter
+│   │   │   │   │   │   └── adapter/
+│   │   │   │   │   │       Adaptadores de puertos requeridos; reutilizar contratos existentes
 │   │   │   │   │   └── presentation/
 │   │   │   │   │       ├── controller/
-│   │   │   │   │       └── dto/
-│   │   │   │   │
+│   │   │   │   │       │   ReporteController
+│   │   │   │   │       ├── dto/
+│   │   │   │   │       │   Request/Response HTTP según API Contracts
+│   │   │   │   │       └── mapper/
+│   │   │   │   │           Conversión HTTP ↔ Command/Query/Result
 │   │   │   │   ├── administracion/
 │   │   │   │   │   ├── domain/
 │   │   │   │   │   │   ├── model/
-│   │   │   │   │   │   │   ├── BloqueoPreventivo.java
-│   │   │   │   │   │   │   ├── AccionModeracion.java
-│   │   │   │   │   │   │   └── MarcaAltoRiesgo.java
+│   │   │   │   │   │   │   BloqueoPreventivo, AccionModeracion, MarcaAltoRiesgo
 │   │   │   │   │   │   └── repository/
+│   │   │   │   │   │       BloqueoRepository, AccionModeracionRepository, MarcaAltoRiesgoRepository
 │   │   │   │   │   ├── application/
-│   │   │   │   │   │   └── service/
-│   │   │   │   │   │       ├── AdministracionCatalogoService.java
-│   │   │   │   │   │       ├── ModeracionService.java
-│   │   │   │   │   │       ├── BloqueoService.java
-│   │   │   │   │   │       ├── RiesgoService.java
-│   │   │   │   │   │       └── BusquedaAdminService.java
+│   │   │   │   │   │   ├── usecase/
+│   │   │   │   │   │   │   CrearCategoriaUseCase, EditarCategoriaUseCase, DesactivarCategoriaUseCase, CrearZonaUseCase,
+│   │   │   │   │   │   │   EditarZonaUseCase, DesactivarZonaUseCase, ConsultarColaReportesUseCase, RevisarReporteUseCase,
+│   │   │   │   │   │   │   ResolverReporteUseCase, BloquearCuentaUseCase, LevantarBloqueoUseCase, ModerarContenidoUseCase,
+│   │   │   │   │   │   │   BuscarCuentasPerfilesUseCase, MarcarServicioAltoRiesgoUseCase, RevisarVerificacionUseCase
+│   │   │   │   │   │   ├── service/
+│   │   │   │   │   │   │   CrearCategoriaService, EditarCategoriaService, DesactivarCategoriaService, CrearZonaService,
+│   │   │   │   │   │   │   EditarZonaService, DesactivarZonaService, ConsultarColaReportesService, RevisarReporteService,
+│   │   │   │   │   │   │   ResolverReporteService, BloquearCuentaService, LevantarBloqueoService, ModerarContenidoService,
+│   │   │   │   │   │   │   BuscarCuentasPerfilesService, MarcarServicioAltoRiesgoService, RevisarVerificacionService
+│   │   │   │   │   │   ├── dto/
+│   │   │   │   │   │   │   Command/Query/Result de las operaciones del módulo (sin HTTP/JPA)
+│   │   │   │   │   │   └── port/
+│   │   │   │   │   │       Contratos públicos de catálogo, reportes, identidad, confianza y auditoría
 │   │   │   │   │   ├── infrastructure/
-│   │   │   │   │   │   └── persistence/
-│   │   │   │   │   │       ├── entity/
-│   │   │   │   │   │       ├── mapper/
-│   │   │   │   │   │       ├── jpa/
-│   │   │   │   │   │       └── adapter/
+│   │   │   │   │   │   ├── persistence/
+│   │   │   │   │   │   │   ├── entity/
+│   │   │   │   │   │   │   │   BloqueoPreventivoEntity, AccionModeracionEntity, MarcaAltoRiesgoEntity
+│   │   │   │   │   │   │   ├── mapper/
+│   │   │   │   │   │   │   │   BloqueoPreventivoMapper, AccionModeracionMapper, MarcaAltoRiesgoMapper
+│   │   │   │   │   │   │   ├── jpa/
+│   │   │   │   │   │   │   │   BloqueoJpaRepository, AccionModeracionJpaRepository, MarcaAltoRiesgoJpaRepository
+│   │   │   │   │   │   │   └── adapter/
+│   │   │   │   │   │   │       BloqueoPersistenceAdapter, AccionModeracionPersistenceAdapter, MarcaAltoRiesgoPersistenceAdapter
+│   │   │   │   │   │   └── adapter/
+│   │   │   │   │   │       Adaptadores de puertos requeridos; reutilizar contratos existentes
 │   │   │   │   │   └── presentation/
 │   │   │   │   │       ├── controller/
-│   │   │   │   │       │   ├── CatalogoAdminController.java
-│   │   │   │   │       │   ├── ReporteAdminController.java
-│   │   │   │   │       │   ├── CuentaAdminController.java
-│   │   │   │   │       │   ├── ModeracionController.java
-│   │   │   │   │       │   └── RiesgoController.java
-│   │   │   │   │       └── dto/
-│   │   │   │   │
+│   │   │   │   │       │   CatalogoAdminController, ReporteAdminController, CuentaAdminController, ModeracionController,
+│   │   │   │   │       │   RiesgoController
+│   │   │   │   │       ├── dto/
+│   │   │   │   │       │   Request/Response HTTP según API Contracts
+│   │   │   │   │       └── mapper/
+│   │   │   │   │           Conversión HTTP ↔ Command/Query/Result
 │   │   │   │   ├── auditoria/
 │   │   │   │   │   ├── domain/
 │   │   │   │   │   │   ├── model/
-│   │   │   │   │   │   │   └── AuditoriaAdministrativa.java
+│   │   │   │   │   │   │   AuditoriaAdministrativa
 │   │   │   │   │   │   └── repository/
+│   │   │   │   │   │       AuditoriaAdministrativaRepository
 │   │   │   │   │   ├── application/
-│   │   │   │   │   │   └── service/
-│   │   │   │   │   │       └── AuditoriaService.java
-│   │   │   │   │   ├── infrastructure/
-│   │   │   │   │   │   └── persistence/
-│   │   │   │   │   │       ├── entity/
-│   │   │   │   │   │       ├── mapper/
-│   │   │   │   │   │       ├── jpa/
-│   │   │   │   │   │       └── adapter/
-│   │   │   │   │   └── presentation/
-│   │   │   │   │       ├── controller/
-│   │   │   │   │       │   └── AuditoriaController.java
-│   │   │   │   │       └── dto/
-│   │   │   │   │
+│   │   │   │   │   │   ├── usecase/
+│   │   │   │   │   │   │   RegistrarAuditoriaUseCase, ConsultarAuditoriaUseCase
+│   │   │   │   │   │   ├── service/
+│   │   │   │   │   │   │   RegistrarAuditoriaService, ConsultarAuditoriaService
+│   │   │   │   │   │   ├── dto/
+│   │   │   │   │   │   │   Command/Query/Result de las operaciones del módulo (sin HTTP/JPA)
+│   │   │   │   │   │   └── port/
+│   │   │   │   │   │       Contratos públicos de catálogo, reportes, identidad, confianza y auditoría
+│   │   │   │   │   └── infrastructure/
+│   │   │   │   │       ├── persistence/
+│   │   │   │   │       │   ├── entity/
+│   │   │   │   │       │   │   AuditoriaAdministrativaEntity
+│   │   │   │   │       │   ├── mapper/
+│   │   │   │   │       │   │   AuditoriaAdministrativaMapper
+│   │   │   │   │       │   ├── jpa/
+│   │   │   │   │       │   │   AuditoriaAdministrativaJpaRepository
+│   │   │   │   │       │   └── adapter/
+│   │   │   │   │       │       AuditoriaAdministrativaPersistenceAdapter
+│   │   │   │   │       └── adapter/
+│   │   │   │   │           Adaptadores de puertos requeridos; reutilizar contratos existentes
 │   │   │   │   ├── formalizacion/
 │   │   │   │   │   ├── domain/
 │   │   │   │   │   │   ├── model/
-│   │   │   │   │   │   │   ├── RutaFormalizacion.java
-│   │   │   │   │   │   │   ├── PasoFormalizacion.java
-│   │   │   │   │   │   │   ├── EnlaceInstitucional.java
-│   │   │   │   │   │   │   └── ProgresoFormalizacion.java
+│   │   │   │   │   │   │   RutaFormalizacion, PasoFormalizacion, EnlaceInstitucional, ProgresoFormalizacion
 │   │   │   │   │   │   └── repository/
+│   │   │   │   │   │       RutaRepository, PasoRepository, EnlaceRepository, ProgresoRepository
 │   │   │   │   │   ├── application/
-│   │   │   │   │   │   └── service/
-│   │   │   │   │   │       ├── RutaFormalizacionService.java
-│   │   │   │   │   │       ├── ProgresoFormalizacionService.java
-│   │   │   │   │   │       └── VinculacionInstitucionalService.java
+│   │   │   │   │   │   ├── usecase/
+│   │   │   │   │   │   │   ConsultarRutaFormalizacionUseCase, ConsultarEnlaceInstitucionalUseCase,
+│   │   │   │   │   │   │   ConsultarProgresoFormalizacionUseCase, ActualizarProgresoFormalizacionUseCase,
+│   │   │   │   │   │   │   ConsultarVinculacionInstitucionalUseCase, ConsultarInsigniaFormalizacionUseCase
+│   │   │   │   │   │   ├── service/
+│   │   │   │   │   │   │   ConsultarRutaFormalizacionService, ConsultarEnlaceInstitucionalService,
+│   │   │   │   │   │   │   ConsultarProgresoFormalizacionService, ActualizarProgresoFormalizacionService,
+│   │   │   │   │   │   │   ConsultarVinculacionInstitucionalService, ConsultarInsigniaFormalizacionService
+│   │   │   │   │   │   ├── dto/
+│   │   │   │   │   │   │   Command/Query/Result de las operaciones del módulo (sin HTTP/JPA)
+│   │   │   │   │   │   └── port/
+│   │   │   │   │   │       Puerto institucional solo si UC080 se aprueba, ConsultaProgresoFormalizacionPort
 │   │   │   │   │   ├── infrastructure/
-│   │   │   │   │   │   └── persistence/
-│   │   │   │   │   │       ├── entity/
-│   │   │   │   │   │       ├── mapper/
-│   │   │   │   │   │       ├── jpa/
-│   │   │   │   │   │       └── adapter/
-│   │   │   │   │   ├── presentation/
-│   │   │   │   │   │   ├── controller/
-│   │   │   │   │   │   └── dto/
-│   │   │   │   │   └── insignia/                              # SPEC-18 Could
-│   │   │   │   │       ├── application/
-│   │   │   │   │       │   └── service/
-│   │   │   │   │       └── presentation/
-│   │   │   │   │           └── dto/
-│   │   │   │   │
+│   │   │   │   │   │   ├── persistence/
+│   │   │   │   │   │   │   ├── entity/
+│   │   │   │   │   │   │   │   RutaFormalizacionEntity, PasoFormalizacionEntity, EnlaceInstitucionalEntity, ProgresoFormalizacionEntity
+│   │   │   │   │   │   │   ├── mapper/
+│   │   │   │   │   │   │   │   RutaFormalizacionMapper, PasoFormalizacionMapper, EnlaceInstitucionalMapper, ProgresoFormalizacionMapper
+│   │   │   │   │   │   │   ├── jpa/
+│   │   │   │   │   │   │   │   RutaJpaRepository, PasoJpaRepository, EnlaceJpaRepository, ProgresoJpaRepository
+│   │   │   │   │   │   │   └── adapter/
+│   │   │   │   │   │   │       RutaPersistenceAdapter, PasoPersistenceAdapter, EnlacePersistenceAdapter, ProgresoPersistenceAdapter
+│   │   │   │   │   │   └── adapter/
+│   │   │   │   │   │       Adaptadores de puertos requeridos; reutilizar contratos existentes
+│   │   │   │   │   └── presentation/
+│   │   │   │   │       ├── controller/
+│   │   │   │   │       │   FormalizacionController
+│   │   │   │   │       ├── dto/
+│   │   │   │   │       │   Request/Response HTTP según API Contracts
+│   │   │   │   │       └── mapper/
+│   │   │   │   │           Conversión HTTP ↔ Command/Query/Result
 │   │   │   │   ├── preferencias/
 │   │   │   │   │   ├── domain/
 │   │   │   │   │   │   ├── model/
-│   │   │   │   │   │   │   └── PreferenciaNotificacion.java
+│   │   │   │   │   │   │   PreferenciaNotificacion
 │   │   │   │   │   │   └── repository/
+│   │   │   │   │   │       PreferenciaNotificacionRepository
 │   │   │   │   │   ├── application/
-│   │   │   │   │   │   └── service/
+│   │   │   │   │   │   ├── usecase/
+│   │   │   │   │   │   │   ConsultarPreferenciasNotificacionUseCase, ActualizarPreferenciasNotificacionUseCase
+│   │   │   │   │   │   ├── service/
+│   │   │   │   │   │   │   ConsultarPreferenciasNotificacionService, ActualizarPreferenciasNotificacionService
+│   │   │   │   │   │   ├── dto/
+│   │   │   │   │   │   │   Command/Query/Result de las operaciones del módulo (sin HTTP/JPA)
+│   │   │   │   │   │   └── port/
+│   │   │   │   │   │       Consultas públicas de servicios, confianza y eventos; storage para exportación
 │   │   │   │   │   ├── infrastructure/
-│   │   │   │   │   │   └── persistence/
-│   │   │   │   │   │       ├── entity/
-│   │   │   │   │   │       ├── mapper/
-│   │   │   │   │   │       ├── jpa/
-│   │   │   │   │   │       └── adapter/
+│   │   │   │   │   │   ├── persistence/
+│   │   │   │   │   │   │   ├── entity/
+│   │   │   │   │   │   │   │   PreferenciaNotificacionEntity
+│   │   │   │   │   │   │   ├── mapper/
+│   │   │   │   │   │   │   │   PreferenciaNotificacionMapper
+│   │   │   │   │   │   │   ├── jpa/
+│   │   │   │   │   │   │   │   PreferenciaNotificacionJpaRepository
+│   │   │   │   │   │   │   └── adapter/
+│   │   │   │   │   │   │       PreferenciaNotificacionPersistenceAdapter
+│   │   │   │   │   │   └── adapter/
+│   │   │   │   │   │       Adaptadores de puertos requeridos; reutilizar contratos existentes
 │   │   │   │   │   └── presentation/
 │   │   │   │   │       ├── controller/
-│   │   │   │   │       └── dto/
-│   │   │   │   │
+│   │   │   │   │       │   PreferenciaNotificacionController
+│   │   │   │   │       ├── dto/
+│   │   │   │   │       │   Request/Response HTTP según API Contracts
+│   │   │   │   │       └── mapper/
+│   │   │   │   │           Conversión HTTP ↔ Command/Query/Result
 │   │   │   │   ├── historial/
 │   │   │   │   │   ├── domain/
-│   │   │   │   │   │   ├── model/
-│   │   │   │   │   │   │   └── DescargaHistorial.java
-│   │   │   │   │   │   └── repository/
+│   │   │   │   │   │   └── model/
+│   │   │   │   │   │       DescargaHistorial
 │   │   │   │   │   ├── application/
-│   │   │   │   │   │   └── service/
-│   │   │   │   │   │       ├── HistorialService.java
-│   │   │   │   │   │       └── ExportacionHistorialService.java
+│   │   │   │   │   │   ├── usecase/
+│   │   │   │   │   │   │   ConsultarHistorialTrabajosUseCase, ExportarHistorialTrabajosUseCase
+│   │   │   │   │   │   ├── service/
+│   │   │   │   │   │   │   ConsultarHistorialTrabajosService, ExportarHistorialTrabajosService
+│   │   │   │   │   │   ├── dto/
+│   │   │   │   │   │   │   Command/Query/Result de las operaciones del módulo (sin HTTP/JPA)
+│   │   │   │   │   │   └── port/
+│   │   │   │   │   │       Consultas públicas de servicios, confianza y eventos; storage para exportación
 │   │   │   │   │   ├── infrastructure/
-│   │   │   │   │   │   └── persistence/
-│   │   │   │   │   │       ├── entity/
-│   │   │   │   │   │       ├── mapper/
-│   │   │   │   │   │       ├── jpa/
-│   │   │   │   │   │       └── adapter/
+│   │   │   │   │   │   └── adapter/
+│   │   │   │   │   │       Adaptadores de puertos requeridos; reutilizar contratos existentes
 │   │   │   │   │   └── presentation/
 │   │   │   │   │       ├── controller/
-│   │   │   │   │       └── dto/
-│   │   │   │   │
+│   │   │   │   │       │   HistorialController
+│   │   │   │   │       ├── dto/
+│   │   │   │   │       │   Request/Response HTTP según API Contracts
+│   │   │   │   │       └── mapper/
+│   │   │   │   │           Conversión HTTP ↔ Command/Query/Result
 │   │   │   │   ├── indicadores/
 │   │   │   │   │   ├── application/
-│   │   │   │   │   │   └── service/
-│   │   │   │   │   │       └── IndicadorService.java
+│   │   │   │   │   │   ├── usecase/
+│   │   │   │   │   │   │   ConsultarIndicadoresPrestadorUseCase
+│   │   │   │   │   │   ├── service/
+│   │   │   │   │   │   │   ConsultarIndicadoresPrestadorService
+│   │   │   │   │   │   ├── dto/
+│   │   │   │   │   │   │   Command/Query/Result de las operaciones del módulo (sin HTTP/JPA)
+│   │   │   │   │   │   └── port/
+│   │   │   │   │   │       Consultas públicas de servicios, confianza y eventos; storage para exportación
+│   │   │   │   │   ├── infrastructure/
+│   │   │   │   │   │   └── adapter/
+│   │   │   │   │   │       Adaptadores de puertos requeridos; reutilizar contratos existentes
 │   │   │   │   │   └── presentation/
 │   │   │   │   │       ├── controller/
-│   │   │   │   │       └── dto/
-│   │   │   │   │           └── IndicadorBasicoResponse.java
-│   │   │   │   │
+│   │   │   │   │       │   IndicadorController
+│   │   │   │   │       ├── dto/
+│   │   │   │   │       │   Request/Response HTTP según API Contracts
+│   │   │   │   │       └── mapper/
+│   │   │   │   │           Conversión HTTP ↔ Command/Query/Result
 │   │   │   │   ├── actividad/
 │   │   │   │   │   ├── application/
-│   │   │   │   │   │   └── service/
-│   │   │   │   │   │       └── ActividadRecienteService.java
-│   │   │   │   │   └── presentation/
-│   │   │   │   │       ├── controller/
-│   │   │   │   │       └── dto/
-│   │   │   │   │
-│   │   │   │   ├── comunicacion/                              # Could — SPEC-15
-│   │   │   │   │   └── realtime/
-│   │   │   │   │       ├── application/
-│   │   │   │   │       │   └── service/
-│   │   │   │   │       └── infrastructure/
-│   │   │   │   │           ├── config/
-│   │   │   │   │           └── gateway/
-│   │   │   │   │
-│   │   │   │   ├── soporte/                                   # Could — SPEC-15
-│   │   │   │   │   ├── domain/{model/,repository/}
-│   │   │   │   │   ├── application/service/
-│   │   │   │   │   ├── infrastructure/persistence/{entity/,mapper/,jpa/,adapter/}
-│   │   │   │   │   └── presentation/{controller/,dto/}
-│   │   │   │   │
-│   │   │   │   ├── onboarding/                                # Could — SPEC-16
-│   │   │   │   │   ├── domain/{model/,repository/}
-│   │   │   │   │   ├── application/service/
-│   │   │   │   │   ├── infrastructure/persistence/{entity/,mapper/,jpa/,adapter/}
-│   │   │   │   │   └── presentation/{controller/,dto/}
-│   │   │   │   │
-│   │   │   │   ├── referidos/                                 # Could — SPEC-19
-│   │   │   │   │   ├── domain/{model/,repository/}
-│   │   │   │   │   ├── application/service/
-│   │   │   │   │   ├── infrastructure/persistence/{entity/,mapper/,jpa/,adapter/}
-│   │   │   │   │   └── presentation/{controller/,dto/}
-│   │   │   │   │
-│   │   │   │   ├── internacionalizacion/                      # Could — SPEC-19
-│   │   │   │   │   ├── domain/{model/,repository/}
-│   │   │   │   │   ├── application/service/
-│   │   │   │   │   ├── infrastructure/persistence/{entity/,mapper/,jpa/,adapter/}
-│   │   │   │   │   └── presentation/{controller/,dto/}
-│   │   │   │   │
-│   │   │   │   ├── pagos/                                     # Future — SPEC-20
-│   │   │   │   │   ├── domain/{model/,repository/}
-│   │   │   │   │   ├── application/
-│   │   │   │   │   │   └── service/
-│   │   │   │   │   │       ├── PagoPilotoService.java
-│   │   │   │   │   │       └── ReconciliacionPagoService.java
+│   │   │   │   │   │   ├── usecase/
+│   │   │   │   │   │   │   ConsultarActividadRecienteUseCase
+│   │   │   │   │   │   ├── service/
+│   │   │   │   │   │   │   ConsultarActividadRecienteService
+│   │   │   │   │   │   ├── dto/
+│   │   │   │   │   │   │   Command/Query/Result de las operaciones del módulo (sin HTTP/JPA)
+│   │   │   │   │   │   └── port/
+│   │   │   │   │   │       Consultas públicas de servicios, confianza y eventos; storage para exportación
 │   │   │   │   │   ├── infrastructure/
-│   │   │   │   │   │   ├── persistence/{entity/,mapper/,jpa/,adapter/}
-│   │   │   │   │   │   └── gateway/
-│   │   │   │   │   │       └── PasarelaPago.java
+│   │   │   │   │   │   └── adapter/
+│   │   │   │   │   │       Adaptadores de puertos requeridos; reutilizar contratos existentes
 │   │   │   │   │   └── presentation/
 │   │   │   │   │       ├── controller/
-│   │   │   │   │       │   ├── PagoPilotoController.java
-│   │   │   │   │       │   └── PagoWebhookController.java
-│   │   │   │   │       └── dto/
-│   │   │   │   │
-│   │   │   │   └── common/             # Transversal, sin capas de dominio
-│   │   │   │       ├── config/{JacksonConfig.java, ApplicationConfig.java}
-│   │   │   │       ├── security/{SecurityConfig.java, CurrentUser.java}
-│   │   │   │       ├── exception/{GlobalExceptionHandler.java}
-│   │   │   │       ├── storage/{ArchivoStorageService.java, S3ArchivoStorageAdapter.java, StorageProperties.java}
-│   │   │   │       ├── featureflags/{FeatureFlagService.java, FeatureFlagsProperties.java}
-│   │   │   │       ├── idempotency/{IdempotencyService.java, IdempotencyFilter.java}
-│   │   │   │       ├── observability/{TraceIdFilter.java, MetricsConfig.java}
-│   │   │   │       ├── pagination/PageResponse.java
-│   │   │   │       └── validation/ValidationUtils.java
+│   │   │   │   │       │   ActividadController
+│   │   │   │   │       ├── dto/
+│   │   │   │   │       │   Request/Response HTTP según API Contracts
+│   │   │   │   │       └── mapper/
+│   │   │   │   │           Conversión HTTP ↔ Command/Query/Result
+│   │   │   │   ├── comunicacion/
+│   │   │   │   │   ├── application/
+│   │   │   │   │   │   ├── usecase/
+│   │   │   │   │   │   │   AutorizarConversacionRealtimeUseCase, EnviarMensajeRealtimeUseCase
+│   │   │   │   │   │   ├── service/
+│   │   │   │   │   │   │   AutorizarConversacionRealtimeService, EnviarMensajeRealtimeService
+│   │   │   │   │   │   ├── dto/
+│   │   │   │   │   │   │   Command/Query/Result de las operaciones del módulo (sin HTTP/JPA)
+│   │   │   │   │   │   └── port/
+│   │   │   │   │   │       Contratos de mensajes/autorización de servicios y canal de soporte
+│   │   │   │   │   └── infrastructure/
+│   │   │   │   │       └── realtime/
+│   │   │   │   │           ChatRealtimeGateway (consume interfaces UseCase)
+│   │   │   │   ├── soporte/
+│   │   │   │   │   ├── application/
+│   │   │   │   │   │   ├── usecase/
+│   │   │   │   │   │   │   SolicitarSoporteWhatsAppUseCase
+│   │   │   │   │   │   ├── service/
+│   │   │   │   │   │   │   SolicitarSoporteWhatsAppService
+│   │   │   │   │   │   ├── dto/
+│   │   │   │   │   │   │   Command/Query/Result de las operaciones del módulo (sin HTTP/JPA)
+│   │   │   │   │   │   └── port/
+│   │   │   │   │   │       Contratos de mensajes/autorización de servicios y canal de soporte
+│   │   │   │   │   ├── infrastructure/
+│   │   │   │   │   │   └── adapter/
+│   │   │   │   │   │       Adaptadores de puertos requeridos; reutilizar contratos existentes
+│   │   │   │   │   └── presentation/
+│   │   │   │   │       ├── controller/
+│   │   │   │   │       │   SoporteController
+│   │   │   │   │       ├── dto/
+│   │   │   │   │       │   Request/Response HTTP según API Contracts
+│   │   │   │   │       └── mapper/
+│   │   │   │   │           Conversión HTTP ↔ Command/Query/Result
+│   │   │   │   ├── onboarding/
+│   │   │   │   │   ├── domain/
+│   │   │   │   │   │   ├── model/
+│   │   │   │   │   │   │   SesionAcompanamiento
+│   │   │   │   │   │   └── repository/
+│   │   │   │   │   │       SesionAcompanamientoRepository
+│   │   │   │   │   ├── application/
+│   │   │   │   │   │   ├── usecase/
+│   │   │   │   │   │   │   SolicitarAcompanamientoUseCase, ConsultarAcompanamientoUseCase
+│   │   │   │   │   │   ├── service/
+│   │   │   │   │   │   │   SolicitarAcompanamientoService, ConsultarAcompanamientoService
+│   │   │   │   │   │   ├── dto/
+│   │   │   │   │   │   │   Command/Query/Result de las operaciones del módulo (sin HTTP/JPA)
+│   │   │   │   │   │   └── port/
+│   │   │   │   │   │       CanalAcompanamiento
+│   │   │   │   │   ├── infrastructure/
+│   │   │   │   │   │   ├── persistence/
+│   │   │   │   │   │   │   ├── entity/
+│   │   │   │   │   │   │   │   SesionAcompanamientoEntity
+│   │   │   │   │   │   │   ├── mapper/
+│   │   │   │   │   │   │   │   SesionAcompanamientoMapper
+│   │   │   │   │   │   │   ├── jpa/
+│   │   │   │   │   │   │   │   SesionAcompanamientoJpaRepository
+│   │   │   │   │   │   │   └── adapter/
+│   │   │   │   │   │   │       SesionAcompanamientoPersistenceAdapter
+│   │   │   │   │   │   └── adapter/
+│   │   │   │   │   │       Adaptadores de puertos requeridos; reutilizar contratos existentes
+│   │   │   │   │   └── presentation/
+│   │   │   │   │       ├── controller/
+│   │   │   │   │       │   OnboardingAsistidoController
+│   │   │   │   │       ├── dto/
+│   │   │   │   │       │   Request/Response HTTP según API Contracts
+│   │   │   │   │       └── mapper/
+│   │   │   │   │           Conversión HTTP ↔ Command/Query/Result
+│   │   │   │   ├── referidos/
+│   │   │   │   │   ├── domain/
+│   │   │   │   │   │   ├── model/
+│   │   │   │   │   │   │   Referido
+│   │   │   │   │   │   └── repository/
+│   │   │   │   │   │       ReferidoRepository
+│   │   │   │   │   ├── application/
+│   │   │   │   │   │   ├── usecase/
+│   │   │   │   │   │   │   GenerarReferidoUseCase, AtribuirReferidoUseCase
+│   │   │   │   │   │   ├── service/
+│   │   │   │   │   │   │   GenerarReferidoService, AtribuirReferidoService
+│   │   │   │   │   │   ├── dto/
+│   │   │   │   │   │   │   Command/Query/Result de las operaciones del módulo (sin HTTP/JPA)
+│   │   │   │   │   │   └── port/
+│   │   │   │   │   │       Contratos de atribución e idiomas
+│   │   │   │   │   └── infrastructure/
+│   │   │   │   │       ├── persistence/
+│   │   │   │   │       │   ├── entity/
+│   │   │   │   │       │   │   ReferidoEntity
+│   │   │   │   │       │   ├── mapper/
+│   │   │   │   │       │   │   ReferidoMapper
+│   │   │   │   │       │   ├── jpa/
+│   │   │   │   │       │   │   ReferidoJpaRepository
+│   │   │   │   │       │   └── adapter/
+│   │   │   │   │       │       ReferidoPersistenceAdapter
+│   │   │   │   │       └── adapter/
+│   │   │   │   │           Adaptadores de puertos requeridos; reutilizar contratos existentes
+│   │   │   │   ├── internacionalizacion/
+│   │   │   │   │   ├── domain/
+│   │   │   │   │   │   ├── model/
+│   │   │   │   │   │   │   IdiomaSoportado, PreferenciaIdioma
+│   │   │   │   │   │   └── repository/
+│   │   │   │   │   │       IdiomaSoportadoRepository, PreferenciaIdiomaRepository
+│   │   │   │   │   ├── application/
+│   │   │   │   │   │   ├── usecase/
+│   │   │   │   │   │   │   ConsultarIdiomasUseCase, ConsultarPreferenciaIdiomaUseCase, ActualizarPreferenciaIdiomaUseCase
+│   │   │   │   │   │   ├── service/
+│   │   │   │   │   │   │   ConsultarIdiomasService, ConsultarPreferenciaIdiomaService, ActualizarPreferenciaIdiomaService
+│   │   │   │   │   │   ├── dto/
+│   │   │   │   │   │   │   Command/Query/Result de las operaciones del módulo (sin HTTP/JPA)
+│   │   │   │   │   │   └── port/
+│   │   │   │   │   │       Contratos de atribución e idiomas
+│   │   │   │   │   └── infrastructure/
+│   │   │   │   │       ├── persistence/
+│   │   │   │   │       │   ├── entity/
+│   │   │   │   │       │   │   IdiomaSoportadoEntity, PreferenciaIdiomaEntity
+│   │   │   │   │       │   ├── mapper/
+│   │   │   │   │       │   │   IdiomaSoportadoMapper, PreferenciaIdiomaMapper
+│   │   │   │   │       │   ├── jpa/
+│   │   │   │   │       │   │   IdiomaSoportadoJpaRepository, PreferenciaIdiomaJpaRepository
+│   │   │   │   │       │   └── adapter/
+│   │   │   │   │       │       IdiomaSoportadoPersistenceAdapter, PreferenciaIdiomaPersistenceAdapter
+│   │   │   │   │       └── adapter/
+│   │   │   │   │           Adaptadores de puertos requeridos; reutilizar contratos existentes
+│   │   │   │   ├── pagos/
+│   │   │   │   │   ├── domain/
+│   │   │   │   │   │   ├── model/
+│   │   │   │   │   │   │   TransaccionPagoPiloto
+│   │   │   │   │   │   └── repository/
+│   │   │   │   │   │       TransaccionPagoRepository
+│   │   │   │   │   ├── application/
+│   │   │   │   │   │   ├── usecase/
+│   │   │   │   │   │   │   IniciarPagoPilotoUseCase, ConsultarPagoPilotoUseCase, ProcesarConfirmacionPagoUseCase,
+│   │   │   │   │   │   │   ReconciliarPagoPilotoUseCase
+│   │   │   │   │   │   ├── service/
+│   │   │   │   │   │   │   IniciarPagoPilotoService, ConsultarPagoPilotoService, ProcesarConfirmacionPagoService,
+│   │   │   │   │   │   │   ReconciliarPagoPilotoService
+│   │   │   │   │   │   ├── dto/
+│   │   │   │   │   │   │   Command/Query/Result de las operaciones del módulo (sin HTTP/JPA)
+│   │   │   │   │   │   └── port/
+│   │   │   │   │   │       PasarelaPago, ConsultaServicioElegiblePort
+│   │   │   │   │   ├── infrastructure/
+│   │   │   │   │   │   ├── persistence/
+│   │   │   │   │   │   │   ├── entity/
+│   │   │   │   │   │   │   │   TransaccionPagoPilotoEntity
+│   │   │   │   │   │   │   ├── mapper/
+│   │   │   │   │   │   │   │   TransaccionPagoPilotoMapper
+│   │   │   │   │   │   │   ├── jpa/
+│   │   │   │   │   │   │   │   TransaccionPagoJpaRepository
+│   │   │   │   │   │   │   └── adapter/
+│   │   │   │   │   │   │       TransaccionPagoPersistenceAdapter
+│   │   │   │   │   │   └── adapter/
+│   │   │   │   │   │       FakePasarelaPago; adaptador productivo solo tras aprobación
+│   │   │   │   │   └── presentation/
+│   │   │   │   │       ├── controller/
+│   │   │   │   │       │   PagoPilotoController, PagoWebhookController
+│   │   │   │   │       ├── dto/
+│   │   │   │   │       │   Request/Response HTTP según API Contracts
+│   │   │   │   │       └── mapper/
+│   │   │   │   │           Conversión HTTP ↔ Command/Query/Result
+│   │   │   │   └── common/
+│   │   │   │       ├── config/
+│   │   │   │       │   PasswordConfig, ApplicationConfig (composición y transacciones)
+│   │   │   │       ├── security/
+│   │   │   │       │   SecurityConfig, AutorizacionRolFilter (depende de ResolverSesionUseCase), @RequiereRol, CurrentUser
+│   │   │   │       ├── exception/
+│   │   │   │       │   GlobalExceptionHandler, ErrorResponse
+│   │   │   │       ├── idempotency/
+│   │   │   │       │   IdempotencyService, IdempotencyFilter
+│   │   │   │       └── observability/
+│   │   │   │           TraceIdFilter
 │   │   ├── main/resources/
 │   │   │   ├── application.yml
 │   │   │   ├── application-dev.yml
@@ -939,7 +1273,7 @@ propuestas/application/
                 → adaptador de persistencia de solicitudes
 ```
 
-El contrato público puede estar definido como interfaz en `solicitudes/application/port/` y tener una implementación en la capa de aplicación. La forma exacta dependerá de la operación, pero no se deben exponer repositorios internos como API entre módulos.
+La entrada pública del módulo propietario se define en `solicitudes/application/usecase/` y su Service la implementa. Si el consumidor requiere desacoplar una consulta externa, declara su contrato de salida en `application/port/` y un adaptador delega en la entrada pública del propietario. No exponer repositorios internos ni importar Service concreto entre módulos.
 
 ### 7.7 `common/` no es un dominio
 
@@ -1012,6 +1346,14 @@ Cliente publica solicitud
 ```
 
 ### 7.11 Regla de crecimiento de la estructura
+
+Las estructuras de los 20 planes SPEC concretan los UseCase y sus Service por operación; no son endpoints adicionales. Se mantienen alcance funcional, tablas y permisos de los SPEC. La aplicación no importa Spring/JPA/HTTP; la configuración de Spring aplica wiring y límites transaccionales mediante decoradores/proxies de infraestructura que conservan la interfaz UseCase.
+
+`SesionAutenticada` es un contrato puro en `auth/application/port`; los adaptadores traducen contexto de seguridad. El filtro consume `ResolverSesionUseCase`. Generación aleatoria de alta entropía y huella SHA-256 son responsabilidades separadas. `common/config` ensambla componentes, `common/security` contiene componentes técnicos y `GlobalExceptionHandler` traduce excepciones de negocio a HTTP.
+
+Las verificaciones de arquitectura exigen Service implements UseCase, constructores de entrada con interfaces, independencia de dominio/aplicación, mappers separados y ausencia de acceso JPA entre módulos. Las pruebas de integración acreditan transacciones completas e idempotencia. La estructura de carpetas por sí sola no demuestra estas propiedades.
+
+
 
 La estructura descrita representa la **arquitectura objetivo**, no una obligación de crear todas las carpetas o clases desde el inicio. Cada directorio se crea cuando el SPEC correspondiente comienza a implementarse y existe una responsabilidad real.
 

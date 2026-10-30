@@ -112,4 +112,28 @@ Como usuario registrado, quiero iniciar, cerrar y recuperar mi sesión, y accede
 - **SC-003**: Ningún usuario autenticado puede ejecutar una capacidad exclusiva de un rol distinto al suyo, en el 100% de los casos de prueba.
 - **SC-004**: El 100% de las solicitudes de recuperación de acceso, existan o no en la base de datos, reciben la misma respuesta observable por parte del sistema.
 
+## Arquitectura y trazabilidad de implementación
 
+Este SPEC se implementa como parte del monolito modular con Arquitectura Limpia. Se conservan historias, requisitos, entidades conceptuales y criterios de éxito anteriores; esta sección fija la separación técnica de responsabilidades.
+
+**Contrato de arquitectura**: cada operación tiene una interfaz `application/usecase/*UseCase` y una implementación `application/service/*Service implements *UseCase`. Controllers, filtros, gateways y workers inyectan las interfaces por constructor; no servicios concretos ni repositorios JPA. Los servicios coordinan dominio y puertos sin importar Spring, JPA o HTTP. Dominio contiene modelos, reglas, excepciones de negocio y repositorios propios; infraestructura implementa los puertos y configura transacciones. Los DTO HTTP y sus mappers pertenecen a presentación; Command/Query/Result de aplicación son independientes del transporte.
+
+Los contratos entre módulos son interfaces públicas de aplicación; no se accede a Service concreto, repositorio interno o entidad JPA de otro módulo. Cuando se requiera persistencia se separan `domain/repository`, `infrastructure/persistence/entity`, `mapper`, `jpa` y `adapter`. La configuración de Spring conecta puertos y adaptadores, y conserva la transacción completa del caso de uso. Solo crear clases/carpetas con responsabilidad real. `common` contiene infraestructura/contratos transversales acotados; el contexto de Spring Security no entra a aplicación. `SesionAutenticada` es contrato puro en `auth/application/port`; generación aleatoria segura del token y huella SHA-256 son responsabilidades separadas.
+
+El [plan técnico de SPEC-01](../../Planes-y-plantilla-del-proyecto/planes/plan-spec-01-autenticacion.md) contiene el árbol de paquetes, puertos, persistencia, tareas backend, frontend e integración actualizados.
+
+### Interfaces de entrada e implementaciones
+
+| Módulo | UseCase (interfaz) | Service (implementación) |
+|---|---|---|
+| `auth` | `RegistrarUsuarioUseCase` | `RegistrarUsuarioService` |
+| `auth` | `IniciarSesionUseCase` | `IniciarSesionService` |
+| `auth` | `CerrarSesionUseCase` | `CerrarSesionService` |
+| `auth` | `ResolverSesionUseCase` | `ResolverSesionService` |
+| `auth` | `SolicitarRecuperacionAccesoUseCase` | `SolicitarRecuperacionAccesoService` |
+| `auth` | `ConfirmarRecuperacionAccesoUseCase` | `ConfirmarRecuperacionAccesoService` |
+| `auth` | `ConsultarUsuarioActualUseCase` | `ConsultarUsuarioActualService` |
+
+Puertos de salida: HasheadorPassword, GeneradorTokenSesion, HuellaToken, NotificadorRecuperacion, UsuarioConsultaPort, SesionAutenticada. Las interfaces de entrada no crean endpoints nuevos; mantener API Contracts y las condiciones Could/Future. Las tareas existentes conservan IDs, historias, dependencias y orden: los nombres de servicio agrupado de origen se descomponen en estas operaciones, sin añadir tareas funcionales.
+
+Persistencia de referencia: `usuarios`, `consentimientos`, `sesiones`, `tokens_recuperacion`. El [manual entregado](../../tasks/fuentes/manual-base-de-datos-aliado.md) detalla el modelo MVP; no implica que los scripts V1–V6 ya estén disponibles o ejecutados.

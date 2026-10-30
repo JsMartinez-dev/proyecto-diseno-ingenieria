@@ -112,6 +112,32 @@ Como usuario registrado, quiero iniciar, cerrar y recuperar mi sesión, y accede
 - **SC-003**: Ningún usuario autenticado puede ejecutar una capacidad exclusiva de un rol distinto al suyo, en el 100% de los casos de prueba.
 - **SC-004**: El 100% de las solicitudes de recuperación de acceso, existan o no en la base de datos, reciben la misma respuesta observable por parte del sistema.
 
+## Arquitectura y trazabilidad de implementación
+
+Este SPEC se implementa como parte del monolito modular con Arquitectura Limpia. Se conservan historias, requisitos, entidades conceptuales y criterios de éxito anteriores; esta sección fija la separación técnica de responsabilidades.
+
+**Contrato de arquitectura**: cada operación tiene una interfaz `application/usecase/*UseCase` y una implementación `application/service/*Service implements *UseCase`. Controllers, filtros, gateways y workers inyectan las interfaces por constructor; no servicios concretos ni repositorios JPA. Los servicios coordinan dominio y puertos sin importar Spring, JPA o HTTP. Dominio contiene modelos, reglas, excepciones de negocio y repositorios propios; infraestructura implementa los puertos y configura transacciones. Los DTO HTTP y sus mappers pertenecen a presentación; Command/Query/Result de aplicación son independientes del transporte.
+
+Los contratos entre módulos son interfaces públicas de aplicación; no se accede a Service concreto, repositorio interno o entidad JPA de otro módulo. Cuando se requiera persistencia se separan `domain/repository`, `infrastructure/persistence/entity`, `mapper`, `jpa` y `adapter`. La configuración de Spring conecta puertos y adaptadores, y conserva la transacción completa del caso de uso. Solo crear clases/carpetas con responsabilidad real. `common` contiene infraestructura/contratos transversales acotados; el contexto de Spring Security no entra a aplicación. `SesionAutenticada` es contrato puro en `auth/application/port`; generación aleatoria segura del token y huella SHA-256 son responsabilidades separadas.
+
+El [plan técnico de SPEC-01](../../Planes-y-plantilla-del-proyecto/planes/plan-spec-01-autenticacion.md) contiene el árbol de paquetes, puertos, persistencia, tareas backend, frontend e integración actualizados.
+
+### Interfaces de entrada e implementaciones
+
+| Módulo | UseCase (interfaz) | Service (implementación) |
+|---|---|---|
+| `auth` | `RegistrarUsuarioUseCase` | `RegistrarUsuarioService` |
+| `auth` | `IniciarSesionUseCase` | `IniciarSesionService` |
+| `auth` | `CerrarSesionUseCase` | `CerrarSesionService` |
+| `auth` | `ResolverSesionUseCase` | `ResolverSesionService` |
+| `auth` | `SolicitarRecuperacionAccesoUseCase` | `SolicitarRecuperacionAccesoService` |
+| `auth` | `ConfirmarRecuperacionAccesoUseCase` | `ConfirmarRecuperacionAccesoService` |
+| `auth` | `ConsultarUsuarioActualUseCase` | `ConsultarUsuarioActualService` |
+
+Puertos de salida: HasheadorPassword, GeneradorTokenSesion, HuellaToken, NotificadorRecuperacion, UsuarioConsultaPort, SesionAutenticada. Las interfaces de entrada no crean endpoints nuevos; mantener API Contracts y las condiciones Could/Future. Las tareas existentes conservan IDs, historias, dependencias y orden: los nombres de servicio agrupado de origen se descomponen en estas operaciones, sin añadir tareas funcionales.
+
+Persistencia de referencia: `usuarios`, `consentimientos`, `sesiones`, `tokens_recuperacion`. El [manual entregado](../../tasks/fuentes/manual-base-de-datos-aliado.md) detalla el modelo MVP; no implica que los scripts V1–V6 ya estén disponibles o ejecutados.
+
 
 
 # Feature Specification: SPEC-02 — Gestión de perfil y privacidad
@@ -235,6 +261,32 @@ Como usuario, quiero solicitar la eliminación de mi cuenta para dejar de tener 
 - **SC-003**: Toda solicitud de eliminación queda registrada y ninguna se ejecuta sin la confirmación requerida.
 - **SC-004**: El 100% de las consultas de datos almacenados devuelve exclusivamente información de la cuenta del solicitante.
 
+## Arquitectura y trazabilidad de implementación
+
+Este SPEC se implementa como parte del monolito modular con Arquitectura Limpia. Se conservan historias, requisitos, entidades conceptuales y criterios de éxito anteriores; esta sección fija la separación técnica de responsabilidades.
+
+**Contrato de arquitectura**: cada operación tiene una interfaz `application/usecase/*UseCase` y una implementación `application/service/*Service implements *UseCase`. Controllers, filtros, gateways y workers inyectan las interfaces por constructor; no servicios concretos ni repositorios JPA. Los servicios coordinan dominio y puertos sin importar Spring, JPA o HTTP. Dominio contiene modelos, reglas, excepciones de negocio y repositorios propios; infraestructura implementa los puertos y configura transacciones. Los DTO HTTP y sus mappers pertenecen a presentación; Command/Query/Result de aplicación son independientes del transporte.
+
+Los contratos entre módulos son interfaces públicas de aplicación; no se accede a Service concreto, repositorio interno o entidad JPA de otro módulo. Cuando se requiera persistencia se separan `domain/repository`, `infrastructure/persistence/entity`, `mapper`, `jpa` y `adapter`. La configuración de Spring conecta puertos y adaptadores, y conserva la transacción completa del caso de uso. Solo crear clases/carpetas con responsabilidad real. `common` contiene infraestructura/contratos transversales acotados; el contexto de Spring Security no entra a aplicación. `SesionAutenticada` es contrato puro en `auth/application/port`; generación aleatoria segura del token y huella SHA-256 son responsabilidades separadas.
+
+El [plan técnico de SPEC-02](../../Planes-y-plantilla-del-proyecto/planes/plan-spec-02-perfil.md) contiene el árbol de paquetes, puertos, persistencia, tareas backend, frontend e integración actualizados.
+
+### Interfaces de entrada e implementaciones
+
+| Módulo | UseCase (interfaz) | Service (implementación) |
+|---|---|---|
+| `perfil` | `ConsultarPerfilUseCase` | `ConsultarPerfilService` |
+| `perfil` | `ActualizarPerfilUseCase` | `ActualizarPerfilService` |
+| `perfil` | `ConfigurarUbicacionUseCase` | `ConfigurarUbicacionService` |
+| `perfil` | `ConfigurarPrivacidadUseCase` | `ConfigurarPrivacidadService` |
+| `perfil` | `SolicitarEliminacionCuentaUseCase` | `SolicitarEliminacionCuentaService` |
+| `perfil` | `ConfirmarEliminacionCuentaUseCase` | `ConfirmarEliminacionCuentaService` |
+
+Puertos de salida: SesionAutenticada y ConsultaServiciosActivosPort; cifrado mediante puerto/adaptador sin dependencia del SDK. Las interfaces de entrada no crean endpoints nuevos; mantener API Contracts y las condiciones Could/Future. Las tareas existentes conservan IDs, historias, dependencias y orden: los nombres de servicio agrupado de origen se descomponen en estas operaciones, sin añadir tareas funcionales.
+
+Persistencia de referencia: `perfiles`, `ubicaciones`, `solicitudes_eliminacion`. El [manual entregado](../../tasks/fuentes/manual-base-de-datos-aliado.md) detalla el modelo MVP; no implica que los scripts V1–V6 ya estén disponibles o ejecutados.
+
+
 
 # Feature Specification: SPEC-03 — Descubrimiento de prestadores
 
@@ -314,6 +366,30 @@ Como cliente, quiero buscar prestadores por categoría y zona, y consultar el pe
 - **SC-003**: El 100% de los intentos de búsqueda o consulta de perfil por un actor sin rol Cliente es denegado.
 - **SC-004**: Ante un perfil sin información pública disponible, el sistema informa la falta de detalle en el 100% de los casos sin revelar la causa específica.
 - **SC-005**: [NEEDS CLARIFICATION: definir] catálogo válido de categorías y zonas, y la política de coincidencia (exacta, parcial, por cercanía) antes de implementar.
+
+## Arquitectura y trazabilidad de implementación
+
+Este SPEC se implementa como parte del monolito modular con Arquitectura Limpia. Se conservan historias, requisitos, entidades conceptuales y criterios de éxito anteriores; esta sección fija la separación técnica de responsabilidades.
+
+**Contrato de arquitectura**: cada operación tiene una interfaz `application/usecase/*UseCase` y una implementación `application/service/*Service implements *UseCase`. Controllers, filtros, gateways y workers inyectan las interfaces por constructor; no servicios concretos ni repositorios JPA. Los servicios coordinan dominio y puertos sin importar Spring, JPA o HTTP. Dominio contiene modelos, reglas, excepciones de negocio y repositorios propios; infraestructura implementa los puertos y configura transacciones. Los DTO HTTP y sus mappers pertenecen a presentación; Command/Query/Result de aplicación son independientes del transporte.
+
+Los contratos entre módulos son interfaces públicas de aplicación; no se accede a Service concreto, repositorio interno o entidad JPA de otro módulo. Cuando se requiera persistencia se separan `domain/repository`, `infrastructure/persistence/entity`, `mapper`, `jpa` y `adapter`. La configuración de Spring conecta puertos y adaptadores, y conserva la transacción completa del caso de uso. Solo crear clases/carpetas con responsabilidad real. `common` contiene infraestructura/contratos transversales acotados; el contexto de Spring Security no entra a aplicación. `SesionAutenticada` es contrato puro en `auth/application/port`; generación aleatoria segura del token y huella SHA-256 son responsabilidades separadas.
+
+El [plan técnico de SPEC-03](../../Planes-y-plantilla-del-proyecto/planes/plan-spec-03-descubrimiento.md) contiene el árbol de paquetes, puertos, persistencia, tareas backend, frontend e integración actualizados.
+
+### Interfaces de entrada e implementaciones
+
+| Módulo | UseCase (interfaz) | Service (implementación) |
+|---|---|---|
+| `descubrimiento` | `BuscarPrestadoresUseCase` | `BuscarPrestadoresService` |
+| `descubrimiento` | `ConsultarPerfilPublicoUseCase` | `ConsultarPerfilPublicoService` |
+
+Puertos de salida: ConsultaPerfilesPublicosPort, ConsultaConfianzaPort y consultas públicas del catálogo. Las interfaces de entrada no crean endpoints nuevos; mantener API Contracts y las condiciones Could/Future. Las tareas existentes conservan IDs, historias, dependencias y orden: los nombres de servicio agrupado de origen se descomponen en estas operaciones, sin añadir tareas funcionales.
+
+Persistencia de referencia: lecturas/proyecciones o extensión de tablas existentes; no crear tablas de lectura propias. El [manual entregado](../../tasks/fuentes/manual-base-de-datos-aliado.md) detalla el modelo MVP; no implica que los scripts V1–V6 ya estén disponibles o ejecutados.
+
+
+
 # Feature Specification: SPEC-04 — Gestión de solicitudes de servicio
 
 **Creado**: 2026-09-16
@@ -468,6 +544,35 @@ Como cliente, quiero ver la lista de mis solicitudes y el detalle y estado de ca
 - **SC-003**: El 100% de los intentos de editar o cancelar una solicitud ajena, inexistente o que ya no está abierta es rechazado sin modificar ningún registro.
 - **SC-004**: El 100% de las consultas de lista o detalle de solicitudes devuelve únicamente información del Cliente autenticado que la solicita.
 - **SC-005**: Ante una pérdida de conexión durante publicación o edición, el 100% de los casos de prueba conserva un único registro consistente, sin duplicados.
+
+## Arquitectura y trazabilidad de implementación
+
+Este SPEC se implementa como parte del monolito modular con Arquitectura Limpia. Se conservan historias, requisitos, entidades conceptuales y criterios de éxito anteriores; esta sección fija la separación técnica de responsabilidades.
+
+**Contrato de arquitectura**: cada operación tiene una interfaz `application/usecase/*UseCase` y una implementación `application/service/*Service implements *UseCase`. Controllers, filtros, gateways y workers inyectan las interfaces por constructor; no servicios concretos ni repositorios JPA. Los servicios coordinan dominio y puertos sin importar Spring, JPA o HTTP. Dominio contiene modelos, reglas, excepciones de negocio y repositorios propios; infraestructura implementa los puertos y configura transacciones. Los DTO HTTP y sus mappers pertenecen a presentación; Command/Query/Result de aplicación son independientes del transporte.
+
+Los contratos entre módulos son interfaces públicas de aplicación; no se accede a Service concreto, repositorio interno o entidad JPA de otro módulo. Cuando se requiera persistencia se separan `domain/repository`, `infrastructure/persistence/entity`, `mapper`, `jpa` y `adapter`. La configuración de Spring conecta puertos y adaptadores, y conserva la transacción completa del caso de uso. Solo crear clases/carpetas con responsabilidad real. `common` contiene infraestructura/contratos transversales acotados; el contexto de Spring Security no entra a aplicación. `SesionAutenticada` es contrato puro en `auth/application/port`; generación aleatoria segura del token y huella SHA-256 son responsabilidades separadas.
+
+El [plan técnico de SPEC-04](../../Planes-y-plantilla-del-proyecto/planes/plan-spec-04-gestion-solicitudes-servicio.md) contiene el árbol de paquetes, puertos, persistencia, tareas backend, frontend e integración actualizados.
+
+### Interfaces de entrada e implementaciones
+
+| Módulo | UseCase (interfaz) | Service (implementación) |
+|---|---|---|
+| `catalogo` | `ConsultarCategoriasUseCase` | `ConsultarCategoriasService` |
+| `catalogo` | `ConsultarZonasUseCase` | `ConsultarZonasService` |
+| `solicitudes` | `CrearSolicitudUseCase` | `CrearSolicitudService` |
+| `solicitudes` | `EditarSolicitudUseCase` | `EditarSolicitudService` |
+| `solicitudes` | `CancelarSolicitudUseCase` | `CancelarSolicitudService` |
+| `solicitudes` | `ListarSolicitudesPropiasUseCase` | `ListarSolicitudesPropiasService` |
+| `solicitudes` | `ConsultarSolicitudPropiaUseCase` | `ConsultarSolicitudPropiaService` |
+
+Puertos de salida: ArchivoStorageService y consultas de catálogo; notificaciones por interfaz del módulo propietario. Las interfaces de entrada no crean endpoints nuevos; mantener API Contracts y las condiciones Could/Future. Las tareas existentes conservan IDs, historias, dependencias y orden: los nombres de servicio agrupado de origen se descomponen en estas operaciones, sin añadir tareas funcionales.
+
+Persistencia de referencia: `categorias_servicio`, `zonas`, `solicitudes`, `fotos_solicitud`, `historial_estado_solicitud`. El [manual entregado](../../tasks/fuentes/manual-base-de-datos-aliado.md) detalla el modelo MVP; no implica que los scripts V1–V6 ya estén disponibles o ejecutados.
+
+
+
 # Feature Specification: SPEC-05 — Creación y gestión del perfil profesional
 
 **Creado**: 2026-09-16 
@@ -651,6 +756,37 @@ Como prestador, quiero consultar cómo ven mi perfil los clientes antes de que q
 - **SC-003**: La vista previa del perfil coincide, en el 100% de los casos de prueba, con la información pública que un Cliente ve al consultar ese mismo perfil.
 - **SC-004**: Ante datos obligatorios faltantes, registro inexistente o rol incorrecto, ninguna operación de esta especificación modifica datos y la interfaz informa la causa.
 
+## Arquitectura y trazabilidad de implementación
+
+Este SPEC se implementa como parte del monolito modular con Arquitectura Limpia. Se conservan historias, requisitos, entidades conceptuales y criterios de éxito anteriores; esta sección fija la separación técnica de responsabilidades.
+
+**Contrato de arquitectura**: cada operación tiene una interfaz `application/usecase/*UseCase` y una implementación `application/service/*Service implements *UseCase`. Controllers, filtros, gateways y workers inyectan las interfaces por constructor; no servicios concretos ni repositorios JPA. Los servicios coordinan dominio y puertos sin importar Spring, JPA o HTTP. Dominio contiene modelos, reglas, excepciones de negocio y repositorios propios; infraestructura implementa los puertos y configura transacciones. Los DTO HTTP y sus mappers pertenecen a presentación; Command/Query/Result de aplicación son independientes del transporte.
+
+Los contratos entre módulos son interfaces públicas de aplicación; no se accede a Service concreto, repositorio interno o entidad JPA de otro módulo. Cuando se requiera persistencia se separan `domain/repository`, `infrastructure/persistence/entity`, `mapper`, `jpa` y `adapter`. La configuración de Spring conecta puertos y adaptadores, y conserva la transacción completa del caso de uso. Solo crear clases/carpetas con responsabilidad real. `common` contiene infraestructura/contratos transversales acotados; el contexto de Spring Security no entra a aplicación. `SesionAutenticada` es contrato puro en `auth/application/port`; generación aleatoria segura del token y huella SHA-256 son responsabilidades separadas.
+
+El [plan técnico de SPEC-05](../../Planes-y-plantilla-del-proyecto/planes/plan-spec-05-perfil-profesional.md) contiene el árbol de paquetes, puertos, persistencia, tareas backend, frontend e integración actualizados.
+
+### Interfaces de entrada e implementaciones
+
+| Módulo | UseCase (interfaz) | Service (implementación) |
+|---|---|---|
+| `perfiles` | `CrearPerfilProfesionalUseCase` | `CrearPerfilProfesionalService` |
+| `perfiles` | `EditarPerfilProfesionalUseCase` | `EditarPerfilProfesionalService` |
+| `perfiles` | `ActualizarCategoriasProfesionalesUseCase` | `ActualizarCategoriasProfesionalesService` |
+| `perfiles` | `ActualizarZonasAtencionUseCase` | `ActualizarZonasAtencionService` |
+| `perfiles` | `RegistrarExperienciaProfesionalUseCase` | `RegistrarExperienciaProfesionalService` |
+| `perfiles` | `AgregarServicioPortafolioUseCase` | `AgregarServicioPortafolioService` |
+| `perfiles` | `EliminarServicioPortafolioUseCase` | `EliminarServicioPortafolioService` |
+| `perfiles` | `ConfigurarDisponibilidadUseCase` | `ConfigurarDisponibilidadService` |
+| `perfiles` | `GestionarCompromisoAgendaUseCase` | `GestionarCompromisoAgendaService` |
+| `perfiles` | `ConsultarVistaPreviaPerfilUseCase` | `ConsultarVistaPreviaPerfilService` |
+
+Puertos de salida: ArchivoStorageService, consultas de catálogo y puerto de consulta de compromisos cuando se requiera. Las interfaces de entrada no crean endpoints nuevos; mantener API Contracts y las condiciones Could/Future. Las tareas existentes conservan IDs, historias, dependencias y orden: los nombres de servicio agrupado de origen se descomponen en estas operaciones, sin añadir tareas funcionales.
+
+Persistencia de referencia: `perfiles_profesionales`, `perfil_categoria`, `perfil_zona_atencion`, `experiencias_profesionales`, `servicios_portafolio`, `disponibilidades`, `compromisos_agenda`. El [manual entregado](../../tasks/fuentes/manual-base-de-datos-aliado.md) detalla el modelo MVP; no implica que los scripts V1–V6 ya estén disponibles o ejecutados.
+
+
+
 # Feature Specification: SPEC-06 — Compatibilidad y oportunidades de servicio
 
 **Creado**: 2026-09-16
@@ -764,10 +900,28 @@ Como prestador, quiero consultar el detalle completo de una oportunidad de mi ta
 - **SC-004**: El 100% de las nuevas solicitudes compatibles genera una notificación hacia el Prestador correspondiente.
 - **SC-005**: Ante datos faltantes, oportunidad inexistente o rol incorrecto, ninguna operación de esta especificación modifica datos y la interfaz informa la causa.
 
+## Arquitectura y trazabilidad de implementación
 
+Este SPEC se implementa como parte del monolito modular con Arquitectura Limpia. Se conservan historias, requisitos, entidades conceptuales y criterios de éxito anteriores; esta sección fija la separación técnica de responsabilidades.
 
+**Contrato de arquitectura**: cada operación tiene una interfaz `application/usecase/*UseCase` y una implementación `application/service/*Service implements *UseCase`. Controllers, filtros, gateways y workers inyectan las interfaces por constructor; no servicios concretos ni repositorios JPA. Los servicios coordinan dominio y puertos sin importar Spring, JPA o HTTP. Dominio contiene modelos, reglas, excepciones de negocio y repositorios propios; infraestructura implementa los puertos y configura transacciones. Los DTO HTTP y sus mappers pertenecen a presentación; Command/Query/Result de aplicación son independientes del transporte.
 
+Los contratos entre módulos son interfaces públicas de aplicación; no se accede a Service concreto, repositorio interno o entidad JPA de otro módulo. Cuando se requiera persistencia se separan `domain/repository`, `infrastructure/persistence/entity`, `mapper`, `jpa` y `adapter`. La configuración de Spring conecta puertos y adaptadores, y conserva la transacción completa del caso de uso. Solo crear clases/carpetas con responsabilidad real. `common` contiene infraestructura/contratos transversales acotados; el contexto de Spring Security no entra a aplicación. `SesionAutenticada` es contrato puro en `auth/application/port`; generación aleatoria segura del token y huella SHA-256 son responsabilidades separadas.
 
+El [plan técnico de SPEC-06](../../Planes-y-plantilla-del-proyecto/planes/plan-spec-06-compatibilidad-oportunidades.md) contiene el árbol de paquetes, puertos, persistencia, tareas backend, frontend e integración actualizados.
+
+### Interfaces de entrada e implementaciones
+
+| Módulo | UseCase (interfaz) | Service (implementación) |
+|---|---|---|
+| `oportunidades` | `ConsultarTableroOportunidadesUseCase` | `ConsultarTableroOportunidadesService` |
+| `oportunidades` | `ConsultarDetalleOportunidadUseCase` | `ConsultarDetalleOportunidadService` |
+| `oportunidades` | `CalcularCompatibilidadUseCase` | `CalcularCompatibilidadService` |
+| `oportunidades` | `DetectarNuevaOportunidadUseCase` | `DetectarNuevaOportunidadService` |
+
+Puertos de salida: ConsultaSolicitudesAbiertasPort, ConsultaCoberturaDisponibilidadPort y RegistroNotificacionPort. Las interfaces de entrada no crean endpoints nuevos; mantener API Contracts y las condiciones Could/Future. Las tareas existentes conservan IDs, historias, dependencias y orden: los nombres de servicio agrupado de origen se descomponen en estas operaciones, sin añadir tareas funcionales.
+
+Persistencia de referencia: `notificaciones`. El [manual entregado](../../tasks/fuentes/manual-base-de-datos-aliado.md) detalla el modelo MVP; no implica que los scripts V1–V6 ya estén disponibles o ejecutados.
 
 
 
@@ -905,6 +1059,31 @@ Como prestador, quiero retirar una propuesta que ya no puedo o no quiero cumplir
 - **SC-002**: El 100% de las propuestas creadas para una solicitud que ya no está abierta es rechazada.
 - **SC-003**: El 100% de las propuestas nuevas genera una notificación hacia el Cliente correspondiente.
 - **SC-004**: El 100% de los intentos de editar o retirar una propuesta ajena o ya inactiva es rechazado sin modificar ningún registro.
+
+## Arquitectura y trazabilidad de implementación
+
+Este SPEC se implementa como parte del monolito modular con Arquitectura Limpia. Se conservan historias, requisitos, entidades conceptuales y criterios de éxito anteriores; esta sección fija la separación técnica de responsabilidades.
+
+**Contrato de arquitectura**: cada operación tiene una interfaz `application/usecase/*UseCase` y una implementación `application/service/*Service implements *UseCase`. Controllers, filtros, gateways y workers inyectan las interfaces por constructor; no servicios concretos ni repositorios JPA. Los servicios coordinan dominio y puertos sin importar Spring, JPA o HTTP. Dominio contiene modelos, reglas, excepciones de negocio y repositorios propios; infraestructura implementa los puertos y configura transacciones. Los DTO HTTP y sus mappers pertenecen a presentación; Command/Query/Result de aplicación son independientes del transporte.
+
+Los contratos entre módulos son interfaces públicas de aplicación; no se accede a Service concreto, repositorio interno o entidad JPA de otro módulo. Cuando se requiera persistencia se separan `domain/repository`, `infrastructure/persistence/entity`, `mapper`, `jpa` y `adapter`. La configuración de Spring conecta puertos y adaptadores, y conserva la transacción completa del caso de uso. Solo crear clases/carpetas con responsabilidad real. `common` contiene infraestructura/contratos transversales acotados; el contexto de Spring Security no entra a aplicación. `SesionAutenticada` es contrato puro en `auth/application/port`; generación aleatoria segura del token y huella SHA-256 son responsabilidades separadas.
+
+El [plan técnico de SPEC-07](../../Planes-y-plantilla-del-proyecto/planes/plan-spec-07-creacion-gestion-propuestas.md) contiene el árbol de paquetes, puertos, persistencia, tareas backend, frontend e integración actualizados.
+
+### Interfaces de entrada e implementaciones
+
+| Módulo | UseCase (interfaz) | Service (implementación) |
+|---|---|---|
+| `propuestas` | `CrearPropuestaUseCase` | `CrearPropuestaService` |
+| `propuestas` | `EditarPropuestaUseCase` | `EditarPropuestaService` |
+| `propuestas` | `RetirarPropuestaUseCase` | `RetirarPropuestaService` |
+
+Puertos de salida: ConsultaCompatibilidadPort, ConsultaSolicitudPort y RegistroNotificacionPort. Las interfaces de entrada no crean endpoints nuevos; mantener API Contracts y las condiciones Could/Future. Las tareas existentes conservan IDs, historias, dependencias y orden: los nombres de servicio agrupado de origen se descomponen en estas operaciones, sin añadir tareas funcionales.
+
+Persistencia de referencia: `propuestas`, `notificaciones`. El [manual entregado](../../tasks/fuentes/manual-base-de-datos-aliado.md) detalla el modelo MVP; no implica que los scripts V1–V6 ya estén disponibles o ejecutados.
+
+
+
 # Feature Specification: SPEC-08 — Contratación y ciclo de vida del servicio
 
 **Creado**: 2026-09-16
@@ -1103,6 +1282,38 @@ Como cliente o prestador, quiero usar el canal de comunicación autorizado una v
 - **SC-003**: El 100% de las transiciones de estado del servicio queda registrada en un historial ordenado, incluso ante intentos simultáneos.
 - **SC-004**: El 100% de los intentos de cancelar un servicio ya finalizado es rechazado sin cambiar su estado.
 - **SC-005**: El 100% de los usos del canal de comunicación autorizado ocurre solo después de que los datos de comunicación fueron habilitados, y ninguno expone datos de contacto personales.
+
+## Arquitectura y trazabilidad de implementación
+
+Este SPEC se implementa como parte del monolito modular con Arquitectura Limpia. Se conservan historias, requisitos, entidades conceptuales y criterios de éxito anteriores; esta sección fija la separación técnica de responsabilidades.
+
+**Contrato de arquitectura**: cada operación tiene una interfaz `application/usecase/*UseCase` y una implementación `application/service/*Service implements *UseCase`. Controllers, filtros, gateways y workers inyectan las interfaces por constructor; no servicios concretos ni repositorios JPA. Los servicios coordinan dominio y puertos sin importar Spring, JPA o HTTP. Dominio contiene modelos, reglas, excepciones de negocio y repositorios propios; infraestructura implementa los puertos y configura transacciones. Los DTO HTTP y sus mappers pertenecen a presentación; Command/Query/Result de aplicación son independientes del transporte.
+
+Los contratos entre módulos son interfaces públicas de aplicación; no se accede a Service concreto, repositorio interno o entidad JPA de otro módulo. Cuando se requiera persistencia se separan `domain/repository`, `infrastructure/persistence/entity`, `mapper`, `jpa` y `adapter`. La configuración de Spring conecta puertos y adaptadores, y conserva la transacción completa del caso de uso. Solo crear clases/carpetas con responsabilidad real. `common` contiene infraestructura/contratos transversales acotados; el contexto de Spring Security no entra a aplicación. `SesionAutenticada` es contrato puro en `auth/application/port`; generación aleatoria segura del token y huella SHA-256 son responsabilidades separadas.
+
+El [plan técnico de SPEC-08](../../Planes-y-plantilla-del-proyecto/planes/plan-spec-08-contratacion-ciclo-servicio.md) contiene el árbol de paquetes, puertos, persistencia, tareas backend, frontend e integración actualizados.
+
+### Interfaces de entrada e implementaciones
+
+| Módulo | UseCase (interfaz) | Service (implementación) |
+|---|---|---|
+| `servicios` | `ListarPropuestasRecibidasUseCase` | `ListarPropuestasRecibidasService` |
+| `servicios` | `AceptarPropuestaUseCase` | `AceptarPropuestaService` |
+| `servicios` | `ConsultarServicioUseCase` | `ConsultarServicioService` |
+| `servicios` | `MarcarServicioEnEjecucionUseCase` | `MarcarServicioEnEjecucionService` |
+| `servicios` | `MarcarServicioTerminadoUseCase` | `MarcarServicioTerminadoService` |
+| `servicios` | `ConfirmarFinalizacionServicioUseCase` | `ConfirmarFinalizacionServicioService` |
+| `servicios` | `CancelarServicioUseCase` | `CancelarServicioService` |
+| `servicios` | `ConsultarHistorialServicioUseCase` | `ConsultarHistorialServicioService` |
+| `servicios` | `EnviarMensajeServicioUseCase` | `EnviarMensajeServicioService` |
+| `servicios` | `ConsultarMensajesServicioUseCase` | `ConsultarMensajesServicioService` |
+
+Puertos de salida: ConsultaGestionPropuestasPort, ConsultaGestionSolicitudPort y RegistroNotificacionPort; adaptadores/composición preservan una transacción de aceptación. Las interfaces de entrada no crean endpoints nuevos; mantener API Contracts y las condiciones Could/Future. Las tareas existentes conservan IDs, historias, dependencias y orden: los nombres de servicio agrupado de origen se descomponen en estas operaciones, sin añadir tareas funcionales.
+
+Persistencia de referencia: `servicios_contratados`, `historial_estado_servicio`, `mensajes_servicio`. El [manual entregado](../../tasks/fuentes/manual-base-de-datos-aliado.md) detalla el modelo MVP; no implica que los scripts V1–V6 ya estén disponibles o ejecutados.
+
+
+
 # Feature Specification: SPEC-09 — Notificaciones de propuestas y servicios
 
 **Creado**: 2026-09-16
@@ -1195,6 +1406,29 @@ Como cliente o prestador, quiero ser notificado automáticamente cuando la otra 
 - **SC-002**: El 100% de las transiciones de estado del servicio (en ejecución, terminado, finalización confirmada, cancelado) genera una notificación hacia la contraparte de quien la ejecutó.
 - **SC-003**: Ante una falla del canal de entrega, el 100% de los eventos de aceptación o cambio de estado permanece consultable en su origen sin generar avisos duplicados al recuperarse.
 - **SC-004**: El 100% de los intentos de generar una notificación sin un evento real asociado es rechazado.
+
+## Arquitectura y trazabilidad de implementación
+
+Este SPEC se implementa como parte del monolito modular con Arquitectura Limpia. Se conservan historias, requisitos, entidades conceptuales y criterios de éxito anteriores; esta sección fija la separación técnica de responsabilidades.
+
+**Contrato de arquitectura**: cada operación tiene una interfaz `application/usecase/*UseCase` y una implementación `application/service/*Service implements *UseCase`. Controllers, filtros, gateways y workers inyectan las interfaces por constructor; no servicios concretos ni repositorios JPA. Los servicios coordinan dominio y puertos sin importar Spring, JPA o HTTP. Dominio contiene modelos, reglas, excepciones de negocio y repositorios propios; infraestructura implementa los puertos y configura transacciones. Los DTO HTTP y sus mappers pertenecen a presentación; Command/Query/Result de aplicación son independientes del transporte.
+
+Los contratos entre módulos son interfaces públicas de aplicación; no se accede a Service concreto, repositorio interno o entidad JPA de otro módulo. Cuando se requiera persistencia se separan `domain/repository`, `infrastructure/persistence/entity`, `mapper`, `jpa` y `adapter`. La configuración de Spring conecta puertos y adaptadores, y conserva la transacción completa del caso de uso. Solo crear clases/carpetas con responsabilidad real. `common` contiene infraestructura/contratos transversales acotados; el contexto de Spring Security no entra a aplicación. `SesionAutenticada` es contrato puro en `auth/application/port`; generación aleatoria segura del token y huella SHA-256 son responsabilidades separadas.
+
+El [plan técnico de SPEC-09](../../Planes-y-plantilla-del-proyecto/planes/plan-spec-09-notificaciones-propuestas-servicios.md) contiene el árbol de paquetes, puertos, persistencia, tareas backend, frontend e integración actualizados.
+
+### Interfaces de entrada e implementaciones
+
+| Módulo | UseCase (interfaz) | Service (implementación) |
+|---|---|---|
+| `notificaciones` | `RegistrarNotificacionUseCase` | `RegistrarNotificacionService` |
+| `notificaciones` | `ConsultarNotificacionesPropiasUseCase` | `ConsultarNotificacionesPropiasService` |
+| `notificaciones` | `EntregarNotificacionesPendientesUseCase` | `EntregarNotificacionesPendientesService` |
+
+Puertos de salida: CanalEntregaNotificacion, ConsultaPreferenciasPort y puertos de entrega; worker invoca interfaz de entrada. Las interfaces de entrada no crean endpoints nuevos; mantener API Contracts y las condiciones Could/Future. Las tareas existentes conservan IDs, historias, dependencias y orden: los nombres de servicio agrupado de origen se descomponen en estas operaciones, sin añadir tareas funcionales.
+
+Persistencia de referencia: `notificaciones`. El [manual entregado](../../tasks/fuentes/manual-base-de-datos-aliado.md) detalla el modelo MVP; no implica que los scripts V1–V6 ya estén disponibles o ejecutados.
+
 
 
 # Feature Specification: SPEC-10 — Calificaciones, reseñas y verificación
@@ -1360,6 +1594,33 @@ Como Usuario, quiero reportar una reseña que considero falsa, ofensiva o injust
 - **SC-003**: Ningún nivel de verificación se presenta junto a lenguaje que sugiera una certificación legal.
 - **SC-004**: El 100% de los reportes de reseña queda disponible en la cola de moderación (SPEC-12) inmediatamente después de registrarse.
 
+## Arquitectura y trazabilidad de implementación
+
+Este SPEC se implementa como parte del monolito modular con Arquitectura Limpia. Se conservan historias, requisitos, entidades conceptuales y criterios de éxito anteriores; esta sección fija la separación técnica de responsabilidades.
+
+**Contrato de arquitectura**: cada operación tiene una interfaz `application/usecase/*UseCase` y una implementación `application/service/*Service implements *UseCase`. Controllers, filtros, gateways y workers inyectan las interfaces por constructor; no servicios concretos ni repositorios JPA. Los servicios coordinan dominio y puertos sin importar Spring, JPA o HTTP. Dominio contiene modelos, reglas, excepciones de negocio y repositorios propios; infraestructura implementa los puertos y configura transacciones. Los DTO HTTP y sus mappers pertenecen a presentación; Command/Query/Result de aplicación son independientes del transporte.
+
+Los contratos entre módulos son interfaces públicas de aplicación; no se accede a Service concreto, repositorio interno o entidad JPA de otro módulo. Cuando se requiera persistencia se separan `domain/repository`, `infrastructure/persistence/entity`, `mapper`, `jpa` y `adapter`. La configuración de Spring conecta puertos y adaptadores, y conserva la transacción completa del caso de uso. Solo crear clases/carpetas con responsabilidad real. `common` contiene infraestructura/contratos transversales acotados; el contexto de Spring Security no entra a aplicación. `SesionAutenticada` es contrato puro en `auth/application/port`; generación aleatoria segura del token y huella SHA-256 son responsabilidades separadas.
+
+El [plan técnico de SPEC-10](../../Planes-y-plantilla-del-proyecto/planes/plan-spec-10-calificaciones-resenas-verificacion.md) contiene el árbol de paquetes, puertos, persistencia, tareas backend, frontend e integración actualizados.
+
+### Interfaces de entrada e implementaciones
+
+| Módulo | UseCase (interfaz) | Service (implementación) |
+|---|---|---|
+| `confianza` | `CalificarServicioUseCase` | `CalificarServicioService` |
+| `confianza` | `AgregarResenaUseCase` | `AgregarResenaService` |
+| `confianza` | `ConsultarConfianzaPrestadorUseCase` | `ConsultarConfianzaPrestadorService` |
+| `confianza` | `SolicitarVerificacionUseCase` | `SolicitarVerificacionService` |
+| `confianza` | `ConsultarVerificacionPropiaUseCase` | `ConsultarVerificacionPropiaService` |
+| `reportes` | `ReportarResenaUseCase` | `ReportarResenaService` |
+
+Puertos de salida: ArchivoStorageService, ConsultaServicioFinalizadoPort y contratos públicos de reputación/reportes. Las interfaces de entrada no crean endpoints nuevos; mantener API Contracts y las condiciones Could/Future. Las tareas existentes conservan IDs, historias, dependencias y orden: los nombres de servicio agrupado de origen se descomponen en estas operaciones, sin añadir tareas funcionales.
+
+Persistencia de referencia: `calificaciones`, `resenas`, `reputaciones_prestador`, `solicitudes_verificacion`, `documentos_verificacion`, `reportes`. El [manual entregado](../../tasks/fuentes/manual-base-de-datos-aliado.md) detalla el modelo MVP; no implica que los scripts V1–V6 ya estén disponibles o ejecutados.
+
+
+
 # Feature Specification: SPEC-11 — Reportes y evidencias
 
 **Creado**: 2026-09-16
@@ -1466,6 +1727,30 @@ Como Usuario, quiero adjuntar evidencia (capturas, fotos, documentos) a un repor
 - **SC-001**: El 100% de los reportes de usuario y de servicio queda disponible en la cola de moderación (SPEC-12) inmediatamente después de registrarse.
 - **SC-002**: Ningún reporte se crea sin un motivo indicado.
 - **SC-003**: El 100% de las evidencias adjuntadas queda asociada a un reporte válido y preexistente; ninguna evidencia queda huérfana.
+
+## Arquitectura y trazabilidad de implementación
+
+Este SPEC se implementa como parte del monolito modular con Arquitectura Limpia. Se conservan historias, requisitos, entidades conceptuales y criterios de éxito anteriores; esta sección fija la separación técnica de responsabilidades.
+
+**Contrato de arquitectura**: cada operación tiene una interfaz `application/usecase/*UseCase` y una implementación `application/service/*Service implements *UseCase`. Controllers, filtros, gateways y workers inyectan las interfaces por constructor; no servicios concretos ni repositorios JPA. Los servicios coordinan dominio y puertos sin importar Spring, JPA o HTTP. Dominio contiene modelos, reglas, excepciones de negocio y repositorios propios; infraestructura implementa los puertos y configura transacciones. Los DTO HTTP y sus mappers pertenecen a presentación; Command/Query/Result de aplicación son independientes del transporte.
+
+Los contratos entre módulos son interfaces públicas de aplicación; no se accede a Service concreto, repositorio interno o entidad JPA de otro módulo. Cuando se requiera persistencia se separan `domain/repository`, `infrastructure/persistence/entity`, `mapper`, `jpa` y `adapter`. La configuración de Spring conecta puertos y adaptadores, y conserva la transacción completa del caso de uso. Solo crear clases/carpetas con responsabilidad real. `common` contiene infraestructura/contratos transversales acotados; el contexto de Spring Security no entra a aplicación. `SesionAutenticada` es contrato puro en `auth/application/port`; generación aleatoria segura del token y huella SHA-256 son responsabilidades separadas.
+
+El [plan técnico de SPEC-11](../../Planes-y-plantilla-del-proyecto/planes/plan-spec-11-reportes-evidencias.md) contiene el árbol de paquetes, puertos, persistencia, tareas backend, frontend e integración actualizados.
+
+### Interfaces de entrada e implementaciones
+
+| Módulo | UseCase (interfaz) | Service (implementación) |
+|---|---|---|
+| `reportes` | `ReportarUsuarioUseCase` | `ReportarUsuarioService` |
+| `reportes` | `ReportarServicioUseCase` | `ReportarServicioService` |
+| `reportes` | `AdjuntarEvidenciaReporteUseCase` | `AdjuntarEvidenciaReporteService` |
+| `reportes` | `ConsultarReportePropioUseCase` | `ConsultarReportePropioService` |
+
+Puertos de salida: ArchivoStorageService y consultas autorizadas de cuenta/servicio/reseña. Las interfaces de entrada no crean endpoints nuevos; mantener API Contracts y las condiciones Could/Future. Las tareas existentes conservan IDs, historias, dependencias y orden: los nombres de servicio agrupado de origen se descomponen en estas operaciones, sin añadir tareas funcionales.
+
+Persistencia de referencia: `reportes`, `evidencias_reporte`. El [manual entregado](../../tasks/fuentes/manual-base-de-datos-aliado.md) detalla el modelo MVP; no implica que los scripts V1–V6 ya estén disponibles o ejecutados.
+
 
 
 # Feature Specification: SPEC-12 — Administración, moderación y gestión de riesgos
@@ -1671,6 +1956,44 @@ Como Administrador, quiero identificar y gestionar servicios clasificados como d
 - **SC-003**: El 100% de los bloqueos preventivos queda con administrador, fecha y motivo registrados.
 - **SC-004**: Ninguna acción de moderación de contenido (UC074) provoca por sí sola un bloqueo de cuenta (UC073); son acciones independientes.
 
+## Arquitectura y trazabilidad de implementación
+
+Este SPEC se implementa como parte del monolito modular con Arquitectura Limpia. Se conservan historias, requisitos, entidades conceptuales y criterios de éxito anteriores; esta sección fija la separación técnica de responsabilidades.
+
+**Contrato de arquitectura**: cada operación tiene una interfaz `application/usecase/*UseCase` y una implementación `application/service/*Service implements *UseCase`. Controllers, filtros, gateways y workers inyectan las interfaces por constructor; no servicios concretos ni repositorios JPA. Los servicios coordinan dominio y puertos sin importar Spring, JPA o HTTP. Dominio contiene modelos, reglas, excepciones de negocio y repositorios propios; infraestructura implementa los puertos y configura transacciones. Los DTO HTTP y sus mappers pertenecen a presentación; Command/Query/Result de aplicación son independientes del transporte.
+
+Los contratos entre módulos son interfaces públicas de aplicación; no se accede a Service concreto, repositorio interno o entidad JPA de otro módulo. Cuando se requiera persistencia se separan `domain/repository`, `infrastructure/persistence/entity`, `mapper`, `jpa` y `adapter`. La configuración de Spring conecta puertos y adaptadores, y conserva la transacción completa del caso de uso. Solo crear clases/carpetas con responsabilidad real. `common` contiene infraestructura/contratos transversales acotados; el contexto de Spring Security no entra a aplicación. `SesionAutenticada` es contrato puro en `auth/application/port`; generación aleatoria segura del token y huella SHA-256 son responsabilidades separadas.
+
+El [plan técnico de SPEC-12](../../Planes-y-plantilla-del-proyecto/planes/plan-spec-12-administracion-moderacion-riesgos.md) contiene el árbol de paquetes, puertos, persistencia, tareas backend, frontend e integración actualizados.
+
+### Interfaces de entrada e implementaciones
+
+| Módulo | UseCase (interfaz) | Service (implementación) |
+|---|---|---|
+| `administracion` | `CrearCategoriaUseCase` | `CrearCategoriaService` |
+| `administracion` | `EditarCategoriaUseCase` | `EditarCategoriaService` |
+| `administracion` | `DesactivarCategoriaUseCase` | `DesactivarCategoriaService` |
+| `administracion` | `CrearZonaUseCase` | `CrearZonaService` |
+| `administracion` | `EditarZonaUseCase` | `EditarZonaService` |
+| `administracion` | `DesactivarZonaUseCase` | `DesactivarZonaService` |
+| `administracion` | `ConsultarColaReportesUseCase` | `ConsultarColaReportesService` |
+| `administracion` | `RevisarReporteUseCase` | `RevisarReporteService` |
+| `administracion` | `ResolverReporteUseCase` | `ResolverReporteService` |
+| `administracion` | `BloquearCuentaUseCase` | `BloquearCuentaService` |
+| `administracion` | `LevantarBloqueoUseCase` | `LevantarBloqueoService` |
+| `administracion` | `ModerarContenidoUseCase` | `ModerarContenidoService` |
+| `administracion` | `BuscarCuentasPerfilesUseCase` | `BuscarCuentasPerfilesService` |
+| `administracion` | `MarcarServicioAltoRiesgoUseCase` | `MarcarServicioAltoRiesgoService` |
+| `administracion` | `RevisarVerificacionUseCase` | `RevisarVerificacionService` |
+| `auditoria` | `RegistrarAuditoriaUseCase` | `RegistrarAuditoriaService` |
+| `auditoria` | `ConsultarAuditoriaUseCase` | `ConsultarAuditoriaService` |
+
+Puertos de salida: contratos públicos de catálogo, reportes, identidad, confianza y auditoría; sin repositorios JPA ajenos. Las interfaces de entrada no crean endpoints nuevos; mantener API Contracts y las condiciones Could/Future. Las tareas existentes conservan IDs, historias, dependencias y orden: los nombres de servicio agrupado de origen se descomponen en estas operaciones, sin añadir tareas funcionales.
+
+Persistencia de referencia: `bloqueos_preventivos`, `acciones_moderacion`, `marcas_alto_riesgo`, `auditoria_administrativa`. El [manual entregado](../../tasks/fuentes/manual-base-de-datos-aliado.md) detalla el modelo MVP; no implica que los scripts V1–V6 ya estén disponibles o ejecutados.
+
+
+
 # Feature Specification: SPEC-13 — Ruta de formalización
 
 **Creado**: 2026-09-16 
@@ -1796,6 +2119,32 @@ Como Prestador, quiero que en el futuro la ruta de formalización pueda vincular
 - **SC-001**: El 100% de las vistas de progreso de formalización muestra explícitamente que el avance es orientativo y no una declaración de estatus legal.
 - **SC-002**: El 100% de los enlaces identificados como oficiales dirige al destino institucional configurado y se distingue como externo.
 - **SC-003**: La desactivación de la capacidad de vinculación institucional futura (UC080) no impide completar ningún flujo de UC077–UC079.
+
+## Arquitectura y trazabilidad de implementación
+
+Este SPEC se implementa como parte del monolito modular con Arquitectura Limpia. Se conservan historias, requisitos, entidades conceptuales y criterios de éxito anteriores; esta sección fija la separación técnica de responsabilidades.
+
+**Contrato de arquitectura**: cada operación tiene una interfaz `application/usecase/*UseCase` y una implementación `application/service/*Service implements *UseCase`. Controllers, filtros, gateways y workers inyectan las interfaces por constructor; no servicios concretos ni repositorios JPA. Los servicios coordinan dominio y puertos sin importar Spring, JPA o HTTP. Dominio contiene modelos, reglas, excepciones de negocio y repositorios propios; infraestructura implementa los puertos y configura transacciones. Los DTO HTTP y sus mappers pertenecen a presentación; Command/Query/Result de aplicación son independientes del transporte.
+
+Los contratos entre módulos son interfaces públicas de aplicación; no se accede a Service concreto, repositorio interno o entidad JPA de otro módulo. Cuando se requiera persistencia se separan `domain/repository`, `infrastructure/persistence/entity`, `mapper`, `jpa` y `adapter`. La configuración de Spring conecta puertos y adaptadores, y conserva la transacción completa del caso de uso. Solo crear clases/carpetas con responsabilidad real. `common` contiene infraestructura/contratos transversales acotados; el contexto de Spring Security no entra a aplicación. `SesionAutenticada` es contrato puro en `auth/application/port`; generación aleatoria segura del token y huella SHA-256 son responsabilidades separadas.
+
+El [plan técnico de SPEC-13](../../Planes-y-plantilla-del-proyecto/planes/plan-spec-13-ruta-formalizacion.md) contiene el árbol de paquetes, puertos, persistencia, tareas backend, frontend e integración actualizados.
+
+### Interfaces de entrada e implementaciones
+
+| Módulo | UseCase (interfaz) | Service (implementación) |
+|---|---|---|
+| `formalizacion` | `ConsultarRutaFormalizacionUseCase` | `ConsultarRutaFormalizacionService` |
+| `formalizacion` | `ConsultarEnlaceInstitucionalUseCase` | `ConsultarEnlaceInstitucionalService` |
+| `formalizacion` | `ConsultarProgresoFormalizacionUseCase` | `ConsultarProgresoFormalizacionService` |
+| `formalizacion` | `ActualizarProgresoFormalizacionUseCase` | `ActualizarProgresoFormalizacionService` |
+| `formalizacion` | `ConsultarVinculacionInstitucionalUseCase` | `ConsultarVinculacionInstitucionalService` |
+
+Puertos de salida: repositorios de dominio para ruta/progreso; puerto institucional únicamente si se aprueba UC080. Las interfaces de entrada no crean endpoints nuevos; mantener API Contracts y las condiciones Could/Future. Las tareas existentes conservan IDs, historias, dependencias y orden: los nombres de servicio agrupado de origen se descomponen en estas operaciones, sin añadir tareas funcionales.
+
+Persistencia de referencia: `rutas_formalizacion`, `pasos_formalizacion`, `enlaces_institucionales`, `progreso_formalizacion`. El [manual entregado](../../tasks/fuentes/manual-base-de-datos-aliado.md) detalla el modelo MVP; no implica que los scripts V1–V6 ya estén disponibles o ejecutados.
+
+
 
 # Feature Specification: SPEC-14 — Preferencias, historial e indicadores
 
@@ -1953,3 +2302,28 @@ Como Usuario, quiero consultar mi actividad reciente para recordar eventos relev
 - **SC-002**: Los indicadores básicos producen resultados reproducibles para el 100% de los conjuntos de datos de prueba definidos, una vez resuelta la política de inclusión/exclusión de la Historia 4.
 - **SC-003**: Los eventos de notificación configurables respetan las preferencias activas del usuario en el 100% de los casos de prueba.
 - **SC-004**: El contenido de toda descarga de historial coincide exactamente con el historial consultable en pantalla para la misma cuenta, en el 100% de los casos.
+
+## Arquitectura y trazabilidad de implementación
+
+Este SPEC se implementa como parte del monolito modular con Arquitectura Limpia. Se conservan historias, requisitos, entidades conceptuales y criterios de éxito anteriores; esta sección fija la separación técnica de responsabilidades.
+
+**Contrato de arquitectura**: cada operación tiene una interfaz `application/usecase/*UseCase` y una implementación `application/service/*Service implements *UseCase`. Controllers, filtros, gateways y workers inyectan las interfaces por constructor; no servicios concretos ni repositorios JPA. Los servicios coordinan dominio y puertos sin importar Spring, JPA o HTTP. Dominio contiene modelos, reglas, excepciones de negocio y repositorios propios; infraestructura implementa los puertos y configura transacciones. Los DTO HTTP y sus mappers pertenecen a presentación; Command/Query/Result de aplicación son independientes del transporte.
+
+Los contratos entre módulos son interfaces públicas de aplicación; no se accede a Service concreto, repositorio interno o entidad JPA de otro módulo. Cuando se requiera persistencia se separan `domain/repository`, `infrastructure/persistence/entity`, `mapper`, `jpa` y `adapter`. La configuración de Spring conecta puertos y adaptadores, y conserva la transacción completa del caso de uso. Solo crear clases/carpetas con responsabilidad real. `common` contiene infraestructura/contratos transversales acotados; el contexto de Spring Security no entra a aplicación. `SesionAutenticada` es contrato puro en `auth/application/port`; generación aleatoria segura del token y huella SHA-256 son responsabilidades separadas.
+
+El [plan técnico de SPEC-14](../../Planes-y-plantilla-del-proyecto/planes/plan-spec-14-preferencias-historial-indicadores.md) contiene el árbol de paquetes, puertos, persistencia, tareas backend, frontend e integración actualizados.
+
+### Interfaces de entrada e implementaciones
+
+| Módulo | UseCase (interfaz) | Service (implementación) |
+|---|---|---|
+| `preferencias` | `ConsultarPreferenciasNotificacionUseCase` | `ConsultarPreferenciasNotificacionService` |
+| `preferencias` | `ActualizarPreferenciasNotificacionUseCase` | `ActualizarPreferenciasNotificacionService` |
+| `historial` | `ConsultarHistorialTrabajosUseCase` | `ConsultarHistorialTrabajosService` |
+| `historial` | `ExportarHistorialTrabajosUseCase` | `ExportarHistorialTrabajosService` |
+| `indicadores` | `ConsultarIndicadoresPrestadorUseCase` | `ConsultarIndicadoresPrestadorService` |
+| `actividad` | `ConsultarActividadRecienteUseCase` | `ConsultarActividadRecienteService` |
+
+Puertos de salida: consultas públicas de servicios/confianza/eventos y ArchivoStorageService para exportación; ConsultaPreferenciasPort se consume desde notificaciones. Las interfaces de entrada no crean endpoints nuevos; mantener API Contracts y las condiciones Could/Future. Las tareas existentes conservan IDs, historias, dependencias y orden: los nombres de servicio agrupado de origen se descomponen en estas operaciones, sin añadir tareas funcionales.
+
+Persistencia de referencia: `preferencias_notificacion`, `descargas_historial`. El [manual entregado](../../tasks/fuentes/manual-base-de-datos-aliado.md) detalla el modelo MVP; no implica que los scripts V1–V6 ya estén disponibles o ejecutados.
