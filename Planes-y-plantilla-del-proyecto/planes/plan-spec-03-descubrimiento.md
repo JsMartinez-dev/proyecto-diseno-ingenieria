@@ -1,7 +1,7 @@
 # Implementation Plan: SPEC-03 — Descubrimiento de prestadores
 
 **Date**: 2026-09-18
-**Spec**: [spec-03-descubrimiento-prestadores](FASE-4-Prototipar/specs/spec-03-descubrimiento-prestadores)
+**Spec**: [spec-03-descubrimiento-prestadores](../../FASE-4-Prototipar/specs/spec-03-descubrimiento-prestadores.md)
 **Depends on**: `plan-spec-01-autenticacion.md` (rol Cliente autenticado, interceptor de autorización por rol)
 
 ## Summary
@@ -36,6 +36,8 @@ Este SPEC no define entidades persistentes propias. Usa como **vistas de lectura
 
 ## Testing Strategy
 
+- **Arquitectura**: comprobar `Service implements UseCase`, constructores de entrada con interfaces, ausencia de Spring/JPA/HTTP en dominio/aplicación, mappers separados y transacciones verificadas con PostgreSQL cuando aplique.
+
 - **Contract tests**: ambos endpoints, incluyendo el caso de lista vacía (200, no error) y el 404 genérico de perfil no disponible.
 - **Integration tests**: uno por Acceptance Scenario del SPEC (búsqueda con/sin resultados, perfil desde búsqueda, perfil directo, perfil no disponible, actor no autorizado). Mientras SPEC-05/06/10/12 no existan, estos tests corren contra fixtures/mocks de esas entidades, dejando explícito en el propio test que es un doble de prueba, no el dato real.
 
@@ -45,22 +47,48 @@ Este SPEC no define entidades persistentes propias. Usa como **vistas de lectura
 ```text
 backend/src/main/java/com/aliado/
 └── descubrimiento/
-    ├── presentation/controller/       DescubrimientoController
-    ├── application/service/           DescubrimientoService
-    └── application/dto/               PrestadorPublicoDTO, CriterioBusqueda
+    ├── application/
+    │   ├── usecase/
+    │   │   BuscarPrestadoresUseCase, ConsultarPerfilPublicoUseCase
+    │   ├── service/
+    │   │   BuscarPrestadoresService, ConsultarPerfilPublicoService
+    │   ├── dto/
+    │   │   Command/Query/Result de las operaciones del módulo (sin HTTP/JPA)
+    │   └── port/
+    │       ConsultaPerfilesPublicosPort, ConsultaConfianzaPort
+    ├── infrastructure/
+    │   └── adapter/
+    │       Adaptadores de puertos requeridos; reutilizar contratos existentes
+    └── presentation/
+        ├── controller/
+        │   DescubrimientoController
+        ├── dto/
+        │   Request/Response HTTP según API Contracts
+        └── mapper/
+            Conversión HTTP ↔ Command/Query/Result
 ```
 
-**Arquitectura por capas**: este SPEC conserva la organización modular y aplica Arquitectura Limpia según las secciones 7.1–7.5 de [plan-general-ALIADO](plan-general-ALIADO.md#7-estructura-lógica-del-repositorio). Las rutas del árbol son relativas a cada módulo: `domain/` contiene modelos, reglas y puertos; `application/` coordina los casos de uso; `presentation/` expone HTTP; `infrastructure/` implementa los detalles técnicos. El dominio no importa Spring, JPA ni DTO HTTP; la aplicación depende de contratos de dominio/aplicación, nunca de adaptadores concretos. Los DTO de aplicación van en `application/dto/` y los contratos HTTP en `presentation/dto/`, con conversión en presentación cuando corresponda.
+**Contrato de arquitectura**: cada operación tiene una interfaz `application/usecase/*UseCase` y una implementación `application/service/*Service implements *UseCase`. Controllers, filtros, gateways y workers inyectan las interfaces por constructor; no servicios concretos ni repositorios JPA. Los servicios coordinan dominio y puertos sin importar Spring, JPA o HTTP. Dominio contiene modelos, reglas, excepciones de negocio y repositorios propios; infraestructura implementa los puertos y configura transacciones. Los DTO HTTP y sus mappers pertenecen a presentación; Command/Query/Result de aplicación son independientes del transporte.
 
-Cuando haya persistencia, los `*Repository` del árbol son puertos en `domain/repository/`, sin heredar de Spring Data. Las tareas existentes de persistencia incluyen sus implementaciones en `infrastructure/persistence/`: `entity/` para entidades JPA, `jpa/` para repositorios Spring Data, `adapter/` para implementar los puertos y `mapper/` para convertir dominio y persistencia. Las integraciones externas se definen mediante puertos de aplicación y adaptadores en `infrastructure/adapter/`; los contratos compartidos existentes de `common/` permanecen libres de detalles técnicos. Las dependencias entre módulos utilizan contratos de dominio o servicios públicos de aplicación, sin acceder a entidades JPA ni adaptadores ajenos. Los filtros de seguridad y la configuración de Spring pertenecen a infraestructura técnica; los controladores y la traducción de errores HTTP pertenecen a presentación. Se crean solo las carpetas necesarias para las tareas ya definidas; se conservan sus identificadores, orden y dependencias.
+Los contratos entre módulos son interfaces públicas de aplicación; no se accede a Service concreto, repositorio interno o entidad JPA de otro módulo. Cuando se requiera persistencia se separan `domain/repository`, `infrastructure/persistence/entity`, `mapper`, `jpa` y `adapter`. La configuración de Spring conecta puertos y adaptadores, y conserva la transacción completa del caso de uso. Solo crear clases/carpetas con responsabilidad real. `common` contiene infraestructura/contratos transversales acotados; el contexto de Spring Security no entra a aplicación. `SesionAutenticada` es contrato puro en `auth/application/port`; generación aleatoria segura del token y huella SHA-256 son responsabilidades separadas.
 
-No hay carpetas `domain/model/` ni `domain/repository/` propias: `DescubrimientoService` consulta, por inyección de dependencias dentro del mismo monolito, los puertos de repositorio de `prestador` (SPEC-05/06), `confianza` (SPEC-10) y el catálogo de `common`/administración (SPEC-12) cuando existan.
+### Interfaces de entrada e implementaciones
+
+| Módulo | UseCase (interfaz) | Service (implementación) |
+|---|---|---|
+| `descubrimiento` | `BuscarPrestadoresUseCase` | `BuscarPrestadoresService` |
+| `descubrimiento` | `ConsultarPerfilPublicoUseCase` | `ConsultarPerfilPublicoService` |
+
+Puertos de salida: ConsultaPerfilesPublicosPort, ConsultaConfianzaPort y consultas públicas del catálogo. Las interfaces de entrada no crean endpoints nuevos; mantener API Contracts y las condiciones Could/Future. Las tareas existentes conservan IDs, historias, dependencias y orden: los nombres de servicio agrupado de origen se descomponen en estas operaciones, sin añadir tareas funcionales.
+
+Persistencia de referencia: lecturas/proyecciones o extensión de tablas existentes; no crear tablas de lectura propias. El [manual entregado](../../tasks/fuentes/manual-base-de-datos-aliado.md) detalla el modelo MVP; no implica que los scripts V1–V6 ya estén disponibles o ejecutados.
+
 
 ---
 
 ## Phase 1: Setup
 
-- [ ] T001 Crear el paquete `descubrimiento/` con sus subcarpetas (`controller`, `service`, `dto`)
+- [ ] T001 Crear el paquete `descubrimiento/` con `application/usecase`, `application/service`, `application/dto`, `application/port` y `presentation` con controller/dto/mapper
 - [ ] T002 Definir fixtures/mocks de `PerfilProfesional`, `Reputacion` y catálogo de `Categoria`/`Zona` para poder probar este módulo antes de que existan SPEC-05/06, SPEC-10 y SPEC-12
 
 ---
@@ -79,8 +107,8 @@ No hay carpetas `domain/model/` ni `domain/repository/` propias: `Descubrimiento
 ### Implementation
 
 - [ ] T005 [P] [US1] DTO `PrestadorPublicoDTO` y `CriterioBusqueda` — `descubrimiento/application/dto`
-- [ ] T006 [US1] `DescubrimientoService.buscar(categoria, zona)` — consulta cross-módulo (depends on T002; depends en producción de los repositorios reales de SPEC-05/06, SPEC-10, SPEC-12)
-- [ ] T007 [US1] `DescubrimientoService.consultarPerfilPublico(id)` — mapeo único reutilizado tanto desde búsqueda como desde acceso directo, garantizando SC-002
+- [ ] T006 [US1] `BuscarPrestadoresUseCase.ejecutar(categoria, zona)` — consulta cross-módulo (depends on T002; depends en producción de los contratos públicos reales de SPEC-05/06, SPEC-10 y catálogo SPEC-04/12)
+- [ ] T007 [US1] `ConsultarPerfilPublicoUseCase.ejecutar(id)` — mapeo único reutilizado tanto desde búsqueda como desde acceso directo, garantizando SC-002
 - [ ] T008 [US1] Reutilizar el interceptor de autorización por rol de SPEC-01 (T018) para restringir ambos endpoints a Cliente
 - [ ] T009 [US1] Endpoints `GET /prestadores`, `GET /prestadores/{id}/perfil` — `descubrimiento/presentation/controller`
 
@@ -89,14 +117,35 @@ No hay carpetas `domain/model/` ni `domain/repository/` propias: `Descubrimiento
 
 ---
 
+## Frontend — app móvil y/o panel
+
+Destino principal: app-movil (React Native); panel-admin solo para superficies administrativas definidas.
+
+- [ ] **F03-FE-01** Lista de Prestadores con filtros de catálogos servidos por API, paginación y restablecimiento de filtros.
+- [ ] **F03-FE-02** Detalle público accesible desde resultados y enlace directo con el mismo DTO de exposición.
+- [ ] **F03-FE-03** Mostrar portafolio, cobertura, reputación y verificación solo cuando estén disponibles; conectar confianza al completar F10.
+- [ ] **F03-FE-04** Mostrar sin resultados o detalle no disponible sin revelar si hubo bloqueo o privacidad.
+
+Aplicar [estados y contrato de cliente](../../tasks/01-arquitectura-y-stack.md#frontend) y reutilizar la demo como referencia de recorrido, no como autoridad de seguridad o esquema. No agregar CRUD administrativos o interfaces Cliente/Prestador fuera de lo especificado.
+
+## Integración y aceptación de la feature
+
+- [ ] **F03-QA-01** Contrato idéntico al consultar desde lista o enlace directo y a la vista previa del Prestador.
+- [ ] **F03-QA-02** Datos de distintos clientes/prestadores para comprobar rol, cobertura y privacidad.
+- [ ] **F03-QA-03** Medir p95 < 300 ms con el dataset del piloto.
+- [ ] **F03-QA-04** Ejecutar escenarios Given/When/Then del SPEC y todos los SC incluidos abajo con actores y datos independientes; adjuntar evidencia de API, DB y UI.
+
+Validación arquitectónica adicional: verificar Service implements UseCase, constructor de controlador/filtro solo con interfaces, dominio/aplicación sin Spring/JPA/HTTP, mappers separados y un test de integración que acredite el límite transaccional cuando haya mutaciones.
+
+Para cerrar esta feature: contratos y migraciones versionados, tareas de origen y suplementos aplicables terminados, escenarios del SPEC aprobados con API real, UI conectada, evidencia de aislamiento por rol y ninguna decisión bloqueante sin resolver. Las funciones OFF se cierran como preparadas/aisladas, nunca como disponibles para usuarios.
+
 ## Dependencies & Execution Order
 
 - **Depende externamente de**: `plan-spec-01-autenticacion.md` (rol Cliente, interceptor de autorización).
-- **Dependencia de datos pendiente (no bloqueante para empezar, sí para terminar)**: SPEC-05/06 (perfil profesional del Prestador), SPEC-10 (reputación), SPEC-12 (catálogo de categorías/zonas). Se puede avanzar Phase 1-2 con fixtures, pero las integration tests de T004 no pueden considerarse definitivamente verdes hasta integrar los repositorios reales.
+- **Dependencia de datos pendiente (no bloqueante para empezar, sí para terminar)**: SPEC-05/06 (perfil profesional del Prestador), SPEC-10 (reputación), SPEC-12 (catálogo de categorías/zonas). Se puede avanzar Phase 1-2 con fixtures, pero las integration tests de T004 no pueden considerarse definitivamente verdes hasta integrar los contratos públicos reales.
 - **Setup (Phase 1)** → depende solo de `plan-spec-01-autenticacion.md`.
 - **User Story 1 (Phase 2)** → depende de Phase 1.
 
 ## Notes
 
-- Este plan documenta una dependencia de datos que contradice el orden superficial de los diagramas (UC-02 antes que UC-03/UC-05); se deja explícita para que, al planear SPEC-05/06/10/12, el equipo recuerde volver aquí y reemplazar los fixtures por los repositorios reales.
-
+- Este plan documenta una dependencia de datos que contradice el orden superficial de los diagramas (UC-02 antes que UC-03/UC-05); se deja explícita para que, al planear SPEC-05/06/10/12, el equipo recuerde volver aquí y reemplazar los fixtures por los contratos públicos reales.

@@ -200,3 +200,39 @@ Como Administrador, quiero identificar y gestionar servicios clasificados como d
 - **SC-002**: Ningún reporte cambia de estado a resuelto/descartado sin haber pasado primero por su revisión de detalle.
 - **SC-003**: El 100% de los bloqueos preventivos queda con administrador, fecha y motivo registrados.
 - **SC-004**: Ninguna acción de moderación de contenido (UC074) provoca por sí sola un bloqueo de cuenta (UC073); son acciones independientes.
+
+## Arquitectura y trazabilidad de implementación
+
+Este SPEC se implementa como parte del monolito modular con Arquitectura Limpia. Se conservan historias, requisitos, entidades conceptuales y criterios de éxito anteriores; esta sección fija la separación técnica de responsabilidades.
+
+**Contrato de arquitectura**: cada operación tiene una interfaz `application/usecase/*UseCase` y una implementación `application/service/*Service implements *UseCase`. Controllers, filtros, gateways y workers inyectan las interfaces por constructor; no servicios concretos ni repositorios JPA. Los servicios coordinan dominio y puertos sin importar Spring, JPA o HTTP. Dominio contiene modelos, reglas, excepciones de negocio y repositorios propios; infraestructura implementa los puertos y configura transacciones. Los DTO HTTP y sus mappers pertenecen a presentación; Command/Query/Result de aplicación son independientes del transporte.
+
+Los contratos entre módulos son interfaces públicas de aplicación; no se accede a Service concreto, repositorio interno o entidad JPA de otro módulo. Cuando se requiera persistencia se separan `domain/repository`, `infrastructure/persistence/entity`, `mapper`, `jpa` y `adapter`. La configuración de Spring conecta puertos y adaptadores, y conserva la transacción completa del caso de uso. Solo crear clases/carpetas con responsabilidad real. `common` contiene infraestructura/contratos transversales acotados; el contexto de Spring Security no entra a aplicación. `SesionAutenticada` es contrato puro en `auth/application/port`; generación aleatoria segura del token y huella SHA-256 son responsabilidades separadas.
+
+El [plan técnico de SPEC-12](../../Planes-y-plantilla-del-proyecto/planes/plan-spec-12-administracion-moderacion-riesgos.md) contiene el árbol de paquetes, puertos, persistencia, tareas backend, frontend e integración actualizados.
+
+### Interfaces de entrada e implementaciones
+
+| Módulo | UseCase (interfaz) | Service (implementación) |
+|---|---|---|
+| `administracion` | `CrearCategoriaUseCase` | `CrearCategoriaService` |
+| `administracion` | `EditarCategoriaUseCase` | `EditarCategoriaService` |
+| `administracion` | `DesactivarCategoriaUseCase` | `DesactivarCategoriaService` |
+| `administracion` | `CrearZonaUseCase` | `CrearZonaService` |
+| `administracion` | `EditarZonaUseCase` | `EditarZonaService` |
+| `administracion` | `DesactivarZonaUseCase` | `DesactivarZonaService` |
+| `administracion` | `ConsultarColaReportesUseCase` | `ConsultarColaReportesService` |
+| `administracion` | `RevisarReporteUseCase` | `RevisarReporteService` |
+| `administracion` | `ResolverReporteUseCase` | `ResolverReporteService` |
+| `administracion` | `BloquearCuentaUseCase` | `BloquearCuentaService` |
+| `administracion` | `LevantarBloqueoUseCase` | `LevantarBloqueoService` |
+| `administracion` | `ModerarContenidoUseCase` | `ModerarContenidoService` |
+| `administracion` | `BuscarCuentasPerfilesUseCase` | `BuscarCuentasPerfilesService` |
+| `administracion` | `MarcarServicioAltoRiesgoUseCase` | `MarcarServicioAltoRiesgoService` |
+| `administracion` | `RevisarVerificacionUseCase` | `RevisarVerificacionService` |
+| `auditoria` | `RegistrarAuditoriaUseCase` | `RegistrarAuditoriaService` |
+| `auditoria` | `ConsultarAuditoriaUseCase` | `ConsultarAuditoriaService` |
+
+Puertos de salida: contratos públicos de catálogo, reportes, identidad, confianza y auditoría; sin repositorios JPA ajenos. Las interfaces de entrada no crean endpoints nuevos; mantener API Contracts y las condiciones Could/Future. Las tareas existentes conservan IDs, historias, dependencias y orden: los nombres de servicio agrupado de origen se descomponen en estas operaciones, sin añadir tareas funcionales.
+
+Persistencia de referencia: `bloqueos_preventivos`, `acciones_moderacion`, `marcas_alto_riesgo`, `auditoria_administrativa`. El [manual entregado](../../tasks/fuentes/manual-base-de-datos-aliado.md) detalla el modelo MVP; no implica que los scripts V1–V6 ya estén disponibles o ejecutados.

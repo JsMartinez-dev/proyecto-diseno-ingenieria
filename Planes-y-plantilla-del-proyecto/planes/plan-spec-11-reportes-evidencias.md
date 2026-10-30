@@ -1,7 +1,7 @@
 # Implementation Plan: SPEC-11
 
 **Date**: 2026-10-02  
-**Spec**: [spec-11-reportes-evidencias](FASE-4-Prototipar/specs/spec-11-reportes-evidencias)  
+**Spec**: [spec-11-reportes-evidencias](../../FASE-4-Prototipar/specs/spec-11-reportes-evidencias.md)
 **Depends on**: `plan-spec-01-autenticacion.md` (Usuario autenticado), `plan-spec-04-gestion-solicitudes-servicio.md` (`ArchivoStorageService`), `plan-spec-08-contratacion-ciclo-servicio.md` (`ServicioContratado`), `plan-spec-10-calificaciones-resenas-verificacion.md` (núcleo `reportes/` y reporte de reseña)
 
 ## Summary
@@ -47,6 +47,8 @@ Reglas:
 
 ## Testing Strategy
 
+- **Arquitectura**: comprobar `Service implements UseCase`, constructores de entrada con interfaces, ausencia de Spring/JPA/HTTP en dominio/aplicación, mappers separados y transacciones verificadas con PostgreSQL cuando aplique.
+
 - **Contract tests**: endpoints y formato de errores.
 - **Integration tests**: 6 Acceptance Scenarios, incluyendo consolidación, archivo inválido y carrera reporte-resuelto vs. nueva evidencia.
 - **Unit tests**: política de consolidación, autorización de evidencia y validación de estado.
@@ -56,19 +58,60 @@ Reglas:
 
 ```text
 backend/src/main/java/com/aliado/
-├── reportes/
-│   ├── presentation/controller/       ReporteController
-│   ├── application/service/           ReporteService, EvidenciaReporteService
-│   ├── domain/repository/             ReporteRepository, EvidenciaReporteRepository
-│   └── domain/model/                  Reporte, EvidenciaReporte
-├── servicios/      # SPEC-08
-├── confianza/      # SPEC-10
-└── common/storage/ # SPEC-04
+└── reportes/
+    ├── domain/
+    │   ├── model/
+    │   │   Reporte, EvidenciaReporte
+    │   └── repository/
+    │       ReporteRepository, EvidenciaReporteRepository
+    ├── application/
+    │   ├── usecase/
+    │   │   ReportarUsuarioUseCase, ReportarServicioUseCase, AdjuntarEvidenciaReporteUseCase,
+    │   │   ConsultarReportePropioUseCase
+    │   ├── service/
+    │   │   ReportarUsuarioService, ReportarServicioService, AdjuntarEvidenciaReporteService,
+    │   │   ConsultarReportePropioService
+    │   ├── dto/
+    │   │   Command/Query/Result de las operaciones del módulo (sin HTTP/JPA)
+    │   └── port/
+    │       ArchivoStorageService (reutilizado)
+    ├── infrastructure/
+    │   ├── persistence/
+    │   │   ├── entity/
+    │   │   │   ReporteEntity, EvidenciaReporteEntity
+    │   │   ├── mapper/
+    │   │   │   ReporteMapper, EvidenciaReporteMapper
+    │   │   ├── jpa/
+    │   │   │   ReporteJpaRepository, EvidenciaReporteJpaRepository
+    │   │   └── adapter/
+    │   │       ReportePersistenceAdapter, EvidenciaReportePersistenceAdapter
+    │   └── adapter/
+    │       Adaptadores de puertos requeridos; reutilizar contratos existentes
+    └── presentation/
+        ├── controller/
+        │   ReporteController
+        ├── dto/
+        │   Request/Response HTTP según API Contracts
+        └── mapper/
+            Conversión HTTP ↔ Command/Query/Result
 ```
 
-**Arquitectura por capas**: este SPEC conserva la organización modular y aplica Arquitectura Limpia según las secciones 7.1–7.5 de [plan-general-ALIADO](plan-general-ALIADO.md#7-estructura-lógica-del-repositorio). Las rutas del árbol son relativas a cada módulo: `domain/` contiene modelos, reglas y puertos; `application/` coordina los casos de uso; `presentation/` expone HTTP; `infrastructure/` implementa los detalles técnicos. El dominio no importa Spring, JPA ni DTO HTTP; la aplicación depende de contratos de dominio/aplicación, nunca de adaptadores concretos. Los DTO de aplicación van en `application/dto/` y los contratos HTTP en `presentation/dto/`, con conversión en presentación cuando corresponda.
+**Contrato de arquitectura**: cada operación tiene una interfaz `application/usecase/*UseCase` y una implementación `application/service/*Service implements *UseCase`. Controllers, filtros, gateways y workers inyectan las interfaces por constructor; no servicios concretos ni repositorios JPA. Los servicios coordinan dominio y puertos sin importar Spring, JPA o HTTP. Dominio contiene modelos, reglas, excepciones de negocio y repositorios propios; infraestructura implementa los puertos y configura transacciones. Los DTO HTTP y sus mappers pertenecen a presentación; Command/Query/Result de aplicación son independientes del transporte.
 
-Cuando haya persistencia, los `*Repository` del árbol son puertos en `domain/repository/`, sin heredar de Spring Data. Las tareas existentes de persistencia incluyen sus implementaciones en `infrastructure/persistence/`: `entity/` para entidades JPA, `jpa/` para repositorios Spring Data, `adapter/` para implementar los puertos y `mapper/` para convertir dominio y persistencia. Las integraciones externas se definen mediante puertos de aplicación y adaptadores en `infrastructure/adapter/`; los contratos compartidos existentes de `common/` permanecen libres de detalles técnicos. Las dependencias entre módulos utilizan contratos de dominio o servicios públicos de aplicación, sin acceder a entidades JPA ni adaptadores ajenos. Los filtros de seguridad y la configuración de Spring pertenecen a infraestructura técnica; los controladores y la traducción de errores HTTP pertenecen a presentación. Se crean solo las carpetas necesarias para las tareas ya definidas; se conservan sus identificadores, orden y dependencias.
+Los contratos entre módulos son interfaces públicas de aplicación; no se accede a Service concreto, repositorio interno o entidad JPA de otro módulo. Cuando se requiera persistencia se separan `domain/repository`, `infrastructure/persistence/entity`, `mapper`, `jpa` y `adapter`. La configuración de Spring conecta puertos y adaptadores, y conserva la transacción completa del caso de uso. Solo crear clases/carpetas con responsabilidad real. `common` contiene infraestructura/contratos transversales acotados; el contexto de Spring Security no entra a aplicación. `SesionAutenticada` es contrato puro en `auth/application/port`; generación aleatoria segura del token y huella SHA-256 son responsabilidades separadas.
+
+### Interfaces de entrada e implementaciones
+
+| Módulo | UseCase (interfaz) | Service (implementación) |
+|---|---|---|
+| `reportes` | `ReportarUsuarioUseCase` | `ReportarUsuarioService` |
+| `reportes` | `ReportarServicioUseCase` | `ReportarServicioService` |
+| `reportes` | `AdjuntarEvidenciaReporteUseCase` | `AdjuntarEvidenciaReporteService` |
+| `reportes` | `ConsultarReportePropioUseCase` | `ConsultarReportePropioService` |
+
+Puertos de salida: ArchivoStorageService y consultas autorizadas de cuenta/servicio/reseña. Las interfaces de entrada no crean endpoints nuevos; mantener API Contracts y las condiciones Could/Future. Las tareas existentes conservan IDs, historias, dependencias y orden: los nombres de servicio agrupado de origen se descomponen en estas operaciones, sin añadir tareas funcionales.
+
+Persistencia de referencia: `reportes`, `evidencias_reporte`. El [manual entregado](../../tasks/fuentes/manual-base-de-datos-aliado.md) detalla el modelo MVP; no implica que los scripts V1–V6 ya estén disponibles o ejecutados.
 
 **Structure Decision**: se amplía el módulo ya creado en SPEC-10 en lugar de crear `reporte_usuario`, `reporte_servicio` y `reporte_resena` como sistemas independientes. La discriminación por tipo queda centralizada y SPEC-12 consume el mismo repositorio/servicio.
 
@@ -84,8 +127,8 @@ Cuando haya persistencia, los `*Repository` del árbol son puertos en `domain/re
 
 ## Phase 2: Foundational
 
-- [ ] T004 `ReporteService` expone operaciones genéricas de creación y consulta.
-- [ ] T005 `EvidenciaReporteService` integra `ArchivoStorageService`, validación MIME/tamaño y autorización.
+- [ ] T004 Interfaces ReportarResenaUseCase, ReportarUsuarioUseCase, ReportarServicioUseCase y ConsultarReportePropioUseCase con sus Service; núcleo compartido único de reportes.
+- [ ] T005 AdjuntarEvidenciaReporteUseCase y su Service usan ArchivoStorageService, validación MIME/tamaño y autorización; detalles del SDK solo en adaptador.
 - [ ] T006 Definir estado `PENDIENTE` como estado inicial consumible por SPEC-12.
 
 ---
@@ -94,7 +137,7 @@ Cuando haya persistencia, los `*Repository` del árbol son puertos en `domain/re
 
 - [ ] T007 [P] [US1] Contract test `POST /usuarios/{id}/reportes`.
 - [ ] T008 [P] [US1] Integration test: éxito, motivo ausente, objetivo inexistente, reporte equivalente.
-- [ ] T009 [US1] Implementar `ReporteService.reportarUsuario()`.
+- [ ] T009 [US1] Implementar `ReportarUsuarioUseCase.ejecutar()`.
 - [ ] T010 [US1] Endpoint correspondiente.
 
 ---
@@ -103,7 +146,7 @@ Cuando haya persistencia, los `*Repository` del árbol son puertos en `domain/re
 
 - [ ] T011 [P] [US2] Contract test `POST /servicios/{id}/reportes`.
 - [ ] T012 [P] [US2] Integration test: participante válido y actor ajeno.
-- [ ] T013 [US2] Implementar `ReporteService.reportarServicio()`.
+- [ ] T013 [US2] Implementar `ReportarServicioUseCase.ejecutar()`.
 - [ ] T014 [US2] Endpoint correspondiente.
 
 ---
@@ -120,6 +163,28 @@ Cuando haya persistencia, los `*Repository` del árbol son puertos en `domain/re
 **Checkpoint**: reportes de los tres tipos quedan listos para la cola administrativa de SPEC-12.
 
 ---
+
+## Frontend — app móvil y/o panel
+
+Destino principal: app-movil (React Native); panel-admin solo para superficies administrativas definidas.
+
+- [ ] **F11-FE-01** Formularios contextuales para reportar cuenta o servicio con motivo obligatorio.
+- [ ] **F11-FE-02** Carga de evidencia solo después de recibir reporteId; permitir reintentar carga sin recrear reporte.
+- [ ] **F11-FE-03** Detalle propio y estado; distinguir carga fallida de reporte creado para no perder trazabilidad.
+- [ ] **F11-FE-04** Mantener contenido y evidencia anteriores al consolidar reporte equivalente abierto.
+
+Aplicar [estados y contrato de cliente](../../tasks/01-arquitectura-y-stack.md#frontend) y reutilizar la demo como referencia de recorrido, no como autoridad de seguridad o esquema. No agregar CRUD administrativos o interfaces Cliente/Prestador fuera de lo especificado.
+
+## Integración y aceptación de la feature
+
+- [ ] **F11-QA-01** CHECK de un objetivo compatible con tipo, FK de evidencia y política de consolidación concurrente.
+- [ ] **F11-QA-02** Usuario ajeno no accede a reporte/evidencia ni reporta un servicio no autorizado por contrato.
+- [ ] **F11-QA-03** Fallo storage o metadatos no deja evidencia publicada huérfana; URL firmada expira.
+- [ ] **F11-QA-04** Ejecutar escenarios Given/When/Then del SPEC y todos los SC incluidos abajo con actores y datos independientes; adjuntar evidencia de API, DB y UI.
+
+Validación arquitectónica adicional: verificar Service implements UseCase, constructor de controlador/filtro solo con interfaces, dominio/aplicación sin Spring/JPA/HTTP, mappers separados y un test de integración que acredite el límite transaccional cuando haya mutaciones.
+
+Para cerrar esta feature: contratos y migraciones versionados, tareas de origen y suplementos aplicables terminados, escenarios del SPEC aprobados con API real, UI conectada, evidencia de aislamiento por rol y ninguna decisión bloqueante sin resolver. Las funciones OFF se cierran como preparadas/aisladas, nunca como disponibles para usuarios.
 
 ## Dependencies & Execution Order
 

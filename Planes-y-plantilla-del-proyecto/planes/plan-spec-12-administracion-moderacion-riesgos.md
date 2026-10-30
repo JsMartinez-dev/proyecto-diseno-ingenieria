@@ -1,7 +1,7 @@
 # Implementation Plan: SPEC-12
 
 **Date**: 2026-10-02  
-**Spec**: [spec-12-administracion-moderacion-riesgos](FASE-4-Prototipar/specs/spec-12-administracion-moderacion-riesgos)  
+**Spec**: [spec-12-administracion-moderacion-riesgos](../../FASE-4-Prototipar/specs/spec-12-administracion-moderacion-riesgos.md)
 **Depends on**: `plan-spec-01-autenticacion.md`, `plan-spec-04-gestion-solicitudes-servicio.md` (`CategoriaServicio`, `Zona`), `plan-spec-05-perfil-profesional.md`, `plan-spec-08-contratacion-ciclo-servicio.md`, `plan-spec-10-calificaciones-resenas-verificacion.md`, `plan-spec-11-reportes-evidencias.md`
 
 ## Summary
@@ -54,6 +54,8 @@ Todos requieren rol `ADMINISTRADOR`.
 
 ## Testing Strategy
 
+- **Arquitectura**: comprobar `Service implements UseCase`, constructores de entrada con interfaces, ausencia de Spring/JPA/HTTP en dominio/aplicación, mappers separados y transacciones verificadas con PostgreSQL cuando aplique.
+
 - **Contract tests** para cada familia de endpoints.
 - **Integration tests**: 12 Acceptance Scenarios, incluyendo categoría/zona en uso, resolución concurrente y cuenta bloqueada todavía localizable por Administrador.
 - **Unit tests**: máquina de estados del reporte, política de desactivación, bloqueo preventivo, moderación no equivalente a bloqueo.
@@ -64,25 +66,104 @@ Todos requieren rol `ADMINISTRADOR`.
 ```text
 backend/src/main/java/com/aliado/
 ├── administracion/
-│   ├── presentation/controller/       CatalogoAdminController, ReporteAdminController,
-│   │               CuentaAdminController, ModeracionController, RiesgoController
-│   ├── application/service/           AdministracionCatalogoService, ModeracionService,
-│   │               BloqueoService, RiesgoService, BusquedaAdminService
-│   ├── domain/repository/             BloqueoRepository, AccionModeracionRepository,
-│   │               MarcaAltoRiesgoRepository
-│   └── domain/model/                  BloqueoPreventivo, AccionModeracion, MarcaAltoRiesgo
-├── auditoria/
-│   ├── application/service/           AuditoriaService
-│   ├── domain/repository/             AuditoriaAdministrativaRepository
-│   └── domain/model/                  AuditoriaAdministrativa
-├── catalogo/       # SPEC-04
-├── reportes/       # SPEC-10/11
-└── common/security/
+│   ├── domain/
+│   │   ├── model/
+│   │   │   BloqueoPreventivo, AccionModeracion, MarcaAltoRiesgo
+│   │   └── repository/
+│   │       BloqueoRepository, AccionModeracionRepository, MarcaAltoRiesgoRepository
+│   ├── application/
+│   │   ├── usecase/
+│   │   │   CrearCategoriaUseCase, EditarCategoriaUseCase, DesactivarCategoriaUseCase, CrearZonaUseCase,
+│   │   │   EditarZonaUseCase, DesactivarZonaUseCase, ConsultarColaReportesUseCase, RevisarReporteUseCase,
+│   │   │   ResolverReporteUseCase, BloquearCuentaUseCase, LevantarBloqueoUseCase, ModerarContenidoUseCase,
+│   │   │   BuscarCuentasPerfilesUseCase, MarcarServicioAltoRiesgoUseCase, RevisarVerificacionUseCase
+│   │   ├── service/
+│   │   │   CrearCategoriaService, EditarCategoriaService, DesactivarCategoriaService, CrearZonaService,
+│   │   │   EditarZonaService, DesactivarZonaService, ConsultarColaReportesService, RevisarReporteService,
+│   │   │   ResolverReporteService, BloquearCuentaService, LevantarBloqueoService, ModerarContenidoService,
+│   │   │   BuscarCuentasPerfilesService, MarcarServicioAltoRiesgoService, RevisarVerificacionService
+│   │   ├── dto/
+│   │   │   Command/Query/Result de las operaciones del módulo (sin HTTP/JPA)
+│   │   └── port/
+│   │       Contratos públicos de catálogo, reportes, identidad, confianza y auditoría
+│   ├── infrastructure/
+│   │   ├── persistence/
+│   │   │   ├── entity/
+│   │   │   │   BloqueoPreventivoEntity, AccionModeracionEntity, MarcaAltoRiesgoEntity
+│   │   │   ├── mapper/
+│   │   │   │   BloqueoPreventivoMapper, AccionModeracionMapper, MarcaAltoRiesgoMapper
+│   │   │   ├── jpa/
+│   │   │   │   BloqueoJpaRepository, AccionModeracionJpaRepository, MarcaAltoRiesgoJpaRepository
+│   │   │   └── adapter/
+│   │   │       BloqueoPersistenceAdapter, AccionModeracionPersistenceAdapter, MarcaAltoRiesgoPersistenceAdapter
+│   │   └── adapter/
+│   │       Adaptadores de puertos requeridos; reutilizar contratos existentes
+│   └── presentation/
+│       ├── controller/
+│       │   CatalogoAdminController, ReporteAdminController, CuentaAdminController, ModeracionController,
+│       │   RiesgoController
+│       ├── dto/
+│       │   Request/Response HTTP según API Contracts
+│       └── mapper/
+│           Conversión HTTP ↔ Command/Query/Result
+└── auditoria/
+    ├── domain/
+    │   ├── model/
+    │   │   AuditoriaAdministrativa
+    │   └── repository/
+    │       AuditoriaAdministrativaRepository
+    ├── application/
+    │   ├── usecase/
+    │   │   RegistrarAuditoriaUseCase, ConsultarAuditoriaUseCase
+    │   ├── service/
+    │   │   RegistrarAuditoriaService, ConsultarAuditoriaService
+    │   ├── dto/
+    │   │   Command/Query/Result de las operaciones del módulo (sin HTTP/JPA)
+    │   └── port/
+    │       Contratos públicos de catálogo, reportes, identidad, confianza y auditoría
+    └── infrastructure/
+        ├── persistence/
+        │   ├── entity/
+        │   │   AuditoriaAdministrativaEntity
+        │   ├── mapper/
+        │   │   AuditoriaAdministrativaMapper
+        │   ├── jpa/
+        │   │   AuditoriaAdministrativaJpaRepository
+        │   └── adapter/
+        │       AuditoriaAdministrativaPersistenceAdapter
+        └── adapter/
+            Adaptadores de puertos requeridos; reutilizar contratos existentes
 ```
 
-**Arquitectura por capas**: este SPEC conserva la organización modular y aplica Arquitectura Limpia según las secciones 7.1–7.5 de [plan-general-ALIADO](plan-general-ALIADO.md#7-estructura-lógica-del-repositorio). Las rutas del árbol son relativas a cada módulo: `domain/` contiene modelos, reglas y puertos; `application/` coordina los casos de uso; `presentation/` expone HTTP; `infrastructure/` implementa los detalles técnicos. El dominio no importa Spring, JPA ni DTO HTTP; la aplicación depende de contratos de dominio/aplicación, nunca de adaptadores concretos. Los DTO de aplicación van en `application/dto/` y los contratos HTTP en `presentation/dto/`, con conversión en presentación cuando corresponda.
+**Contrato de arquitectura**: cada operación tiene una interfaz `application/usecase/*UseCase` y una implementación `application/service/*Service implements *UseCase`. Controllers, filtros, gateways y workers inyectan las interfaces por constructor; no servicios concretos ni repositorios JPA. Los servicios coordinan dominio y puertos sin importar Spring, JPA o HTTP. Dominio contiene modelos, reglas, excepciones de negocio y repositorios propios; infraestructura implementa los puertos y configura transacciones. Los DTO HTTP y sus mappers pertenecen a presentación; Command/Query/Result de aplicación son independientes del transporte.
 
-Cuando haya persistencia, los `*Repository` del árbol son puertos en `domain/repository/`, sin heredar de Spring Data. Las tareas existentes de persistencia incluyen sus implementaciones en `infrastructure/persistence/`: `entity/` para entidades JPA, `jpa/` para repositorios Spring Data, `adapter/` para implementar los puertos y `mapper/` para convertir dominio y persistencia. Las integraciones externas se definen mediante puertos de aplicación y adaptadores en `infrastructure/adapter/`; los contratos compartidos existentes de `common/` permanecen libres de detalles técnicos. Las dependencias entre módulos utilizan contratos de dominio o servicios públicos de aplicación, sin acceder a entidades JPA ni adaptadores ajenos. Los filtros de seguridad y la configuración de Spring pertenecen a infraestructura técnica; los controladores y la traducción de errores HTTP pertenecen a presentación. Se crean solo las carpetas necesarias para las tareas ya definidas; se conservan sus identificadores, orden y dependencias.
+Los contratos entre módulos son interfaces públicas de aplicación; no se accede a Service concreto, repositorio interno o entidad JPA de otro módulo. Cuando se requiera persistencia se separan `domain/repository`, `infrastructure/persistence/entity`, `mapper`, `jpa` y `adapter`. La configuración de Spring conecta puertos y adaptadores, y conserva la transacción completa del caso de uso. Solo crear clases/carpetas con responsabilidad real. `common` contiene infraestructura/contratos transversales acotados; el contexto de Spring Security no entra a aplicación. `SesionAutenticada` es contrato puro en `auth/application/port`; generación aleatoria segura del token y huella SHA-256 son responsabilidades separadas.
+
+### Interfaces de entrada e implementaciones
+
+| Módulo | UseCase (interfaz) | Service (implementación) |
+|---|---|---|
+| `administracion` | `CrearCategoriaUseCase` | `CrearCategoriaService` |
+| `administracion` | `EditarCategoriaUseCase` | `EditarCategoriaService` |
+| `administracion` | `DesactivarCategoriaUseCase` | `DesactivarCategoriaService` |
+| `administracion` | `CrearZonaUseCase` | `CrearZonaService` |
+| `administracion` | `EditarZonaUseCase` | `EditarZonaService` |
+| `administracion` | `DesactivarZonaUseCase` | `DesactivarZonaService` |
+| `administracion` | `ConsultarColaReportesUseCase` | `ConsultarColaReportesService` |
+| `administracion` | `RevisarReporteUseCase` | `RevisarReporteService` |
+| `administracion` | `ResolverReporteUseCase` | `ResolverReporteService` |
+| `administracion` | `BloquearCuentaUseCase` | `BloquearCuentaService` |
+| `administracion` | `LevantarBloqueoUseCase` | `LevantarBloqueoService` |
+| `administracion` | `ModerarContenidoUseCase` | `ModerarContenidoService` |
+| `administracion` | `BuscarCuentasPerfilesUseCase` | `BuscarCuentasPerfilesService` |
+| `administracion` | `MarcarServicioAltoRiesgoUseCase` | `MarcarServicioAltoRiesgoService` |
+| `administracion` | `RevisarVerificacionUseCase` | `RevisarVerificacionService` |
+| `auditoria` | `RegistrarAuditoriaUseCase` | `RegistrarAuditoriaService` |
+| `auditoria` | `ConsultarAuditoriaUseCase` | `ConsultarAuditoriaService` |
+
+Puertos de salida: contratos públicos de catálogo, reportes, identidad, confianza y auditoría; sin repositorios JPA ajenos. Las interfaces de entrada no crean endpoints nuevos; mantener API Contracts y las condiciones Could/Future. Las tareas existentes conservan IDs, historias, dependencias y orden: los nombres de servicio agrupado de origen se descomponen en estas operaciones, sin añadir tareas funcionales.
+
+Persistencia de referencia: `bloqueos_preventivos`, `acciones_moderacion`, `marcas_alto_riesgo`, `auditoria_administrativa`. El [manual entregado](../../tasks/fuentes/manual-base-de-datos-aliado.md) detalla el modelo MVP; no implica que los scripts V1–V6 ya estén disponibles o ejecutados.
 
 **Structure Decision**: administración opera sobre los módulos propietarios mediante servicios, no duplicando entidades. `auditoria/` es transversal y append-only. El rol Administrador se autentica con SPEC-01 pero no puede ser creado mediante el endpoint público de registro Cliente/Prestador.
 
@@ -99,9 +180,9 @@ Cuando haya persistencia, los `*Repository` del árbol son puertos en `domain/re
 
 ## Phase 2: Foundational
 
-- [ ] T005 `AuditoriaService.registrar()` append-only para toda mutación administrativa.
+- [ ] T005 `RegistrarAuditoriaUseCase.ejecutar()` append-only para toda mutación administrativa.
 - [ ] T006 Filtro/annotation de autorización `ADMINISTRADOR`.
-- [ ] T007 `ReporteAdminService` con transición PENDIENTE→EN_REVISION→RESUELTO/DESCARTADO.
+- [ ] T007 ConsultarColaReportesUseCase, RevisarReporteUseCase y ResolverReporteUseCase con sus Service coordinan el contrato público de reportes y transición PENDIENTE→EN_REVISION→RESUELTO/DESCARTADO.
 - [ ] T008 Garantizar que abrir detalle marca revisión antes de permitir resolución.
 
 ---
@@ -109,7 +190,7 @@ Cuando haya persistencia, los `*Repository` del árbol son puertos en `domain/re
 ## Phase 3: User Story 1 - Administrar categorías [UC068] (Priority: P1)
 
 - [ ] T009 [P] Contract/integration tests de alta, edición y desactivación.
-- [ ] T010 Implementar `AdministracionCatalogoService` para categorías.
+- [ ] T010 CrearCategoriaUseCase, EditarCategoriaUseCase y DesactivarCategoriaUseCase con sus Service, mediante el contrato público propietario del catálogo.
 - [ ] T011 Impedir publicar borrador que conserva categoría desactivada.
 - [ ] T012 Auditar cada cambio.
 
@@ -157,7 +238,7 @@ Cuando haya persistencia, los `*Repository` del árbol son puertos en `domain/re
 ## Phase 8: User Story 6 - Buscar usuarios y perfiles [UC075] (Priority: P2)
 
 - [ ] T032 Contract/integration tests por nombre, email e identificador.
-- [ ] T033 `BusquedaAdminService` con DTO mínimo administrativo.
+- [ ] T033 BuscarCuentasPerfilesUseCase y BuscarCuentasPerfilesService con DTO mínimo administrativo.
 - [ ] T034 Endpoint paginado.
 
 ---
@@ -170,6 +251,31 @@ Cuando haya persistencia, los `*Repository` del árbol son puertos en `domain/re
 - [ ] T038 Auditoría de la clasificación.
 
 ---
+
+## Frontend — app móvil y/o panel
+
+Destino principal: panel-admin (React); app-movil refleja efectos de bloqueos y moderación.
+
+- [ ] **F12-FE-01** Panel React con navegación exclusiva Administrador y login real; los guardas de UI complementan la autorización backend.
+- [ ] **F12-FE-02** CRUD lógico de categorías/zonas; búsqueda de cuentas/perfiles y estados vacíos.
+- [ ] **F12-FE-03** Cola de reportes con detalle/evidencia; habilitar resolver/descartar solo tras revisión y motivo obligatorio.
+- [ ] **F12-FE-04** Bloqueo/desbloqueo con confirmación y motivo; moderación de contenido separada de bloqueo.
+- [ ] **F12-FE-05** Detalle de servicio con marca de riesgo según catálogo acordado, auditoría filtrable y solo lectura.
+- [ ] **F12-FE-06** Revisión documental aprobar/rechazar con justificación: formalizar endpoints y persistencia faltantes en D-11.
+
+Aplicar [estados y contrato de cliente](../../tasks/01-arquitectura-y-stack.md#frontend) y reutilizar la demo como referencia de recorrido, no como autoridad de seguridad o esquema. No agregar CRUD administrativos o interfaces Cliente/Prestador fuera de lo especificado.
+
+## Integración y aceptación de la feature
+
+- [ ] **F12-QA-01** Dos administradores resuelven a la vez: una resolución válida y conflicto consistente.
+- [ ] **F12-QA-02** Cada mutación y revisión definida registra auditoría; trigger y permisos impiden UPDATE/DELETE sobre auditoría.
+- [ ] **F12-QA-03** Cuenta bloqueada pierde capacidades ordinarias y exposición pública; moderar contenido no bloquea cuenta.
+- [ ] **F12-QA-04** Desactivar catálogo no borra referencias de solicitudes/perfiles históricos.
+- [ ] **F12-QA-05** Ejecutar escenarios Given/When/Then del SPEC y todos los SC incluidos abajo con actores y datos independientes; adjuntar evidencia de API, DB y UI.
+
+Validación arquitectónica adicional: verificar Service implements UseCase, constructor de controlador/filtro solo con interfaces, dominio/aplicación sin Spring/JPA/HTTP, mappers separados y un test de integración que acredite el límite transaccional cuando haya mutaciones.
+
+Para cerrar esta feature: contratos y migraciones versionados, tareas de origen y suplementos aplicables terminados, escenarios del SPEC aprobados con API real, UI conectada, evidencia de aislamiento por rol y ninguna decisión bloqueante sin resolver. Las funciones OFF se cierran como preparadas/aisladas, nunca como disponibles para usuarios.
 
 ## Dependencies & Execution Order
 
