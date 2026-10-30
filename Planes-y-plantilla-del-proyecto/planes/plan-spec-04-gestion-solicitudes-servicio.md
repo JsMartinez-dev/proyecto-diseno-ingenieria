@@ -58,19 +58,23 @@ Todos los endpoints restringidos a rol CLIENTE mediante el filtro de autorizaci�
 backend/src/main/java/com/aliado/
 ├── auth/            # SPEC-01 (reutilizado, sin cambios)
 ├── catalogo/        # nuevo — compartido, reutilizable por SPEC-05 y SPEC-06
-│   ├── model/       CategoriaServicio, Zona
-│   └── repository/  CategoriaServicioRepository, ZonaRepository
+│   ├── domain/model/                  CategoriaServicio, Zona
+│   └── domain/repository/             CategoriaServicioRepository, ZonaRepository
 ├── solicitudes/     # nuevo
-│   ├── controller/  SolicitudController
-│   ├── service/     SolicitudService
-│   ├── repository/  SolicitudRepository, FotoSolicitudRepository, HistorialEstadoSolicitudRepository
-│   └── model/       Solicitud, FotoSolicitud, HistorialEstadoSolicitud
+│   ├── presentation/controller/       SolicitudController
+│   ├── application/service/           SolicitudService
+│   ├── domain/repository/             SolicitudRepository, FotoSolicitudRepository, HistorialEstadoSolicitudRepository
+│   └── domain/model/                  Solicitud, FotoSolicitud, HistorialEstadoSolicitud
 └── common/          # SPEC-01 (reutilizado)
     ├── config/
     ├── security/
     ├── exception/
-    └── storage/     ArchivoStorageService (interfaz, nuevo)
+    └── storage/                       ArchivoStorageService (interfaz, nuevo)
 ```
+
+**Arquitectura por capas**: este SPEC conserva la organización modular y aplica Arquitectura Limpia según las secciones 7.1–7.5 de [plan-general-ALIADO](plan-general-ALIADO.md#7-estructura-lógica-del-repositorio). Las rutas del árbol son relativas a cada módulo: `domain/` contiene modelos, reglas y puertos; `application/` coordina los casos de uso; `presentation/` expone HTTP; `infrastructure/` implementa los detalles técnicos. El dominio no importa Spring, JPA ni DTO HTTP; la aplicación depende de contratos de dominio/aplicación, nunca de adaptadores concretos. Los DTO de aplicación van en `application/dto/` y los contratos HTTP en `presentation/dto/`, con conversión en presentación cuando corresponda.
+
+Cuando haya persistencia, los `*Repository` del árbol son puertos en `domain/repository/`, sin heredar de Spring Data. Las tareas existentes de persistencia incluyen sus implementaciones en `infrastructure/persistence/`: `entity/` para entidades JPA, `jpa/` para repositorios Spring Data, `adapter/` para implementar los puertos y `mapper/` para convertir dominio y persistencia. Las integraciones externas se definen mediante puertos de aplicación y adaptadores en `infrastructure/adapter/`; los contratos compartidos existentes de `common/` permanecen libres de detalles técnicos. Las dependencias entre módulos utilizan contratos de dominio o servicios públicos de aplicación, sin acceder a entidades JPA ni adaptadores ajenos. Los filtros de seguridad y la configuración de Spring pertenecen a infraestructura técnica; los controladores y la traducción de errores HTTP pertenecen a presentación. Se crean solo las carpetas necesarias para las tareas ya definidas; se conservan sus identificadores, orden y dependencias.
 
 **Structure Decision**: se mantiene el patrón modular por funcionalidad de SPEC-01 (`solicitudes/` sigue la misma organización en capas que `auth/`). Se introduce `catalogo/` como módulo de datos de referencia — no es un módulo de negocio propio, sino un catálogo compartido para `CategoriaServicio` y `Zona`, conceptos que tanto este SPEC como SPEC-05 (categorías/zonas del Prestador) y SPEC-06 (criterios de compatibilidad) necesitan sin duplicar su definición. El contrato `ArchivoStorageService` se ubica en `common/storage/` porque SPEC-05 también lo necesitará para el portafolio de servicios.
 
@@ -78,15 +82,15 @@ backend/src/main/java/com/aliado/
 
 ## Phase 1: Setup
 
-- [ ] T001 Crear el paquete `catalogo/` (model, repository) y el paquete `solicitudes/` con sus subcarpetas en capas
+- [ ] T001 Crear el paquete `catalogo/` (`domain/model`, `domain/repository` y adaptadores de persistencia) y el paquete `solicitudes/` con sus subcarpetas en capas de Arquitectura Limpia (según Project Structure)
 - [ ] T002 Migración Flyway: tablas `categorias_servicio`, `zonas`, `solicitudes`, `fotos_solicitud`, `historial_estado_solicitud`
 
 ---
 
 ## Phase 2: Foundational
 
-- [ ] T003 Modelos `CategoriaServicio` y `Zona` (catálogo compartido) - `catalogo/model`
-- [ ] T004 `CategoriaServicioRepository`, `ZonaRepository` - `catalogo/repository`
+- [ ] T003 Modelos `CategoriaServicio` y `Zona` (catálogo compartido) - `catalogo/domain/model`
+- [ ] T004 `CategoriaServicioRepository`, `ZonaRepository` - `catalogo/domain/repository`
 - [ ] T005 Seed inicial de categorías y zonas vía migración Flyway.
 - [ ] T006 Definir interfaz `ArchivoStorageService` (contrato para subir/asociar archivos, reutilizable por el portafolio de SPEC-05) - `common/storage` 
 
@@ -107,10 +111,10 @@ backend/src/main/java/com/aliado/
 
 ### Implementation
 
-- [ ] T009 [P] [US1] Modelos `Solicitud`, `FotoSolicitud` — `solicitudes/model` (depends on T003)
-- [ ] T010 [US1] `SolicitudRepository`, `FotoSolicitudRepository` — `solicitudes/repository`
+- [ ] T009 [P] [US1] Modelos `Solicitud`, `FotoSolicitud` — `solicitudes/domain/model` (depends on T003)
+- [ ] T010 [US1] `SolicitudRepository`, `FotoSolicitudRepository` — `solicitudes/domain/repository`
 - [ ] T011 [US1] `SolicitudService.crear()`: valida categoría, zona y urgencia obligatorios (FR-017), asocia fotos opcionales vía `ArchivoStorageService` (FR-016), decide estado BORRADOR/PUBLICADA (FR-019), idempotente ante reintento por pérdida de conexión (depends on T009, T010, T006)
-- [ ] T012 [US1] Endpoint `POST /api/v1/solicitudes` restringido a rol CLIENTE (reutiliza filtro de SPEC-01 T018) — `solicitudes/controller`
+- [ ] T012 [US1] Endpoint `POST /api/v1/solicitudes` restringido a rol CLIENTE (reutiliza filtro de SPEC-01 T018) — `solicitudes/presentation/controller`
 - [ ] T013 [US1] Registrar entrada inicial en `HistorialEstadoSolicitud` al crear (depends on T011)
 
 **Checkpoint**: un Cliente puede publicar o guardar como borrador una solicitud completa de forma independiente.
@@ -132,7 +136,7 @@ backend/src/main/java/com/aliado/
 
 - [ ] T016 [US2] `SolicitudService.editar()`: valida estado abierto (BORRADOR/PUBLICADA) y propiedad, rechaza en caso contrario (FR-020) (depends on T010)
 - [ ] T017 [US2] `SolicitudService.cancelar()`: valida estado abierto y propiedad, transiciona a CANCELADA, registra en historial (FR-021) (depends on T010, T013)
-- [ ] T018 [US2] Endpoints `PUT /api/v1/solicitudes/{id}`, `POST /api/v1/solicitudes/{id}/cancelar` - `solicitudes/controller`
+- [ ] T018 [US2] Endpoints `PUT /api/v1/solicitudes/{id}`, `POST /api/v1/solicitudes/{id}/cancelar` - `solicitudes/presentation/controller`
 - [ ] T019 [US2] Bloqueo de edición/cancelación sobre solicitudes en estado CONTRATADA 
 
 **Checkpoint**: el Cliente solo puede editar/cancelar sus propias solicitudes abiertas.
@@ -153,7 +157,7 @@ backend/src/main/java/com/aliado/
 ### Implementation
 
 - [ ] T022 [US3] `SolicitudService.listarPorCliente()`, `obtenerDetalle()`: filtra por propietario; el detalle unifica la respuesta para solicitud inexistente o ajena (FR-022, FR-023) (depends on T010)
-- [ ] T023 [US3] Endpoints `GET /api/v1/solicitudes/mias`, `GET /api/v1/solicitudes/mias/{id}` - `solicitudes/controller`
+- [ ] T023 [US3] Endpoints `GET /api/v1/solicitudes/mias`, `GET /api/v1/solicitudes/mias/{id}` - `solicitudes/presentation/controller`
 
 **Checkpoint**: el Cliente tiene visibilidad completa de sus propias solicitudes.
 

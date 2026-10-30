@@ -53,12 +53,18 @@ backend/src/main/java/com/aliado/
 ├── auth/              # SPEC-01 (reutilizado)
 ├── servicios/         # SPEC-08 (reutilizado — ServicioContratado, puntos de extensión de aceptación y transición)
 ├── notificaciones/    # nuevo
-│   ├── controller/    NotificacionController
-│   ├── service/       NotificacionService, CanalEntregaNotificacion (interfaz + implementación mínima)
-│   ├── repository/    NotificacionRepository
-│   └── model/         Notificacion
+│   ├── presentation/controller/       NotificacionController
+│   ├── application/port/              CanalEntregaNotificacion (interfaz)
+│   ├── infrastructure/adapter/        Implementación mínima de CanalEntregaNotificacion
+│   ├── application/service/           NotificacionService
+│   ├── domain/repository/             NotificacionRepository
+│   └── domain/model/                  Notificacion
 └── common/            # SPEC-01/SPEC-04 (reutilizado)
 ```
+
+**Arquitectura por capas**: este SPEC conserva la organización modular y aplica Arquitectura Limpia según las secciones 7.1–7.5 de [plan-general-ALIADO](plan-general-ALIADO.md#7-estructura-lógica-del-repositorio). Las rutas del árbol son relativas a cada módulo: `domain/` contiene modelos, reglas y puertos; `application/` coordina los casos de uso; `presentation/` expone HTTP; `infrastructure/` implementa los detalles técnicos. El dominio no importa Spring, JPA ni DTO HTTP; la aplicación depende de contratos de dominio/aplicación, nunca de adaptadores concretos. Los DTO de aplicación van en `application/dto/` y los contratos HTTP en `presentation/dto/`, con conversión en presentación cuando corresponda.
+
+Cuando haya persistencia, los `*Repository` del árbol son puertos en `domain/repository/`, sin heredar de Spring Data. Las tareas existentes de persistencia incluyen sus implementaciones en `infrastructure/persistence/`: `entity/` para entidades JPA, `jpa/` para repositorios Spring Data, `adapter/` para implementar los puertos y `mapper/` para convertir dominio y persistencia. Las integraciones externas se definen mediante puertos de aplicación y adaptadores en `infrastructure/adapter/`; los contratos compartidos existentes de `common/` permanecen libres de detalles técnicos. Las dependencias entre módulos utilizan contratos de dominio o servicios públicos de aplicación, sin acceder a entidades JPA ni adaptadores ajenos. Los filtros de seguridad y la configuración de Spring pertenecen a infraestructura técnica; los controladores y la traducción de errores HTTP pertenecen a presentación. Se crean solo las carpetas necesarias para las tareas ya definidas; se conservan sus identificadores, orden y dependencias.
 
 **Structure Decision**: se introduce `notificaciones/` como módulo genérico, en vez de repetir el patrón puntual de `NotificacionOportunidad` (SPEC-06) y `NotificacionPropuestaRecibida` (SPEC-07). `NotificacionService.notificar()` se invoca directamente desde `ServicioService` (SPEC-08) en el mismo método que ejecuta la aceptación de propuesta (T008 de SPEC-08) y cada transición de estado (T018-T021 de SPEC-08), dentro de la misma transacción, para que el evento de dominio y el registro de notificación sean atómicos — así se cumple el edge case de "el evento permanece consultable y no se duplica" incluso si el canal de entrega externo falla después. `CanalEntregaNotificacion` queda como interfaz separada de `NotificacionService` para que la lógica de negocio (qué notificar, a quién, una sola vez) no dependa del mecanismo real de entrega, que queda pendiente de definir.
 
@@ -66,14 +72,14 @@ backend/src/main/java/com/aliado/
 
 ## Phase 1: Setup
 
-- [ ] T001 Crear el paquete `notificaciones/` con sus subcarpetas en capas
+- [ ] T001 Crear el paquete `notificaciones/` con sus subcarpetas en capas de Arquitectura Limpia (según Project Structure)
 - [ ] T002 Migración Flyway: tabla `notificaciones` con restricción de unicidad `(tipo, servicio_id, destinatario_id, detalle)`
 
 ---
 
 ## Phase 2: Foundational
 
-- [ ] T003 Definir interfaz `CanalEntregaNotificacion` (contrato de entrega, con una implementación mínima que registra el intento sin proveedor externo real) — `notificaciones/service` 
+- [ ] T003 Definir interfaz `CanalEntregaNotificacion` (contrato de entrega, con una implementación mínima que registra el intento sin proveedor externo real) — puerto en `notificaciones/application/port` e implementación en `notificaciones/infrastructure/adapter`
 - [ ] T004 `NotificacionService.notificar(destinatarioId, tipo, servicioId, detalle)`: crea una `Notificacion` solo si no existe ya una fila con la misma clave de unicidad (idempotencia ante reintentos), delega la entrega a `CanalEntregaNotificacion` sin bloquear la transacción de origen (depends on T003)
 
 **Checkpoint**: el mecanismo genérico de notificación está listo para que SPEC-08 lo invoque desde sus puntos de extensión.
@@ -93,10 +99,10 @@ backend/src/main/java/com/aliado/
 
 ### Implementation
 
-- [ ] T007 [P] [US1] Modelo `Notificacion` — `notificaciones/model`
-- [ ] T008 [US1] `NotificacionRepository` — `notificaciones/repository`
+- [ ] T007 [P] [US1] Modelo `Notificacion` — `notificaciones/domain/model`
+- [ ] T008 [US1] `NotificacionRepository` — `notificaciones/domain/repository`
 - [ ] T009 [US1] Enganchar `NotificacionService.notificar()` dentro de `ServicioService.aceptarPropuesta()` (T008 de SPEC-08), notificando al Prestador cuya propuesta fue aceptada (FR-057) (depends on T004, T008, dependencia externa: `ServicioService.aceptarPropuesta()` de SPEC-08 — modificación mínima de ese método para invocar el punto de extensión, sin alterar su lógica transaccional ya probada)
-- [ ] T010 [US1] Endpoint `GET /api/v1/notificaciones` (propias del actor autenticado) — `notificaciones/controller`
+- [ ] T010 [US1] Endpoint `GET /api/v1/notificaciones` (propias del actor autenticado) — `notificaciones/presentation/controller`
 
 **Checkpoint**: el Prestador recibe notificación automática de aceptación, sin que ningún actor deba solicitarla.
 

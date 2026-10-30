@@ -52,15 +52,19 @@ Relaciones: `Usuario` 1—N `Sesion`, `Usuario` 1—N `TokenRecuperacion`, `Usua
 ```text
 backend/src/main/java/com/aliado/
 ├── auth/
-│   ├── controller/ AuthController
-│   ├── service/    AuthService, TokenService
-│   ├── repository/ UsuarioRepository, SesionRepository,   TokenRecuperacionRepository, ConsentimientoRepository
-│   └── model/      Usuario, Sesion, TokenRecuperacion, Consentimiento
+│   ├── presentation/controller/       AuthController
+│   ├── application/service/           AuthService, TokenService
+│   ├── domain/repository/             UsuarioRepository, SesionRepository,   TokenRecuperacionRepository, ConsentimientoRepository
+│   └── domain/model/                  Usuario, Sesion, TokenRecuperacion, Consentimiento
 └── common/
     ├── config/
     ├── security/
     └── exception/
 ```
+
+**Arquitectura por capas**: este SPEC conserva la organización modular y aplica Arquitectura Limpia según las secciones 7.1–7.5 de [plan-general-ALIADO](plan-general-ALIADO.md#7-estructura-lógica-del-repositorio). Las rutas del árbol son relativas a cada módulo: `domain/` contiene modelos, reglas y puertos; `application/` coordina los casos de uso; `presentation/` expone HTTP; `infrastructure/` implementa los detalles técnicos. El dominio no importa Spring, JPA ni DTO HTTP; la aplicación depende de contratos de dominio/aplicación, nunca de adaptadores concretos. Los DTO de aplicación van en `application/dto/` y los contratos HTTP en `presentation/dto/`, con conversión en presentación cuando corresponda.
+
+Cuando haya persistencia, los `*Repository` del árbol son puertos en `domain/repository/`, sin heredar de Spring Data. Las tareas existentes de persistencia incluyen sus implementaciones en `infrastructure/persistence/`: `entity/` para entidades JPA, `jpa/` para repositorios Spring Data, `adapter/` para implementar los puertos y `mapper/` para convertir dominio y persistencia. Las integraciones externas se definen mediante puertos de aplicación y adaptadores en `infrastructure/adapter/`; los contratos compartidos existentes de `common/` permanecen libres de detalles técnicos. Las dependencias entre módulos utilizan contratos de dominio o servicios públicos de aplicación, sin acceder a entidades JPA ni adaptadores ajenos. Los filtros de seguridad y la configuración de Spring pertenecen a infraestructura técnica; los controladores y la traducción de errores HTTP pertenecen a presentación. Se crean solo las carpetas necesarias para las tareas ya definidas; se conservan sus identificadores, orden y dependencias.
 
 **Structure Decision**: Se utilizará una estructura modular por funcionalidad, separando el módulo `auth/` de la infraestructura transversal ubicada en `common/`. El módulo `auth/` encapsulará toda la lógica relacionada con registro, autenticación, sesiones, recuperación de acceso y control de roles.
 
@@ -68,7 +72,7 @@ backend/src/main/java/com/aliado/
 
 ## Phase 1: Setup
 
-- [ ] T001 Crear el paquete `auth/` con sus subcarpetas en capas
+- [ ] T001 Crear el paquete `auth/` con sus subcarpetas en capas de Arquitectura Limpia (según Project Structure)
 - [ ] T002 Migración Flyway inicial: tablas `usuarios`, `consentimientos`, `sesiones`, `tokens_recuperacion`
 
 ---
@@ -98,9 +102,9 @@ backend/src/main/java/com/aliado/
 
 ### Implementation
 
-- [ ] T009 [P] [US1] Modelo `Usuario` y `Consentimiento` - `auth/model`
+- [ ] T009 [P] [US1] Modelo `Usuario` y `Consentimiento` - `auth/domain/model`
 - [ ] T010 [US1] `AuthService.registrar()`: valida unicidad de correo (FR-003), exige aceptación de términos (FR-002), hashea password (depends on T009, T004)
-- [ ] T011 [US1] Endpoint `POST /api/v1/auth/registro` -`auth/controller`
+- [ ] T011 [US1] Endpoint `POST /api/v1/auth/registro` -`auth/presentation/controller`
 - [ ] T012 [US1] Manejo transaccional del edge case "pérdida de conexión durante el registro"
 
 **Checkpoint**: una persona puede registrarse como Cliente o Prestador de forma independiente.
@@ -120,11 +124,11 @@ backend/src/main/java/com/aliado/
 
 ### Implementation
 
-- [ ] T015 [P] [US2] Modelo `Sesion` y `TokenRecuperacion`  -`auth/model` (depends on T009)
-- [ ] T016 [US2] `AuthService.login()` / `logout()`  - `auth/service`
-- [ ] T017 [US2] `TokenService`: generación, expiración y verificación de un solo uso del token de recuperación  - `auth/service`
-- [ ] T018 [US2] Interceptor/filtro de autorización por rol, reutilizable por todos los demás SPEC del sistema  - `auth/service` + `common/security`
-- [ ] T019 [US2] Endpoints `login`, `logout`, `recuperacion`, `recuperacion/confirmar`  - `auth/controller`
+- [ ] T015 [P] [US2] Modelo `Sesion` y `TokenRecuperacion`  -`auth/domain/model` (depends on T009)
+- [ ] T016 [US2] `AuthService.login()` / `logout()`  - `auth/application/service`
+- [ ] T017 [US2] `TokenService`: generación, expiración y verificación de un solo uso del token de recuperación  - `auth/application/service`
+- [ ] T018 [US2] Interceptor/filtro de autorización por rol, reutilizable por todos los demás SPEC del sistema  - `common/security` (filtro técnico que invoca servicios de `auth/application/service`)
+- [ ] T019 [US2] Endpoints `login`, `logout`, `recuperacion`, `recuperacion/confirmar`  - `auth/presentation/controller`
 
 **Checkpoint**: `auth` queda completo. Este es el punto en el que cualquier otro SPEC del proyecto puede empezar a depender de `Usuario` autenticado.
 

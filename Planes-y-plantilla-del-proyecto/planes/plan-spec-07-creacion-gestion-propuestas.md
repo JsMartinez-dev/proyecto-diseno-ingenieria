@@ -56,12 +56,16 @@ backend/src/main/java/com/aliado/
 ├── perfiles/          # SPEC-05 (reutilizado)
 ├── oportunidades/      # SPEC-06 (reutilizado — CompatibilidadService)
 ├── propuestas/        # nuevo
-│   ├── controller/    PropuestaController
-│   ├── service/       PropuestaService
-│   ├── repository/    PropuestaRepository, NotificacionPropuestaRecibidaRepository
-│   └── model/         Propuesta, NotificacionPropuestaRecibida
+│   ├── presentation/controller/       PropuestaController
+│   ├── application/service/           PropuestaService
+│   ├── domain/repository/             PropuestaRepository, NotificacionPropuestaRecibidaRepository
+│   └── domain/model/                  Propuesta, NotificacionPropuestaRecibida
 └── common/            # SPEC-01/SPEC-04 (reutilizado)
 ```
+
+**Arquitectura por capas**: este SPEC conserva la organización modular y aplica Arquitectura Limpia según las secciones 7.1–7.5 de [plan-general-ALIADO](plan-general-ALIADO.md#7-estructura-lógica-del-repositorio). Las rutas del árbol son relativas a cada módulo: `domain/` contiene modelos, reglas y puertos; `application/` coordina los casos de uso; `presentation/` expone HTTP; `infrastructure/` implementa los detalles técnicos. El dominio no importa Spring, JPA ni DTO HTTP; la aplicación depende de contratos de dominio/aplicación, nunca de adaptadores concretos. Los DTO de aplicación van en `application/dto/` y los contratos HTTP en `presentation/dto/`, con conversión en presentación cuando corresponda.
+
+Cuando haya persistencia, los `*Repository` del árbol son puertos en `domain/repository/`, sin heredar de Spring Data. Las tareas existentes de persistencia incluyen sus implementaciones en `infrastructure/persistence/`: `entity/` para entidades JPA, `jpa/` para repositorios Spring Data, `adapter/` para implementar los puertos y `mapper/` para convertir dominio y persistencia. Las integraciones externas se definen mediante puertos de aplicación y adaptadores en `infrastructure/adapter/`; los contratos compartidos existentes de `common/` permanecen libres de detalles técnicos. Las dependencias entre módulos utilizan contratos de dominio o servicios públicos de aplicación, sin acceder a entidades JPA ni adaptadores ajenos. Los filtros de seguridad y la configuración de Spring pertenecen a infraestructura técnica; los controladores y la traducción de errores HTTP pertenecen a presentación. Se crean solo las carpetas necesarias para las tareas ya definidas; se conservan sus identificadores, orden y dependencias.
 
 **Structure Decision**: se mantiene el patrón modular ya usado. `PropuestaService` reutiliza `CompatibilidadService` de SPEC-06 (inyectado) para validar que la solicitud sigue abierta y es compatible con el Prestador antes de crear la propuesta, en vez de duplicar esa lógica de verificación. `NotificacionPropuestaRecibida` se modela como entidad propia del módulo, siguiendo el mismo patrón puntual que `NotificacionOportunidad` de SPEC-06 — ver Notes sobre la inconsistencia que esto genera frente a SPEC-09.
 
@@ -69,7 +73,7 @@ backend/src/main/java/com/aliado/
 
 ## Phase 1: Setup
 
-- [ ] T001 Crear el paquete `propuestas/` con sus subcarpetas en capas
+- [ ] T001 Crear el paquete `propuestas/` con sus subcarpetas en capas de Arquitectura Limpia (según Project Structure)
 - [ ] T002 Migración Flyway: tablas `propuestas`, `notificaciones_propuesta_recibida`
 
 ---
@@ -95,10 +99,10 @@ No se requieren tareas fundacionales nuevas: autenticación/roles (SPEC-01), `So
 
 ### Implementation
 
-- [ ] T005 [P] [US1] Modelos `Propuesta`, `NotificacionPropuestaRecibida` — `propuestas/model`
-- [ ] T006 [US1] `PropuestaRepository`, `NotificacionPropuestaRecibidaRepository` — `propuestas/repository`
+- [ ] T005 [P] [US1] Modelos `Propuesta`, `NotificacionPropuestaRecibida` — `propuestas/domain/model`
+- [ ] T006 [US1] `PropuestaRepository`, `NotificacionPropuestaRecibidaRepository` — `propuestas/domain/repository`
 - [ ] T007 [US1] `PropuestaService.crear()`: valida disponibilidad obligatoria (FR-040), valida que la solicitud esté abierta y compatible reutilizando `CompatibilidadService.obtenerDetalle()` de SPEC-06 (FR-039), asocia mensaje opcional (FR-041), crea `Propuesta` en estado ACTIVA y la `NotificacionPropuestaRecibida` asociada en una sola transacción (FR-044, RNF-006) (depends on T005, T006, dependencia externa: `CompatibilidadService` de SPEC-06)
-- [ ] T008 [US1] Endpoint `POST /api/v1/propuestas` restringido a rol PRESTADOR — `propuestas/controller`
+- [ ] T008 [US1] Endpoint `POST /api/v1/propuestas` restringido a rol PRESTADOR — `propuestas/presentation/controller`
 
 **Checkpoint**: un Prestador puede crear una propuesta completa de forma independiente, y el Cliente queda notificado.
 
@@ -118,7 +122,7 @@ No se requieren tareas fundacionales nuevas: autenticación/roles (SPEC-01), `So
 ### Implementation
 
 - [ ] T011 [US2] `PropuestaService.editar()`: valida propiedad y estado ACTIVA, rechaza en caso contrario (FR-042) (depends on T006)
-- [ ] T012 [US2] Endpoint `PUT /api/v1/propuestas/{id}` — `propuestas/controller`
+- [ ] T012 [US2] Endpoint `PUT /api/v1/propuestas/{id}` — `propuestas/presentation/controller`
 
 **Checkpoint**: el Prestador puede mantener actualizada una propuesta activa de forma independiente.
 
@@ -138,7 +142,7 @@ No se requieren tareas fundacionales nuevas: autenticación/roles (SPEC-01), `So
 ### Implementation
 
 - [ ] T015 [US3] `PropuestaService.retirar()`: valida propiedad y estado ACTIVA, transiciona a RETIRADA, rechaza en caso contrario (FR-043); asegura que ninguna notificación de "propuesta nueva" se genere sobre una propuesta ya retirada (edge case del SPEC) (depends on T006)
-- [ ] T016 [US3] Endpoint `POST /api/v1/propuestas/{id}/retirar` — `propuestas/controller`
+- [ ] T016 [US3] Endpoint `POST /api/v1/propuestas/{id}/retirar` — `propuestas/presentation/controller`
 
 **Checkpoint**: el Prestador puede retirar una propuesta que ya no puede cumplir, de forma independiente.
 

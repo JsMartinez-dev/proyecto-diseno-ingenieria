@@ -45,12 +45,16 @@ Este SPEC no define entidades persistentes propias. Usa como **vistas de lectura
 ```text
 backend/src/main/java/com/aliado/
 └── descubrimiento/
-    ├── controller/ DescubrimientoController
-    ├── service/    DescubrimientoService
-    └── dto/        PrestadorPublicoDTO, CriterioBusqueda
+    ├── presentation/controller/       DescubrimientoController
+    ├── application/service/           DescubrimientoService
+    └── application/dto/               PrestadorPublicoDTO, CriterioBusqueda
 ```
 
-No hay carpeta `model/` ni `repository/` propias: `DescubrimientoService` consulta, por inyección de dependencias dentro del mismo monolito, los repositorios de `prestador` (SPEC-05/06), `confianza` (SPEC-10) y el catálogo de `common`/administración (SPEC-12) cuando existan.
+**Arquitectura por capas**: este SPEC conserva la organización modular y aplica Arquitectura Limpia según las secciones 7.1–7.5 de [plan-general-ALIADO](plan-general-ALIADO.md#7-estructura-lógica-del-repositorio). Las rutas del árbol son relativas a cada módulo: `domain/` contiene modelos, reglas y puertos; `application/` coordina los casos de uso; `presentation/` expone HTTP; `infrastructure/` implementa los detalles técnicos. El dominio no importa Spring, JPA ni DTO HTTP; la aplicación depende de contratos de dominio/aplicación, nunca de adaptadores concretos. Los DTO de aplicación van en `application/dto/` y los contratos HTTP en `presentation/dto/`, con conversión en presentación cuando corresponda.
+
+Cuando haya persistencia, los `*Repository` del árbol son puertos en `domain/repository/`, sin heredar de Spring Data. Las tareas existentes de persistencia incluyen sus implementaciones en `infrastructure/persistence/`: `entity/` para entidades JPA, `jpa/` para repositorios Spring Data, `adapter/` para implementar los puertos y `mapper/` para convertir dominio y persistencia. Las integraciones externas se definen mediante puertos de aplicación y adaptadores en `infrastructure/adapter/`; los contratos compartidos existentes de `common/` permanecen libres de detalles técnicos. Las dependencias entre módulos utilizan contratos de dominio o servicios públicos de aplicación, sin acceder a entidades JPA ni adaptadores ajenos. Los filtros de seguridad y la configuración de Spring pertenecen a infraestructura técnica; los controladores y la traducción de errores HTTP pertenecen a presentación. Se crean solo las carpetas necesarias para las tareas ya definidas; se conservan sus identificadores, orden y dependencias.
+
+No hay carpetas `domain/model/` ni `domain/repository/` propias: `DescubrimientoService` consulta, por inyección de dependencias dentro del mismo monolito, los puertos de repositorio de `prestador` (SPEC-05/06), `confianza` (SPEC-10) y el catálogo de `common`/administración (SPEC-12) cuando existan.
 
 ---
 
@@ -74,11 +78,11 @@ No hay carpeta `model/` ni `repository/` propias: `DescubrimientoService` consul
 
 ### Implementation
 
-- [ ] T005 [P] [US1] DTO `PrestadorPublicoDTO` y `CriterioBusqueda` — `descubrimiento/dto`
+- [ ] T005 [P] [US1] DTO `PrestadorPublicoDTO` y `CriterioBusqueda` — `descubrimiento/application/dto`
 - [ ] T006 [US1] `DescubrimientoService.buscar(categoria, zona)` — consulta cross-módulo (depends on T002; depends en producción de los repositorios reales de SPEC-05/06, SPEC-10, SPEC-12)
 - [ ] T007 [US1] `DescubrimientoService.consultarPerfilPublico(id)` — mapeo único reutilizado tanto desde búsqueda como desde acceso directo, garantizando SC-002
 - [ ] T008 [US1] Reutilizar el interceptor de autorización por rol de SPEC-01 (T018) para restringir ambos endpoints a Cliente
-- [ ] T009 [US1] Endpoints `GET /prestadores`, `GET /prestadores/{id}/perfil` — `descubrimiento/controller`
+- [ ] T009 [US1] Endpoints `GET /prestadores`, `GET /prestadores/{id}/perfil` — `descubrimiento/presentation/controller`
 
 
 **Checkpoint**: un Cliente puede descubrir Prestadores y consultar su perfil público de forma consistente, aunque los datos reales subyacentes todavía vengan de fixtures hasta que SPEC-05/06, SPEC-10 y SPEC-12 se implementen.

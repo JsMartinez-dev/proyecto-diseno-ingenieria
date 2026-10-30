@@ -64,20 +64,24 @@ backend/src/main/java/com/aliado/
 ├── solicitudes/       # SPEC-04 (reutilizado)
 ├── propuestas/        # SPEC-07 (reutilizado)
 ├── servicios/         # nuevo
-│   ├── controller/    ServicioController, MensajeServicioController
-│   ├── service/       ServicioService, MensajeServicioService
-│   ├── repository/    ServicioContratadoRepository, HistorialEstadoServicioRepository, MensajeServicioRepository
-│   └── model/         ServicioContratado, HistorialEstadoServicio, MensajeServicio
+│   ├── presentation/controller/       ServicioController, MensajeServicioController
+│   ├── application/service/           ServicioService, MensajeServicioService
+│   ├── domain/repository/             ServicioContratadoRepository, HistorialEstadoServicioRepository, MensajeServicioRepository
+│   └── domain/model/                  ServicioContratado, HistorialEstadoServicio, MensajeServicio
 └── common/            # SPEC-01/SPEC-04 (reutilizado)
 ```
 
-**Structure Decision**: se mantiene el patrón modular ya usado. `ServicioService` depende de `PropuestaRepository` (SPEC-07) para leer y cerrar propuestas al aceptar, y de `SolicitudRepository` (SPEC-04) para vincular el servicio a su solicitud de origen; no se duplican esas entidades. La concurrencia en transiciones simultáneas (edge case del SPEC) se resuelve con bloqueo optimista (`@Version` en `ServicioContratado`): una transición que pierde la carrera recibe un conflicto de versión y se traduce a `409`, cumpliendo "aplica una sola transición válida... y rechaza la otra sin dejar el servicio en un estado ambiguo" sin introducir una cola de mensajes u otra infraestructura nueva no pedida por el SPEC. `MensajeServicioService` se separa de `ServicioService` porque su única responsabilidad es el canal de comunicación (US5), condicionado por el flag `comunicacionHabilitada` que sí pertenece a `ServicioService`.
+**Arquitectura por capas**: este SPEC conserva la organización modular y aplica Arquitectura Limpia según las secciones 7.1–7.5 de [plan-general-ALIADO](plan-general-ALIADO.md#7-estructura-lógica-del-repositorio). Las rutas del árbol son relativas a cada módulo: `domain/` contiene modelos, reglas y puertos; `application/` coordina los casos de uso; `presentation/` expone HTTP; `infrastructure/` implementa los detalles técnicos. El dominio no importa Spring, JPA ni DTO HTTP; la aplicación depende de contratos de dominio/aplicación, nunca de adaptadores concretos. Los DTO de aplicación van en `application/dto/` y los contratos HTTP en `presentation/dto/`, con conversión en presentación cuando corresponda.
+
+Cuando haya persistencia, los `*Repository` del árbol son puertos en `domain/repository/`, sin heredar de Spring Data. Las tareas existentes de persistencia incluyen sus implementaciones en `infrastructure/persistence/`: `entity/` para entidades JPA, `jpa/` para repositorios Spring Data, `adapter/` para implementar los puertos y `mapper/` para convertir dominio y persistencia. Las integraciones externas se definen mediante puertos de aplicación y adaptadores en `infrastructure/adapter/`; los contratos compartidos existentes de `common/` permanecen libres de detalles técnicos. Las dependencias entre módulos utilizan contratos de dominio o servicios públicos de aplicación, sin acceder a entidades JPA ni adaptadores ajenos. Los filtros de seguridad y la configuración de Spring pertenecen a infraestructura técnica; los controladores y la traducción de errores HTTP pertenecen a presentación. Se crean solo las carpetas necesarias para las tareas ya definidas; se conservan sus identificadores, orden y dependencias.
+
+**Structure Decision**: se mantiene el patrón modular ya usado. `ServicioService` depende de `PropuestaRepository` (SPEC-07) para leer y cerrar propuestas al aceptar, y de `SolicitudRepository` (SPEC-04) para vincular el servicio a su solicitud de origen; no se duplican esas entidades. La concurrencia en transiciones simultáneas (edge case del SPEC) se resuelve con bloqueo optimista (`@Version` en la entidad JPA que persiste `ServicioContratado`, dentro de `infrastructure/persistence/entity/`): una transición que pierde la carrera recibe un conflicto de versión y se traduce a `409`, cumpliendo "aplica una sola transición válida... y rechaza la otra sin dejar el servicio en un estado ambiguo" sin introducir una cola de mensajes u otra infraestructura nueva no pedida por el SPEC. `MensajeServicioService` se separa de `ServicioService` porque su única responsabilidad es el canal de comunicación (US5), condicionado por el flag `comunicacionHabilitada` que sí pertenece a `ServicioService`.
 
 ---
 
 ## Phase 1: Setup
 
-- [ ] T001 Crear el paquete `servicios/` con sus subcarpetas en capas
+- [ ] T001 Crear el paquete `servicios/` con sus subcarpetas en capas de Arquitectura Limpia (según Project Structure)
 - [ ] T002 Migración Flyway: tablas `servicios_contratados` (con columna `version` para bloqueo optimista), `historial_estado_servicio`, `mensajes_servicio`
 
 ---
@@ -103,11 +107,11 @@ No se requieren tareas fundacionales nuevas: autenticación/roles (SPEC-01), `So
 
 ### Implementation
 
-- [ ] T005 [P] [US1] Modelo `ServicioContratado` — `servicios/model`
-- [ ] T006 [US1] `ServicioContratadoRepository` — `servicios/repository`
+- [ ] T005 [P] [US1] Modelo `ServicioContratado` — `servicios/domain/model`
+- [ ] T006 [US1] `ServicioContratadoRepository` — `servicios/domain/repository`
 - [ ] T007 [US1] `ServicioService.listarPropuestasRecibidas(solicitudId)`: reutiliza `PropuestaRepository` de SPEC-07 filtrando por solicitud propia y estado ACTIVA (FR-045) (depends on dependencia externa: `PropuestaRepository` de SPEC-07)
 - [ ] T008 [US1] `ServicioService.aceptarPropuesta(propuestaId)`: valida que la solicitud no tenga ya un servicio contratado (FR-046), transaccionalmente crea `ServicioContratado` en estado CONTRATADO (FR-048), marca la propuesta aceptada como ACEPTADA y cierra el resto de propuestas activas de la misma solicitud como CERRADA (FR-047, reutiliza `PropuestaRepository` de SPEC-07), habilita `comunicacionHabilitada = true` (FR-049), registra la entrada inicial en `HistorialEstadoServicio` (depends on T005, T006, dependencia externa: `PropuestaRepository` de SPEC-07)
-- [ ] T009 [US1] Endpoints `GET /api/v1/solicitudes/{id}/propuestas`, `POST /api/v1/propuestas/{id}/aceptar` — `servicios/controller`
+- [ ] T009 [US1] Endpoints `GET /api/v1/solicitudes/{id}/propuestas`, `POST /api/v1/propuestas/{id}/aceptar` — `servicios/presentation/controller`
 
 **Checkpoint**: el Cliente puede aceptar una propuesta de forma independiente, y el resultado queda consistente en una sola operación.
 
@@ -127,7 +131,7 @@ No se requieren tareas fundacionales nuevas: autenticación/roles (SPEC-01), `So
 ### Implementation
 
 - [ ] T012 [US2] `ServicioService.obtenerDetalle(servicioId, actorId)`: valida que el actor sea el Cliente o el Prestador del servicio, construye la respuesta con solicitud de origen, propuesta aceptada y estado actual (FR-050) (depends on T006)
-- [ ] T013 [US2] Endpoint `GET /api/v1/servicios/{id}` — `servicios/controller`
+- [ ] T013 [US2] Endpoint `GET /api/v1/servicios/{id}` — `servicios/presentation/controller`
 
 **Checkpoint**: ambas partes tienen una referencia única y confiable del servicio, de forma independiente.
 
@@ -146,14 +150,14 @@ No se requieren tareas fundacionales nuevas: autenticación/roles (SPEC-01), `So
 
 ### Implementation
 
-- [ ] T016 [P] [US3] Modelo `HistorialEstadoServicio` — `servicios/model` (depends on T005)
-- [ ] T017 [US3] `HistorialEstadoServicioRepository` — `servicios/repository`
-- [ ] T018 [US3] `ServicioService.marcarEnEjecucion()`: valida que el actor sea el Prestador del servicio y que el estado actual lo permita, usa `@Version` para detectar conflicto de concurrencia (FR-051) (depends on T006, T017)
+- [ ] T016 [P] [US3] Modelo `HistorialEstadoServicio` — `servicios/domain/model` (depends on T005)
+- [ ] T017 [US3] `HistorialEstadoServicioRepository` — `servicios/domain/repository`
+- [ ] T018 [US3] `ServicioService.marcarEnEjecucion()`: valida que el actor sea el Prestador del servicio y que el estado actual lo permita, detecta conflicto de concurrencia mediante el puerto de persistencia (el adaptador JPA usa `@Version`) (FR-051) (depends on T006, T017)
 - [ ] T019 [US3] `ServicioService.marcarTerminado()`: mismas validaciones que T018, deja el servicio pendiente de confirmación del Cliente (FR-052) 
 - [ ] T020 [US3] `ServicioService.confirmarFinalizacion()`: valida que el actor sea el Cliente del servicio y que esté en estado TERMINADO, cierra definitivamente como FINALIZADO (FR-053) (depends on T018)
 - [ ] T021 [US3] `ServicioService.cancelar()`: valida que el actor sea Cliente o Prestador del servicio y que no esté ya FINALIZADO, transiciona a CANCELADO y rechaza en caso contrario (FR-054) (depends on T018)
 - [ ] T022 [US3] Cada transición registra su entrada en `HistorialEstadoServicio` con el actor que la ejecutó, dentro de la misma transacción de la transición (depends on T017, T018-T021)
-- [ ] T023 [US3] Endpoints `POST /api/v1/servicios/{id}/en-ejecucion`, `/terminado`, `/confirmar-finalizacion`, `/cancelar` — `servicios/controller`
+- [ ] T023 [US3] Endpoints `POST /api/v1/servicios/{id}/en-ejecucion`, `/terminado`, `/confirmar-finalizacion`, `/cancelar` — `servicios/presentation/controller`
 
 **Checkpoint**: el estado del servicio refleja siempre la realidad, incluso ante transiciones simultáneas.
 
@@ -173,7 +177,7 @@ No se requieren tareas fundacionales nuevas: autenticación/roles (SPEC-01), `So
 ### Implementation
 
 - [ ] T026 [US4] `ServicioService.obtenerHistorial(servicioId, actorId)`: valida que el actor sea Cliente o Prestador del servicio, devuelve las transiciones ordenadas cronológicamente (FR-055) (depends on T017)
-- [ ] T027 [US4] Endpoint `GET /api/v1/servicios/{id}/historial` — `servicios/controller`
+- [ ] T027 [US4] Endpoint `GET /api/v1/servicios/{id}/historial` — `servicios/presentation/controller`
 
 **Checkpoint**: ambas partes tienen trazabilidad completa del servicio, de forma independiente.
 
@@ -192,11 +196,11 @@ No se requieren tareas fundacionales nuevas: autenticación/roles (SPEC-01), `So
 
 ### Implementation
 
-- [ ] T030 [P] [US5] Modelo `MensajeServicio` — `servicios/model` (depends on T005)
-- [ ] T031 [US5] `MensajeServicioRepository` — `servicios/repository`
+- [ ] T030 [P] [US5] Modelo `MensajeServicio` — `servicios/domain/model` (depends on T005)
+- [ ] T031 [US5] `MensajeServicioRepository` — `servicios/domain/repository`
 - [ ] T032 [US5] `MensajeServicioService.enviar()`: valida que el actor sea Cliente o Prestador del servicio y que `comunicacionHabilitada = true`, rechaza en caso contrario (FR-056) (depends on T006, T031)
 - [ ] T033 [US5] `MensajeServicioService.listar()`: misma validación de propiedad y habilitación (depends on T032)
-- [ ] T034 [US5] Endpoints `POST /api/v1/servicios/{id}/mensajes`, `GET /api/v1/servicios/{id}/mensajes` — `servicios/controller`
+- [ ] T034 [US5] Endpoints `POST /api/v1/servicios/{id}/mensajes`, `GET /api/v1/servicios/{id}/mensajes` — `servicios/presentation/controller`
 
 **Checkpoint**: ambas partes pueden coordinar el servicio sin depender de canales informales.
 
