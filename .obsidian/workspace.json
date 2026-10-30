@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "tasks/01-arquitectura-y-stack.md",
+                "file": "Planes-y-plantilla-del-proyecto/planes/plan-spec-01-autenticacion.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "01-arquitectura-y-stack"
+              "title": "plan-spec-01-autenticacion"
             }
           },
           {
@@ -204,15 +204,15 @@
       "bases:Crear nueva base": false
     }
   },
-  "active": "0b320436009abb74",
+  "active": "4fe7ee3994669842",
   "lastOpenFiles": [
+    "Planes-y-plantilla-del-proyecto/planes/plan-spec-01-autenticacion.md",
+    "tasks/fuentes/planes/plan-spec-01-autenticacion.md",
+    "tasks/01-arquitectura-y-stack.md",
     "tasks/features/01-acceso-identidad.md",
     "Plan_de_ejecucion.md",
     "templates/plan-template 1.md",
-    "tasks/01-arquitectura-y-stack.md",
     "tasks/fuentes/planes/plan-spec-02-perfil.md",
-    "tasks/fuentes/planes/plan-spec-01-autenticacion.md",
-    "Planes-y-plantilla-del-proyecto/planes/plan-spec-01-autenticacion.md",
     "Planes-y-plantilla-del-proyecto/planes/plan-general-ALIADO.md",
     "README.md",
     "P.md",
