@@ -1,0 +1,84 @@
+{
+  "palette": "graphite",
+  "performancePreset": "smooth",
+  "frontmatterKindKeys": [
+    "kind",
+    "type",
+    "category"
+  ],
+  "frontmatterKindValueMap": {},
+  "frontmatterRegionKeys": [
+    "brain_region",
+    "brainRegion",
+    "lobe",
+    "region"
+  ],
+  "tagKindMap": {
+    "project": "project",
+    "person": "person",
+    "decision": "decision",
+    "question": "question",
+    "tool": "tool",
+    "concept": "concept",
+    "source": "source",
+    "daily": "dailyNote",
+    "moc": "concept",
+    "thread": "workThread",
+    "index": "index"
+  },
+  "folderKindMap": {
+    "People": "person",
+    "Projects": "project",
+    "Sources": "source",
+    "Daily": "dailyNote",
+    "Journal": "dailyNote",
+    "Concepts": "concept",
+    "Topics": "concept",
+    "MOCs": "concept",
+    "Maps": "concept",
+    "Index": "index",
+    "Home": "index"
+  },
+  "frontmatterRegionValueMap": {},
+  "tagRegionMap": {},
+  "folderRegionMap": {},
+  "noteRegionMap": {},
+  "treatDateFilesAsDaily": true,
+  "honorDailyNotesFormat": true,
+  "dailyNoteDateFormat": "YYYY-MM-DD",
+  "nodeCap": 1500,
+  "edgeCap": 4000,
+  "idleAutoRotate": true,
+  "showLobeLabels": true,
+  "showLegendChip": true,
+  "enabledLobes": {
+    "frontal": true,
+    "parietal": true,
+    "temporal": true,
+    "occipital": true,
+    "cerebellum": true,
+    "stem": true
+  },
+  "clickAction": "current",
+  "hubThresholdPercent": 4,
+  "pinnedNodePositions": {
+    "FASE-4-Prototipar/prototipo/prototipo-funcional/node_modules/@babel/helper-simple-access/README.md": {
+      "x": 0.14203123366116993,
+      "y": -0.6343660491317981,
+      "z": -0.25378001164478425
+    },
+    "FASE-4-Prototipar/prototipo/prototipo-funcional/node_modules/@typescript-eslint/eslint-plugin/docs/rules/space-infix-ops.md": {
+      "x": 0.2608756940977175,
+      "y": 0.5507781840450003,
+      "z": 0.02140870807331008
+    },
+    "FASE-4-Prototipar/specs/spec-16-onboarding-asistido.md": {
+      "x": 0.2628060820530623,
+      "y": 0.4093180062741098,
+      "z": -0.08039093128603178
+    }
+  },
+  "defaultKind": "concept",
+  "inferKindsFromLinks": true,
+  "rendererMode": "auto"
+}

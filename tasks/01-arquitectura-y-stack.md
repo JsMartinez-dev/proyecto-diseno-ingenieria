@@ -74,25 +74,25 @@ Referencia inspeccionada: [backend-rifas/develop/pom.xml](https://github.com/Seu
 
 **Línea base documental de ALIADO: Spring Boot 3.3.x.** D-01 exige fijar versión concreta y comprobar soporte/compatibilidad antes de generar el proyecto. `backend-rifas` usa Boot **4.0.5**, Java **21**, springdoc **3.0.2** y jjwt **0.12.6**: son versiones observadas en esa referencia, no versiones aprobadas automáticamente para ALIADO. Adoptar Boot 4 exige ADR y actualizar la línea base, no mezclar dependencias Boot 4 con un parent Boot 3.
 
-| Capacidad | En backend-rifas | Plan ALIADO |
-|---|---|---|
-| REST MVC | `spring-boot-starter-webmvc` (Boot 4) | `spring-boot-starter-web` en línea Boot 3; adaptar a webmvc solo si D-01 adopta Boot 4 |
-| JPA | `spring-boot-starter-data-jpa` | Usar en infraestructura; versión por BOM/parent |
-| Seguridad | `spring-boot-starter-security` | Usar con sesiones opacas, BCrypt y autorización por recurso |
-| Validación | `spring-boot-starter-validation` | DTO HTTP y reglas de aplicación/dominio correspondientes |
-| PostgreSQL | `org.postgresql:postgresql`, runtime | Usar PostgreSQL 16 y driver administrado |
-| Flyway | starter Flyway + `flyway-database-postgresql` | Boot 3: resolver `flyway-core` + soporte PostgreSQL compatible; Boot 4: starter; un único mecanismo de DDL |
-| Correo | `spring-boot-starter-mail` | Puerto de recuperación y adaptador SMTP; capturador local en dev |
-| OpenAPI | springdoc webmvc UI 3.0.2 | Seleccionar springdoc 2.x para Boot 3 o 3.x para Boot 4; contrato revisado y versionado |
-| Lombok | Opcional, annotation processor | Opcional en infraestructura; no condicionar el dominio a generación opaca |
-| Devtools | Opcional runtime | Solo desarrollo |
-| Pruebas | Starters de prueba por tecnología (Boot 4), H2 | Boot 3: starter-test + spring-security-test; Testcontainers/PostgreSQL como validación real de SQL/JPA |
-| JWT | jjwt API/impl/Jackson 0.12.6 | No incluir: ALIADO usa sesión opaca revocable, salvo cambio explícito de D-04 |
-| Imágenes WebP | TwelveMonkeys 3.15.3 | Solo si formatos aprobados requieren decodificar/reprocesar WebP; no obligatorio por copiar referencia |
-| Plantillas | Mustache y Thymeleaf | Elegir uno únicamente si se necesitan correos HTML; no incorporar dos motores por defecto |
-| Salud/métricas | No observado en el pom revisado | Añadir Actuator para objetivos del plan general; acceso restringido |
-| Storage/entrega | No observado en ese pom | Seleccionar SDK S3-compatible y proveedor push en D-06/D-08; adaptadores sustituibles |
-| Arquitectura | No se usa como modelo limpio | Añadir verificación de dependencias hacia dentro, automatizada en CI |
+| Capacidad       | En backend-rifas                               | Plan ALIADO                                                                                                |
+| --------------- | ---------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| REST MVC        | `spring-boot-starter-webmvc` (Boot 4)          | `spring-boot-starter-web` en línea Boot 3; adaptar a webmvc solo si D-01 adopta Boot 4                     |
+| JPA             | `spring-boot-starter-data-jpa`                 | Usar en infraestructura; versión por BOM/parent                                                            |
+| Seguridad       | `spring-boot-starter-security`                 | Usar con sesiones opacas, BCrypt y autorización por recurso                                                |
+| Validación      | `spring-boot-starter-validation`               | DTO HTTP y reglas de aplicación/dominio correspondientes                                                   |
+| PostgreSQL      | `org.postgresql:postgresql`, runtime           | Usar PostgreSQL 16 y driver administrado                                                                   |
+| Flyway          | starter Flyway + `flyway-database-postgresql`  | Boot 3: resolver `flyway-core` + soporte PostgreSQL compatible; Boot 4: starter; un único mecanismo de DDL |
+| Correo          | `spring-boot-starter-mail`                     | Puerto de recuperación y adaptador SMTP; capturador local en dev                                           |
+| OpenAPI         | springdoc webmvc UI 3.0.2                      | Seleccionar springdoc 2.x para Boot 3 o 3.x para Boot 4; contrato revisado y versionado                    |
+| Lombok          | Opcional, annotation processor                 | Opcional en infraestructura; no condicionar el dominio a generación opaca                                  |
+| Devtools        | Opcional runtime                               | Solo desarrollo                                                                                            |
+| Pruebas         | Starters de prueba por tecnología (Boot 4), H2 | Boot 3: starter-test + spring-security-test; Testcontainers/PostgreSQL como validación real de SQL/JPA     |
+| JWT             | jjwt API/impl/Jackson 0.12.6                   | No incluir: ALIADO usa sesión opaca revocable, salvo cambio explícito de D-04                              |
+| Imágenes WebP   | TwelveMonkeys 3.15.3                           | Solo si formatos aprobados requieren decodificar/reprocesar WebP; no obligatorio por copiar referencia     |
+| Plantillas      | Mustache y Thymeleaf                           | Elegir uno únicamente si se necesitan correos HTML; no incorporar dos motores por defecto                  |
+| Salud/métricas  | No observado en el pom revisado                | Añadir Actuator para objetivos del plan general; acceso restringido                                        |
+| Storage/entrega | No observado en ese pom                        | Seleccionar SDK S3-compatible y proveedor push en D-06/D-08; adaptadores sustituibles                      |
+| Arquitectura    | No se usa como modelo limpio                   | Añadir verificación de dependencias hacia dentro, automatizada en CI                                       |
 
 La nomenclatura de starters cambió en Boot 4; comprobar la [guía oficial de migración](https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-4.0-Migration-Guide). La [matriz de springdoc](https://springdoc.org/faq.html) distingue Boot 3/4. Estas fuentes respaldan la separación de líneas; no se fija una versión soportada sin validarla en F00.
 

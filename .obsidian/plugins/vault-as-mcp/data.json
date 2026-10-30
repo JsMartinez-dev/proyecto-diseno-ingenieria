@@ -1,0 +1,15 @@
+{
+  "serverPort": 8765,
+  "serverHost": "127.0.0.1",
+  "autoStart": true,
+  "debug": false,
+  "logPermissionMessages": true,
+  "normalizeQuotes": true,
+  "pathACL": {
+    "forbidden": [],
+    "readOnly": [],
+    "writable": []
+  },
+  "tlsEnabled": false,
+  "bearerToken": "E_4zGWDeK8xWXJL3eKtgP4WawfY3TSlTMo5NznoUJ6A"
+}
